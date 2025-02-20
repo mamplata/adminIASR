@@ -43,7 +43,8 @@ const submit = () => {
                         <template #icon>
                             <MailIcon aria-hidden="true" class="w-5 h-5" />
                         </template>
-                        <Input withIcon id="email" type="email" class="block w-full" placeholder="Email" v-model="form.email" required autofocus autocomplete="username" />
+                        <Input withIcon id="email" type="email" class="block w-full" placeholder="Email"
+                            v-model="form.email" required autofocus autocomplete="username" />
                     </InputIconWrapper>
                 </div>
 
@@ -53,7 +54,8 @@ const submit = () => {
                         <template #icon>
                             <LockClosedIcon aria-hidden="true" class="w-5 h-5" />
                         </template>
-                        <Input withIcon id="password" type="password" class="block w-full" placeholder="Password" v-model="form.password" required autocomplete="current-password" />
+                        <Input withIcon id="password" type="password" class="block w-full" placeholder="Password"
+                            v-model="form.password" required autocomplete="current-password" />
                     </InputIconWrapper>
                 </div>
 
@@ -63,24 +65,18 @@ const submit = () => {
                         <span class="ml-2 text-sm text-gray-600">Remember me</span>
                     </label>
 
-                    <Link v-if="canResetPassword" :href="route('password.request')" class="text-sm text-blue-500 hover:underline">
-                        Forgot your password?
+                    <Link v-if="canResetPassword" :href="route('password.request')"
+                        class="text-sm text-blue-500 hover:underline">
+                    Forgot your password?
                     </Link>
                 </div>
 
                 <div>
-                    <Button class="justify-center gap-2 w-full" :disabled="form.processing" v-slot="{iconSizeClasses}">
+                    <Button class="justify-center gap-2 w-full" :disabled="form.processing" v-slot="{ iconSizeClasses }">
                         <LoginIcon aria-hidden="true" :class="iconSizeClasses" />
                         <span>Log in</span>
                     </Button>
                 </div>
-
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Don't have an account?
-                    <Link :href="route('register')" class="text-blue-500 hover:underline">
-                        Register
-                    </Link>
-                </p>
             </div>
         </form>
     </GuestLayout>

@@ -107,8 +107,8 @@ onUnmounted(() => {
             </Button>
 
             <Link :href="route('dashboard')">
-            <ApplicationLogo class="w-10 h-10" />
-            <span class="sr-only">K UI</span>
+            <ApplicationLogo class="w-full max-w-[100px] h-auto" />
+            <span class="sr-only">IASR</span>
             </Link>
 
             <Button iconOnly variant="secondary" type="button" @click="sidebarState.isOpen = !sidebarState.isOpen"
