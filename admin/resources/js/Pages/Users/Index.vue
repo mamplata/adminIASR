@@ -10,7 +10,7 @@ import UserManagement from '@/Components/UserManagement.vue';
         <template #header>
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <h2 class="text-xl font-semibold leading-tight">
-                    User Management
+                    User Management try
                 </h2>
             </div>
         </template>
