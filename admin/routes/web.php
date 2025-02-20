@@ -4,6 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AuditLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,5 +30,9 @@ Route::middleware('auth')->group(function () {
 Route::get('/components/buttons', function () {
     return Inertia::render('Components/Buttons');
 })->middleware(['auth', 'verified'])->name('components.buttons');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
+});
 
 require __DIR__ . '/auth.php';

@@ -21,42 +21,14 @@ import { TemplateIcon } from '@heroicons/vue/outline'
             </template>
         </SidebarLink>
 
-        <SidebarCollapsible title="Components" :active="route().current('components.*')">
+        <SidebarCollapsible title="Logs" :active="route().current('logs.*')">
             <template #icon>
                 <TemplateIcon class="flex-shrink-0 w-6 h-6" aria-hidden="true" />
             </template>
 
-            <SidebarCollapsibleItem :href="route('components.buttons')" title="Buttons"
-                :active="route().current('components.buttons')" />
+            <SidebarCollapsibleItem :href="route('logs.audit-logs.index')" title="Audit Logs"
+                :active="route().current('logs.audit-logs.index')" />
         </SidebarCollapsible>
 
-        <!-- Examples -->
-        <!--
-        => External link example
-        <SidebarLink
-            title="Github"
-            href="https://github.com/kamona-wd/kui-laravel-breeze"
-            external
-            target="_blank"
-        >
-        </SidebarLink>
-
-        => Collapsible examples
-        <SidebarCollapsible title="Users" :active="$page.url.startsWith('/users')">
-            <SidebarCollapsibleItem :href="route('users.index')" title="List" :active="$page.url === '/users/index'" />
-            <SidebarCollapsibleItem :href="route('users.create')" title="Create" :active="$page.url === '/users/create'" />
-        </SidebarCollapsible>
-
-        <SidebarCollapsible title="Users" :active="usePage().url.value.startsWith('/users')">
-            <template #icon>
-                <UserIcon
-                    class="flex-shrink-0 w-6 h-6"
-                    aria-hidden="true"
-                />
-            </template>
-
-            <SidebarCollapsibleItem :href="route('users.index')" title="List" :active="route().current('users.index')" />
-            <SidebarCollapsibleItem :href="route('users.create')" title="Create" :active="route().current('users.create')" />
-        </SidebarCollapsible>-->
     </PerfectScrollbar>
 </template>

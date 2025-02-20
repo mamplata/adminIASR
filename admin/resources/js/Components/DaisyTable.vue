@@ -13,7 +13,7 @@
 
             <!-- Table Body -->
             <tbody>
-                <tr v-for="(row, index) in data" :key="index" class="border-b dark:border-gray-700">
+                <tr v-for="(row, index) in currentPageData" :key="index" class="border-b dark:border-gray-700">
                     <td v-for="column in columns" :key="column" class="p-2">{{ row[column] }}</td>
                     <td v-if="actionsSlot" class="p-2">
                         <slot name="actions" :row="row"></slot>
@@ -21,6 +21,20 @@
                 </tr>
             </tbody>
         </table>
+
+        <!-- Pagination Controls -->
+        <div class="flex justify-end mt-4 space-x-2">
+            <button :disabled="currentPage <= 1" @click="changePage(currentPage - 1)" class="btn btn-sm">Prev</button>
+
+            <!-- Page Number Buttons -->
+            <button v-for="page in pages" :key="page"
+                :class="{ 'btn': true, 'btn-sm': true, 'btn-primary': currentPage === page }" @click="changePage(page)">
+                {{ page }}
+            </button>
+
+            <button :disabled="currentPage >= lastPage" @click="changePage(currentPage + 1)"
+                class="btn btn-sm">Next</button>
+        </div>
     </div>
 </template>
 
@@ -30,6 +44,14 @@ export default {
         data: {
             type: Array,
             required: true
+        },
+        currentPage: {
+            type: Number,
+            required: true
+        },
+        lastPage: {
+            type: Number,
+            required: true
         }
     },
     computed: {
@@ -38,11 +60,25 @@ export default {
         },
         actionsSlot() {
             return !!this.$slots.actions;
+        },
+        pages() {
+            const pageNumbers = [];
+            for (let i = 1; i <= this.lastPage; i++) {
+                pageNumbers.push(i);
+            }
+            return pageNumbers;
+        },
+        currentPageData() {
+            const startIndex = (this.currentPage - 1) * 10;  // Adjust based on your per-page setting
+            return this.data.slice(startIndex, startIndex + 10);  // Limit to 10 items per page
         }
     },
     methods: {
         formatHeader(header) {
             return header.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+        },
+        changePage(page) {
+            this.$emit('change-page', page);  // Emit the page change event
         }
     }
 };
