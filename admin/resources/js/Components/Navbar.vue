@@ -102,12 +102,9 @@ onUnmounted(() => {
                 'translate-y-0': scrolling.up,
             },
         ]">
-            <Button iconOnly variant="secondary" type="button" v-slot="{ iconSizeClasses }" srText="Search">
-                <SearchIcon aria-hidden="true" :class="iconSizeClasses" />
-            </Button>
 
             <Link :href="route('dashboard')">
-            <ApplicationLogo class="w-full max-w-[100px] h-auto" />
+            <ApplicationLogo class="w-full max-w-[80px] h-auto" />
             <span class="sr-only">IASR</span>
             </Link>
 
