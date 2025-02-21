@@ -1,6 +1,6 @@
 <template>
-    <div class="overflow-x-auto" :class="{'dark': isDarkMode}">
-        <table class="table w-full">
+    <div class="overflow-x-auto" :class="{ 'dark': isDarkMode }">
+        <table v-if="data.length > 0" class="table w-full">
             <!-- Table Head -->
             <thead>
                 <tr class="bg-gray-200 dark:bg-gray-800 text-black dark:text-white">
@@ -13,7 +13,8 @@
 
             <!-- Table Body -->
             <tbody>
-                <tr v-for="(row, index) in currentPageData" :key="index" class="border-b dark:border-gray-700 text-black dark:text-white">
+                <tr v-for="(row, index) in currentPageData" :key="index"
+                    class="border-b dark:border-gray-700 text-black dark:text-white">
                     <td v-for="column in columns" :key="column" class="p-2">{{ row[column] }}</td>
                     <td v-if="actionsSlot" class="p-2">
                         <slot name="actions" :row="row"></slot>
@@ -22,19 +23,32 @@
             </tbody>
         </table>
 
+        <!-- Message when Table is Empty -->
+        <div v-else class="text-center py-4 text-gray-500 dark:text-gray-300">
+            No data available.
+        </div>
+
         <!-- Pagination Controls -->
-        <div class="flex justify-end mt-4 space-x-2">
-            <button :disabled="currentPage <= 1" @click="changePage(currentPage - 1)" class="btn btn-sm dark:bg-gray-700 dark:text-white">Prev</button>
+        <div v-if="data.length > 0" class="flex justify-end mt-4 space-x-2">
+            <button :disabled="currentPage <= 1" @click="changePage(currentPage - 1)"
+                class="btn btn-sm dark:bg-gray-700 dark:text-white">
+                Prev
+            </button>
 
             <!-- Page Number Buttons -->
-            <button v-for="page in pages" :key="page"
-                :class="{ 'btn': true, 'btn-sm': true, 'text-white btn-success shadow-lg hover:bg-[#20714c]': currentPage === page, 'dark:bg-gray-700 dark:text-white': isDarkMode }" 
-                @click="changePage(page)">
+            <button v-for="page in pages" :key="page" :class="{
+                'btn': true,
+                'btn-sm': true,
+                'text-white btn-success shadow-lg hover:bg-[#20714c]': currentPage === page,
+                'dark:bg-gray-700 dark:text-white': isDarkMode
+            }" @click="changePage(page)">
                 {{ page }}
             </button>
 
             <button :disabled="currentPage >= lastPage" @click="changePage(currentPage + 1)"
-                class="btn btn-sm dark:bg-gray-700 dark:text-white">Next</button>
+                class="btn btn-sm dark:bg-gray-700 dark:text-white">
+                Next
+            </button>
         </div>
     </div>
 </template>
@@ -70,8 +84,8 @@ export default {
             return pageNumbers;
         },
         currentPageData() {
-            const startIndex = (this.currentPage - 1) * 10;  // Adjust based on your per-page setting
-            return this.data.slice(startIndex, startIndex + 10);  // Limit to 10 items per page
+            const startIndex = (this.currentPage - 1) * 5; // Adjust per-page items here
+            return this.data.slice(startIndex, startIndex + 5); // Change number based on pagination
         }
     },
     methods: {
@@ -79,11 +93,7 @@ export default {
             return header.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
         },
         changePage(page) {
-            this.$emit('change-page', page);  // Emit the page change event
-        },
-        toggleDarkMode() {
-            this.isDarkMode = !this.isDarkMode;
-            localStorage.setItem('darkMode', this.isDarkMode);
+            this.$emit('change-page', page);  // Emit the new page number to parent
         }
     }
 };

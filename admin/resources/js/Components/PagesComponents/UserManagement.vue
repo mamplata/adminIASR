@@ -1,6 +1,5 @@
 <template>
     <div :class="{ 'dark': isDarkMode }" class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
-
         <!-- Search Input -->
         <div class="flex mb-2">
             <input v-model="searchQuery" type="text" placeholder="Search by name or email"
@@ -24,8 +23,13 @@
         </transition>
 
         <!-- User Table -->
-        <DaisyTable :data="users.data" :currentPage="currentPage" :lastPage="users.last_page"
-            @change-page="changePage" />
+        <div v-if="users.data.length > 0">
+            <DaisyTable :data="users.data" :currentPage="currentPage" :lastPage="users.last_page"
+                @change-page="changePage" />
+        </div>
+        <div v-else class="text-center py-4 text-gray-500 dark:text-gray-300">
+            No users found.
+        </div>
 
         <DaisyModal ref="modal" title="Add User">
             <template #default>
@@ -84,7 +88,9 @@ export default {
                 onSuccess: () => {
                     this.$refs.modal.closeModal();
                     this.successMessage = "User added successfully!";
-                    setTimeout(() => this.successMessage = "", 3000); // Hide message after 3s
+                    setTimeout(() => this.successMessage = "", 4000);
+                    this.userForm.reset();
+                    this.fetchUsers(1);  // Refresh users after adding a user
                 },
                 onError: () => {
                     this.successMessage = "Error adding user. Try again!";
@@ -93,7 +99,7 @@ export default {
         },
         changePage(page) {
             this.currentPage = page;
-            this.fetchUsers(page);
+            this.fetchUsers(page);  // Fetch data for the new page
         },
         fetchUsers(page) {
             this.loading = true;
@@ -110,17 +116,3 @@ export default {
     }
 };
 </script>
-
-<style>
-/* Table Row Animation */
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-}
-
-.fade-enter,
-.fade-leave-to {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-</style>
