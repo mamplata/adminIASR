@@ -22,8 +22,9 @@
             </div>
         </transition>
 
+        <!-- User Table -->
         <DaisyTable :data="users.data" :currentPage="users.current_page" :lastPage="users.last_page"
-        @change-page="fetchUsers" />
+            @change-page="fetchUsers" />
 
         <DaisyModal ref="modal" title="Add User">
             <template #default>
