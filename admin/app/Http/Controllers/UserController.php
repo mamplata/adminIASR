@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::orderBy('created_at', 'desc');
 
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
@@ -21,7 +21,16 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->latest()->paginate(5)->appends(['search' => $request->input('search')]);
+         // Paginate results and return only name & email
+         $users = $query->latest()
+         ->paginate(5)
+         ->appends(['search' => $request->input('search')])
+         ->through(fn ($user) => [
+             'name' => $user->name,
+             'email' => $user->email,
+         ]);
+
+        // $users = $query->latest()->paginate(5)->appends(['search' => $request->input('search')]);
         return Inertia::render('Users/Index', ['users' => $users, 'search' => $request->input('search')]);
     }
 
