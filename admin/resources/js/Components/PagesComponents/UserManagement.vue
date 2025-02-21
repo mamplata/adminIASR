@@ -58,6 +58,9 @@ export default {
         };
     },
     methods: {
+        closeModal() {
+            this.$refs.modal.closeModal();
+        },
         openModal() {
             this.$refs.modal.showModal();
         },

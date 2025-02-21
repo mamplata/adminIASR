@@ -1,7 +1,5 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue'
-import Button from '@/Components/Button.vue'
-import { GithubIcon } from '@/Components/Icons/brands'
 </script>
 
 <template>

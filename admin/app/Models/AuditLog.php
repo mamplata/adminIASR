@@ -16,4 +16,9 @@ class AuditLog extends Model
         'model_id',
         'details'
     ];
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
 }

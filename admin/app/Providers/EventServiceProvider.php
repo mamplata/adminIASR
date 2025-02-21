@@ -3,8 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Vite;
-use App\Models\User;
-use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use App\Listeners\LogAuthenticationEvent;
 use Illuminate\Auth\Events\Login;
@@ -26,7 +24,6 @@ class EventServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
-        User::observe(UserObserver::class);
     }
 
     protected $listen = [

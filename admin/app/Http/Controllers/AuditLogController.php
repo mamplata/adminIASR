@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
@@ -10,35 +9,44 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = AuditLog::with('users')->orderBy('created_at', 'desc');
+        $query = AuditLog::with('admin:id,name')->orderBy('created_at', 'desc');
 
         // Apply filters
-        if ($request->has('action') && $request->action != '') {
+        if ($request->filled('action')) {
             $query->where('action', $request->action);
         }
 
-        if ($request->has('model') && $request->model != '') {
+        if ($request->filled('model')) {
             $query->where('model', $request->model);
         }
 
-        if ($request->has('admin_id') && $request->admin_id != '') {
+        if ($request->filled('admin_id')) {
             $query->where('admin_id', $request->admin_id);
         }
 
-        if ($request->has('start_date') && $request->start_date != '') {
+        if ($request->filled('start_date')) {
             $query->whereDate('created_at', '>=', $request->start_date);
         }
 
-        if ($request->has('end_date') && $request->end_date != '') {
+        if ($request->filled('end_date')) {
             $query->whereDate('created_at', '<=', $request->end_date);
         }
 
         // Paginate results
-        $auditLogs = $query->paginate(10);
+        $auditLogs = $query->paginate(5)->through(fn ($log) => [
+            'id' => $log->id,
+            'action' => $log->action,
+            'model' => $log->model,
+            'model_id' => $log->model_id,
+            'details' => $log->details,
+            'created_at' => $log->created_at,
+            'updated_at' => $log->updated_at,
+            'admin' => $log->admin?->name, // Return only the admin name
+        ]);
 
         return Inertia::render('Logs/AuditLogs/Index', [
             'auditLogs' => $auditLogs,
-            'filters' => $request->all()  // Pass the current filters back to the front-end
+            'filters' => $request->only(['action', 'model', 'admin_id', 'start_date', 'end_date'])
         ]);
     }
 }
