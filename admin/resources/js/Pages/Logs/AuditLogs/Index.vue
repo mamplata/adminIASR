@@ -16,13 +16,25 @@ import { useForm, router } from '@inertiajs/vue3';
             </template>
 
             <!-- Passing the users prop to the UserManagement component -->
-            <AuditLogsManagement :auditLogs="auditLogs" />
+            <AuditLogsManagement 
+                :auditLogs="auditLogs"
+                :filters="filters"
+                :admins="admins"
+                :actions="actions"
+                :models="models"
+            />
         </AuthenticatedLayout>
     </div>
 </template>
 
 <script>
 export default {
-    props: { auditLogs: Object }, // Make sure this 'users' is passed from the parent correctly
+    props: { 
+        auditLogs: Object, 
+        filters: Object, 
+        admins: Array, 
+        actions: Array, 
+        models: Array 
+    }
 };
 </script>
