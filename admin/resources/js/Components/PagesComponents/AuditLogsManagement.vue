@@ -34,6 +34,7 @@
         </div>
 
         <button @click="fetchLogs(1)" class="btn btn-success text-white hover:bg-[#20714c] mb-2">Search</button>
+        <button @click="resetFilters" class="btn btn-secondary text-white hover:bg-[#7b7b7b] mb-2">Reset</button>
 
         <!-- Display "Data not available" if no data is present -->
         <p v-if="noData" class="text-center text-gray-500">Data not available</p>
@@ -98,8 +99,8 @@ export default {
     },
     methods: {
         fetchLogs(page) {
-            // Check if no filters are provided (both startDate and endDate are empty)
-            if (!this.selectedAction && !this.selectedModel && !this.selectedAdmin && !this.startDate && !this.endDate) {
+            // Check if no filters are provided (both startDate and endDate are empty), but only do this if it's not a reset
+            if (!this.selectedAction && !this.selectedModel && !this.selectedAdmin && !this.startDate && !this.endDate && !this.resetting) {
                 this.noData = true;
                 return;
             }
@@ -127,6 +128,18 @@ export default {
         changePage(page) {
             this.currentPage = page;
             this.fetchLogs(page);
+        },
+        // Method to reset all filters
+        resetFilters() {
+            this.selectedAction = "";
+            this.selectedModel = "";
+            this.selectedAdmin = "";
+            this.startDate = "";
+            this.endDate = "";
+            this.noData = false;  // Reset "Data not available" flag
+            this.resetting = true; // Set flag to indicate that reset is happening
+            this.fetchLogs(1);     // Fetch all logs (no filters applied)
+            this.resetting = false; // Reset the flag after fetching
         }
     },
     components: { DaisyTable }
