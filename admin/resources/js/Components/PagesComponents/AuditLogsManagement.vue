@@ -26,12 +26,8 @@
         <button @click="fetchLogs(1)" class="btn btn-success text-white hover:bg-[#20714c] mb-2">Search</button>
 
         <!-- Audit Log Table -->
-        <DaisyTable 
-            :data="auditLogs.data" 
-            :currentPage="auditLogs.current_page" 
-            :lastPage="auditLogs.last_page" 
-            @change-page="fetchLogs"
-        />
+        <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
+            @change-page="fetchLogs" />
     </div>
 </template>
 

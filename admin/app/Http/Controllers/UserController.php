@@ -31,7 +31,6 @@ class UserController extends Controller
                 'role' => $user->role,
             ]);
 
-        // $users = $query->latest()->paginate(5)->appends(['search' => $request->input('search')]);
         return Inertia::render('Users/Index', ['users' => $users, 'search' => $request->input('search')]);
     }
 

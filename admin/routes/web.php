@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -33,6 +34,14 @@ Route::get('/components/buttons', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
+});
+
+//ANNOUNCEMENTS
+Route::middleware(['auth'])->group(function () {
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::put('/announcements/{announcements}', [AnnouncementController::class, 'update'])->name('announcements.update');
+    Route::delete('/usannouncementsers/{announcements}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });
 
 require __DIR__ . '/auth.php';

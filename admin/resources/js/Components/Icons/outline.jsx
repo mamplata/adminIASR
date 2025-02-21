@@ -91,6 +91,43 @@ export const UserIcon = defineComponent({
 })
 
 
+export const AnnouncementIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Megaphone Shape */}
+                <path
+                    d="M3 8h8l5 4-5 4H3V8z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                {/* Sound Waves */}
+                <path
+                    d="M18 8a3 3 0 0 1 0 8"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                />
+                <path
+                    d="M20 6a5 5 0 0 1 0 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                />
+            </svg>
+        )
+    },
+})
+
 export const ArrowsInnerIcon = defineComponent({
     setup() {
         return () => (

@@ -22,14 +22,8 @@
             </div>
         </transition>
 
-        <!-- User Table -->
-        <div v-if="users.data.length > 0">
-            <DaisyTable :data="users.data" :currentPage="users.current_page" :lastPage="users.last_page"
-                @change-page="fetchLogs" />
-        </div>
-        <div v-else class="text-center py-4 text-gray-500 dark:text-gray-300">
-            No users found.
-        </div>
+        <DaisyTable :data="users.data" :currentPage="users.current_page" :lastPage="users.last_page"
+        @change-page="fetchUsers" />
 
         <DaisyModal ref="modal" title="Add User">
             <template #default>
