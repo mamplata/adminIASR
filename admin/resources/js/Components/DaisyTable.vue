@@ -28,7 +28,7 @@
 
             <!-- Page Number Buttons -->
             <button v-for="page in pages" :key="page"
-                :class="{ 'btn': true, 'btn-sm': true, 'btn-primary': currentPage === page, 'dark:bg-gray-700 dark:text-white': isDarkMode }" 
+                :class="{ 'btn': true, 'btn-sm': true, 'text-white btn-success shadow-lg hover:bg-[#20714c]': currentPage === page, 'dark:bg-gray-700 dark:text-white': isDarkMode }" 
                 @click="changePage(page)">
                 {{ page }}
             </button>
