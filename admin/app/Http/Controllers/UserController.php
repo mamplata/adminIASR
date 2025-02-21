@@ -17,18 +17,19 @@ class UserController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('email', 'LIKE', "%{$search}%");
+                    ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
-         // Paginate results and return only name & email
-         $users = $query->latest()
-         ->paginate(5)
-         ->appends(['search' => $request->input('search')])
-         ->through(fn ($user) => [
-             'name' => $user->name,
-             'email' => $user->email,
-         ]);
+        // Paginate results and return only name & email
+        $users = $query->latest()
+            ->paginate(5)
+            ->appends(['search' => $request->input('search')])
+            ->through(fn($user) => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ]);
 
         // $users = $query->latest()->paginate(5)->appends(['search' => $request->input('search')]);
         return Inertia::render('Users/Index', ['users' => $users, 'search' => $request->input('search')]);
