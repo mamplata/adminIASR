@@ -31,11 +31,13 @@
                     <label class="label">Password</label>
                     <input v-model="userForm.password" type="password"
                         class="input input-bordered w-full mb-2 dark:bg-gray-700 dark:text-white" required />
-                </form>
-            </template>
 
-            <template #actions>
-                <button type="submit" class="btn btn-success text-white hover:bg-[#20714c]">Save</button>
+                    <!-- Move the Submit Button Inside the Form -->
+                    <div class="modal-action">
+                        <button type="button" @click="closeModal" class="btn">Cancel</button>
+                        <button type="submit" class="btn btn-success text-white hover:bg-[#20714c]">Save</button>
+                    </div>
+                </form>
             </template>
         </DaisyModal>
     </div>
@@ -74,7 +76,7 @@ export default {
     },
     components: {
         DaisyTable,
-        DaisyModal,  // ✅ Ensure this matches the actual file name
+        DaisyModal,  
     }
 };
 </script>

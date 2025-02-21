@@ -10,7 +10,7 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = AuditLog::with('admin')->orderBy('created_at', 'desc');
+        $query = AuditLog::with('users')->orderBy('created_at', 'desc');
 
         // Apply filters
         if ($request->has('action') && $request->action != '') {

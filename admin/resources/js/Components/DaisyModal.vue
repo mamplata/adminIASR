@@ -9,16 +9,6 @@
                 <div v-if="$slots.default">
                     <slot></slot>
                 </div>
-
-                <!-- Modal Actions -->
-                <div class="modal-action">
-                    <button type="button" @click="closeModal" class="btn">Cancel</button>
-
-                    <!-- Wrap slot actions properly -->
-                    <div v-if="$slots.actions">
-                        <slot name="actions"></slot>
-                    </div>
-                </div>
             </div>
         </dialog>
     </div>
