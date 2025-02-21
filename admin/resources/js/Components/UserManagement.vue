@@ -35,7 +35,7 @@
             </template>
 
             <template #actions>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-success text-white hover:bg-[#20714c]">Save</button>
             </template>
         </DaisyModal>
     </div>
