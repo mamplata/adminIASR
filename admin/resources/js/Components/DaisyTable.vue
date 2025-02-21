@@ -13,7 +13,7 @@
 
             <!-- Table Body -->
             <tbody>
-                <tr v-for="(row, index) in currentPageData" :key="index"
+                <tr v-for="(row, index) in data" :key="index"
                     class="border-b dark:border-gray-700 text-black dark:text-white">
                     <td v-for="column in columns" :key="column" class="p-2">{{ row[column] }}</td>
                     <td v-if="actionsSlot" class="p-2">
@@ -29,7 +29,7 @@
         </div>
 
         <!-- Pagination Controls -->
-        <div v-if="data.length > 0" class="flex justify-end mt-4 space-x-2">
+        <div v-if="lastPage > 1" class="flex justify-end mt-4 space-x-2">
             <button :disabled="currentPage <= 1" @click="changePage(currentPage - 1)"
                 class="btn btn-sm dark:bg-gray-700 dark:text-white">
                 Prev
@@ -77,15 +77,7 @@ export default {
             return !!this.$slots.actions;
         },
         pages() {
-            const pageNumbers = [];
-            for (let i = 1; i <= this.lastPage; i++) {
-                pageNumbers.push(i);
-            }
-            return pageNumbers;
-        },
-        currentPageData() {
-            const startIndex = (this.currentPage - 1) * 5; // Adjust per-page items here
-            return this.data.slice(startIndex, startIndex + 5); // Change number based on pagination
+            return Array.from({ length: this.lastPage }, (_, i) => i + 1);
         }
     },
     methods: {
