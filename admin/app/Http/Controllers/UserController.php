@@ -13,7 +13,7 @@ class UserController extends Controller
     {
         $query = User::orderBy('created_at', 'desc');
 
-        if ($request->has('search') && !empty($request->input('search'))) {
+        if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
@@ -22,10 +22,9 @@ class UserController extends Controller
         }
 
         // Paginate results and return only name & email
-        $users = $query->latest()
-            ->paginate(5)
+        $users = $query->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn($user) => [
+            ->through(fn ($user) => [
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,

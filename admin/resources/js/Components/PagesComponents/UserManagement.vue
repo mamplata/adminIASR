@@ -9,6 +9,9 @@
                 <span v-if="loading" class="loading loading-spinner loading-sm"></span>
                 <span v-else>Search</span>
             </button>
+            <button @click="resetSearch" class="btn text-white btn-secondary shadow-lg hover:bg-gray-400 ml-2">
+                Reset
+            </button>
         </div>
 
         <!-- Add User Button -->
@@ -72,10 +75,10 @@ import { useForm, router } from '@inertiajs/vue3';
 import DaisyModal from '@/Components/DaisyModal.vue';
 
 export default {
-    props: { users: Object },
+    props: { users: Object, search: String },
     data() {
         return {
-            searchQuery: "",
+            searchQuery: this.search || "",
             currentPage: 1,
             loading: false,
             successMessage: "",
@@ -110,10 +113,15 @@ export default {
         fetchUsers(page) {
             this.loading = true;
             router.get(`/users`, { page: page, search: this.searchQuery }, {
+                preserveState: true,
                 onFinish: () => {
                     this.loading = false;
                 }
             });
+        },
+        resetSearch() {
+            this.searchQuery = "";
+            this.fetchUsers(1);
         },
     },
     components: {

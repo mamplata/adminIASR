@@ -1,22 +1,27 @@
 <template>
     <div class="overflow-x-auto">
-        <table v-if="data.length > 0" class="table w-full">
+        <table v-if="data.length > 0" class="min-w-full bg-white dark:bg-gray-900 shadow-md rounded-lg">
             <!-- Table Head -->
             <thead>
-                <tr class="bg-gray-200 dark:bg-gray-800 text-black dark:text-white">
-                    <th v-for="column in columns" :key="column" class="text-left p-2">
+                <tr class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-b">
+                    <th v-for="column in columns" :key="column" class="px-4 py-2 text-left font-semibold uppercase">
                         {{ formatHeader(column) }}
+                        <!-- Optionally, add sort icons here for future enhancements -->
                     </th>
-                    <th v-if="actionsSlot" class="text-left p-2">Actions</th>
+                    <th v-if="actionsSlot" class="px-4 py-2 text-left font-semibold uppercase">
+                        Actions
+                    </th>
                 </tr>
             </thead>
 
             <!-- Table Body -->
             <tbody>
                 <tr v-for="(row, index) in data" :key="index"
-                    class="border-b dark:border-gray-700 text-black dark:text-white">
-                    <td v-for="column in columns" :key="column" class="p-2">{{ row[column] }}</td>
-                    <td v-if="actionsSlot" class="p-2">
+                    class="border-b dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150">
+                    <td v-for="column in columns" :key="column" class="px-4 py-2">
+                        {{ row[column] }}
+                    </td>
+                    <td v-if="actionsSlot" class="px-4 py-2">
                         <slot name="actions" :row="row"></slot>
                     </td>
                 </tr>
@@ -30,26 +35,31 @@
 
         <!-- Pagination Controls -->
         <div v-if="lastPage > 1" class="flex justify-end mt-4 space-x-2">
-            <button :disabled="currentPage <= 1" @click="changePage(currentPage - 1)"
-                class="btn btn-sm dark:bg-gray-700 dark:text-white">
+            <button :disabled="currentPage <= 1" @click="changePage(currentPage - 1)" class="btn btn-sm px-3 py-1 transition-colors duration-150 rounded-md
+               bg-gray-200 text-gray-700 hover:bg-gray-300
+               dark:bg-gray-700 dark:text-white hover:dark:bg-gray-600
+               disabled:opacity-50 disabled:cursor-not-allowed">
                 Prev
             </button>
 
             <!-- Page Number Buttons -->
-            <button v-for="page in pages" :key="page" :class="{
-                'btn': true,
-                'btn-sm': true,
-                'text-white btn-success shadow-lg hover:bg-[#20714c]': currentPage === page,
-                'dark:bg-gray-700 dark:text-white': isDarkMode
-            }" @click="changePage(page)">
+            <button v-for="page in pages" :key="page" @click="changePage(page)" :class="[
+                'btn btn-sm px-3 py-1 transition-colors duration-150 rounded-md',
+                currentPage === page
+                    ? 'bg-green-600 text-white shadow-lg hover:bg-green-700'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-white hover:dark:bg-gray-600'
+            ]">
                 {{ page }}
             </button>
 
-            <button :disabled="currentPage >= lastPage" @click="changePage(currentPage + 1)"
-                class="btn btn-sm dark:bg-gray-700 dark:text-white">
+            <button :disabled="currentPage >= lastPage" @click="changePage(currentPage + 1)" class="btn btn-sm px-3 py-1 transition-colors duration-150 rounded-md
+               bg-gray-200 text-gray-700 hover:bg-gray-300
+               dark:bg-gray-700 dark:text-white hover:dark:bg-gray-600
+               disabled:opacity-50 disabled:cursor-not-allowed">
                 Next
             </button>
         </div>
+
     </div>
 </template>
 
@@ -85,7 +95,7 @@ export default {
             return header.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
         },
         changePage(page) {
-            this.$emit('change-page', page);  // Emit the new page number to parent
+            this.$emit('change-page', page);
         }
     }
 };
