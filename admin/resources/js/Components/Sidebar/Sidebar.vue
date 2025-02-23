@@ -37,11 +37,11 @@ onMounted(() => {
                     !sidebarState.isOpen && !sidebarState.isHovered,
             },
         ]" @mouseenter="sidebarState.handleHover(true)" @mouseleave="sidebarState.handleHover(false)">
-            <SidebarHeader />
 
+            <SidebarHeader />
+            <SidebarFooter />
             <SidebarContent />
 
-            <SidebarFooter />
         </aside>
     </div>
 </template>
