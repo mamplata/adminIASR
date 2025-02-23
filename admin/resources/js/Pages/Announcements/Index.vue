@@ -15,13 +15,13 @@ import AnnouncementManagement from '@/Components/PagesComponents/AnnouncementMan
             </template>
 
 
-            <AnnouncementManagement :announcements="announcements"  :searchDepartments="searchDepartments"/>
+            <AnnouncementManagement :announcements="announcements" :searchDepartments="searchDepartments" />
         </AuthenticatedLayout>
     </div>
 </template>
 
 <script>
 export default {
-    props: { announcements: Object }, 
+    props: { announcements: Object, searchDepartments: Array },
 };
 </script>

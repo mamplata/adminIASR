@@ -1,9 +1,9 @@
 <template>
-    <div :class="{ 'dark': isDarkMode }" class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
+    <div class="p-6 overflow-hidden rounded-md shadow-md">
         <!-- Search Input -->
         <div class="flex mb-2">
             <input v-model="searchQuery" type="text" placeholder="Search by name or email"
-                class="input input-bordered w-full dark:bg-gray-700 dark:text-white">
+                class="w-full p-2 border border-gray-300 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             <button @click="fetchUsers(1)" :disabled="loading"
                 class="btn text-white btn-success shadow-lg hover:bg-[#20714c] ml-2">
                 <span v-if="loading" class="loading loading-spinner loading-sm"></span>
@@ -12,8 +12,9 @@
         </div>
 
         <!-- Add User Button -->
-        <button @click="openModal" class="btn text-white btn-success shadow-lg hover:bg-[#20714c] mb-2">Add
-            User</button>
+        <button @click="openModal" class="btn text-white btn-success shadow-lg hover:bg-[#20714c] mb-2">
+            Add User
+        </button>
 
         <!-- Success Notification -->
         <transition name="fade">
@@ -26,30 +27,40 @@
         <DaisyTable :data="users.data" :currentPage="users.current_page" :lastPage="users.last_page"
             @change-page="fetchUsers" />
 
-        <DaisyModal ref="modal" title="Add User">
+        <DaisyModal :isDarkMode="isDarkMode" ref="modal" title="Add User">
             <template #default>
                 <form @submit.prevent="saveUser">
-                    <label class="label">Name</label>
-                    <input v-model="userForm.name" type="text"
-                        class="input input-bordered w-full mb-2 dark:bg-gray-700 dark:text-white" required />
+                    <label class="label text-gray-700 dark:text-gray-300">Name</label>
+                    <input v-model="userForm.name" type="text" class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2
+        focus:border-blue-500 focus:ring-2 focus:ring-blue-300
+        dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
+                        required />
 
-                    <label class="label">Email</label>
-                    <input v-model="userForm.email" type="email"
-                        class="input input-bordered w-full mb-2 dark:bg-gray-700 dark:text-white" required />
+                    <label class="label text-gray-700 dark:text-gray-300">Email</label>
+                    <input v-model="userForm.email" type="email" class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2
+        focus:border-blue-500 focus:ring-2 focus:ring-blue-300
+        dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
+                        required />
 
-                    <label class="label">Password</label>
-                    <input v-model="userForm.password" type="password"
-                        class="input input-bordered w-full mb-2 dark:bg-gray-700 dark:text-white" required />
+                    <label class="label text-gray-700 dark:text-gray-300">Password</label>
+                    <input v-model="userForm.password" type="password" class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2
+        focus:border-blue-500 focus:ring-2 focus:ring-blue-300
+        dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
+                        required />
 
                     <!-- Submit Button with Loading State -->
                     <div class="modal-action">
-                        <button type="button" @click="closeModal" class="btn">Cancel</button>
-                        <button type="submit" class="btn btn-success text-white hover:bg-[#20714c]">
+                        <button type="button" @click="closeModal"
+                            class="btn btn-secondary text-white dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">Cancel</button>
+
+                        <button type="submit"
+                            class="btn btn-success text-white hover:bg-[#20714c] dark:bg-green-700 dark:hover:bg-green-600">
                             <span v-if="userForm.processing" class="loading loading-spinner loading-sm"></span>
                             <span v-else>Save</span>
                         </button>
                     </div>
                 </form>
+
             </template>
         </DaisyModal>
     </div>
@@ -85,7 +96,7 @@ export default {
                     this.successMessage = "User added successfully!";
                     setTimeout(() => this.successMessage = "", 4000);
                     this.userForm.reset();
-                    this.fetchUsers(1);  // Refresh users after adding a user
+                    this.fetchUsers(1);
                 },
                 onError: () => {
                     this.successMessage = "Error adding user. Try again!";
@@ -94,7 +105,7 @@ export default {
         },
         changePage(page) {
             this.currentPage = page;
-            this.fetchUsers(page);  // Fetch data for the new page
+            this.fetchUsers(page);
         },
         fetchUsers(page) {
             this.loading = true;

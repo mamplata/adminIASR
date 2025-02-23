@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
-            $table->string('department')->nullable(); // e.g., 'ccs', 'coe', 'cbaa', or null for general
-            $table->string('publisher');              // who is publishing
-            $table->string('type')->default('text');  // 'text' or 'image'
-            $table->json('content');                  // stored as JSON
+            $table->string('department');
+            $table->string('publisher');
+            $table->string('type'); // 'text' or 'image'
+            $table->json('content'); // JSON field for text or image metadata
+            $table->date('publication_date');
             $table->timestamps();
         });
     }

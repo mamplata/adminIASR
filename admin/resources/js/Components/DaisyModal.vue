@@ -1,7 +1,7 @@
 <template>
     <div>
         <dialog ref="modal" class="modal">
-            <div class="modal-box dark:bg-gray-800 dark:text-white">
+            <div class="modal-box bg-white dark:bg-gray-800 dark:text-white">
                 <!-- Modal Title -->
                 <h2 class="text-lg font-bold">{{ title }}</h2>
 

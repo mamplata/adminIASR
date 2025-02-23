@@ -1,5 +1,5 @@
 <template>
-    <div class="overflow-x-auto" :class="{ 'dark': isDarkMode }">
+    <div class="overflow-x-auto">
         <table v-if="data.length > 0" class="table w-full">
             <!-- Table Head -->
             <thead>

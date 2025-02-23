@@ -2,18 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Announcement extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'department',
         'publisher',
         'type',
         'content',
+        'publication_date',
     ];
 
     protected $casts = [
-        'content' => 'array', // automatically decode the JSON into an array
+        'content' => 'array',
+        'publication_date' => 'date',
     ];
 }
