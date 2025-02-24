@@ -82,25 +82,38 @@ class AnnouncementController extends Controller
 
     public function update(Request $request, Announcement $announcement)
     {
-        $validated = $request->validate([
+        // Base validation rules
+        $rules = [
             'department'       => 'required|string',
             'publisher'        => 'required|string',
             'type'             => 'required|in:text,image',
             'publication_date' => 'required|date',
-            'content'          => 'required',
-            'file'             => 'nullable'
-        ]);
-
+            'content'          => 'required', // For text type, this is JSON
+        ];
+    
+        // For image type, if a new file is provided, add file-specific validations.
         if ($request->type === 'image') {
-            // Check if the user has uploaded a new file.
             if ($request->hasFile('content')) {
-                // New file is provided, so delete the old file if it exists.
-                if (isset($announcement->content['file_path'])) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $announcement->content['file_path']));
+                // Validate the file (adjust mimes and max size as needed)
+                $rules['content'] = 'required|file|mimes:jpeg,png,jpg|max:2048';
+            }
+            // No additional rules for file_path, as we might not send a new file.
+        }
+    
+        $validated = $request->validate($rules);
+    
+        if ($request->type === 'image') {
+            if ($request->hasFile('content')) {
+                // Delete the previous file if it exists (even if coming from a text-to-image switch)
+                $currentContent = $announcement->content;
+                if (is_array($currentContent) && isset($currentContent['file_path'])) {
+                    $relativePath = str_replace('/storage/', '', $currentContent['file_path']);
+                    if (Storage::disk('public')->exists($relativePath)) {
+                        Storage::disk('public')->delete($relativePath);
+                    }
                 }
-
-                // Store the new file.
-                $file = $request->file('file');
+                // Handle new file upload
+                $file = $request->file('content');
                 $filePath = $file->store('announcements', 'public');
                 $validated['content'] = [
                     'file_name' => $file->getClientOriginalName(),
@@ -109,12 +122,20 @@ class AnnouncementController extends Controller
                     'size'      => $file->getSize(),
                 ];
             } else {
-                // No new file was uploaded.
-                // Retain the existing file information from the database.
-                $validated['content'] = $announcement->content;
+                // No new file uploaded; do not update the content.
+                unset($validated['content']);
             }
         } else {
-            // For text type announcements, decode the JSON content.
+            // Changing to text type
+            // If the previous content was an image, delete the stored image.
+            $currentContent = $announcement->content;
+            if (is_array($currentContent) && isset($currentContent['file_path'])) {
+                $relativePath = str_replace('/storage/', '', $currentContent['file_path']);
+                if (Storage::disk('public')->exists($relativePath)) {
+                    Storage::disk('public')->delete($relativePath);
+                }
+            }
+            // For text announcements, decode the JSON content.
             $content = json_decode($request->input('content'), true);
             if (!$content || !isset($content['title']) || !isset($content['body'])) {
                 return back()->withErrors(['content' => 'Invalid content format.']);
@@ -124,14 +145,30 @@ class AnnouncementController extends Controller
                 'body'  => $content['body'],
             ];
         }
-
+    
+        // Update the announcement with the validated data.
         $announcement->update($validated);
-
-        return redirect()
-            ->route('announcements.index')
-            ->with('success', 'Announcement updated!');
-     
+    
+        return redirect()->route('announcements.index')
+                         ->with('success', 'Announcement updated!');
     }
-        
-}
 
+    public function destroy(Announcement $announcement)
+    {
+        // Check if the current announcement has image content
+        $currentContent = $announcement->content;
+        if (is_array($currentContent) && isset($currentContent['file_path'])) {
+            // Convert the full URL to the relative file path
+            $relativePath = str_replace('/storage/', '', $currentContent['file_path']);
+            if (Storage::disk('public')->exists($relativePath)) {
+                Storage::disk('public')->delete($relativePath);
+            }
+        }
+        
+        // Delete the announcement record from the database
+        $announcement->delete();
+        
+        return redirect()->route('announcements.index')
+                        ->with('success', 'Announcement deleted!');
+    }    
+}

@@ -34,8 +34,9 @@
                 <span>{{ successMessage }}</span>
             </div>
         </transition>
-        <DaisyTable :data="announcements.data" :excludedColumns="['id', 'content']" :currentPage="announcements.current_page"
-            :lastPage="announcements.last_page" @change-page="fetchAnnouncements">
+        <DaisyTable :data="announcements.data" :excludedColumns="['id', 'content']"
+            :currentPage="announcements.current_page" :lastPage="announcements.last_page"
+            @change-page="fetchAnnouncements">
             <template #actions="{ row }">
                 <div class="flex gap-2">
                     <button @click="viewAnnouncement(row)"
@@ -46,12 +47,17 @@
                         class="btn text-white btn-warning shadow-lg hover:bg-yellow-600 mb-2">
                         Edit
                     </button>
-                    <button @click="openModal(row)" class="btn text-white btn-error shadow-lg hover:bg-red-700 mb-2">
+                    <button @click="confirmDeleteAnnouncement(row.id)"
+                        class="btn text-white btn-error shadow-lg hover:bg-red-700 mb-2">
                         Delete
                     </button>
                 </div>
             </template>
         </DaisyTable>
+
+        <DaisyConfirm :visible="showConfirm" title="Delete Announcement"
+            message="Are you sure you want to delete this announcement?" @confirm="handleConfirmDelete"
+            @cancel="handleCancelDelete" />
 
         <!-- Conditionally render the announcement card -->
         <DaisyCardAnnouncement v-if="selectedAnnouncement" :announcement="selectedAnnouncement"
@@ -112,7 +118,7 @@
                         <label class="label text-gray-900 dark:text-white">{{ uploadImage }}</label>
                         <div class="relative flex flex-col items-center mb-2">
                             <input type="file" accept="image/*" @change="handleImageUpload" class="hidden"
-                                id="fileInput" :required="announcementForm.type === 'image'" />
+                                id="fileInput" :required="isFileRequired" />
                             <label for="fileInput"
                                 class="cursor-pointer px-4 py-2 w-full border border-gray-300 rounded-md text-center bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-600">
                                 {{ fileName || 'Choose File' }}
@@ -143,6 +149,7 @@ import DaisyTable from '@/Components/DaisyTable.vue';
 import DaisyModal from '@/Components/DaisyModal.vue';
 import { useForm, router } from '@inertiajs/vue3';
 import DaisyCardAnnouncement from '@/Components/DaisyCardAnnouncement.vue';
+import DaisyConfirm from '../DaisyConfirm.vue';
 
 export default {
     props: {
@@ -174,7 +181,17 @@ export default {
             currentRow: null,
             isEditing: false,
             uploadImage: "Upload Image",
+            hasImage: false, 
+            showConfirm: false,
+            announcementToDelete: null,
         };
+    },
+    computed: {
+        // Required if type is image and either not editing or editing but no file exists.
+        isFileRequired() {
+        // When not editing, or when editing but there's no file selected (or already set)
+        return this.announcementForm.type === 'image' && (!this.isEditing || !this.hasImage);
+        },
     },
     methods: {
         openModal(action, row = null) {
@@ -198,6 +215,7 @@ export default {
                     }
                 } else {
                     this.uploadImage = "Upload New Image (Optional)";
+                    this.hasImage = true;
                     this.announcementForm.content = row.content;
                 }
                 // For image type, you may optionally set fileName if stored.
@@ -212,6 +230,8 @@ export default {
         },
         closeModal() {
             this.isEditing = false;
+            this.uploadImage = "Upload New Image";
+            this.announcementForm.content = '';
             this.$refs.modal.closeModal();
         },
         resetForm() {
@@ -237,7 +257,7 @@ export default {
                 // For image announcements, assign the file to the content field.
                 this.announcementForm.content = this.announcementForm.file;
             }
-
+           
             this.announcementForm.post('/announcements', {
                 forceFormData: true, // Ensures file is sent as FormData
                 onSuccess: () => {
@@ -255,32 +275,58 @@ export default {
         },
         updateAnnouncement() {
             if (this.announcementForm.type === 'text') {
-                // For text announcements, send a JSON string.
                 this.announcementForm.content = JSON.stringify({
-                title: this.extraContent.title,
-                body: this.extraContent.body,
+                    title: this.extraContent.title,
+                    body: this.extraContent.body,
                 });
-            } 
+            } else if (this.announcementForm.type === 'image') {
+                if (this.announcementForm.file != null) {
+                    this.announcementForm.content = this.announcementForm.file;
+                }
+            }
 
-            // Use the PUT method to update the announcement.
-            // Assuming this.currentRow holds the announcement being edited.
-            console.log(this.currentRow.id);
-            this.announcementForm.put(route('announcements.update', this.currentRow.id), {
-                forceFormData: true, // Ensures file is sent as FormData
+            // Use POST with _method override instead of PUT
+            this.announcementForm.post(`/announcements/${this.currentRow.id}`, {
+                _method: 'PUT',
+                forceFormData: true,
                 onSuccess: () => {
-                this.closeModal();
-                this.successMessage = "Announcement updated successfully!";
-                setTimeout(() => (this.successMessage = ""), 4000);
-                this.announcementForm.reset();
-                this.extraContent = { title: "", body: "" };
-                this.fileName = '';
-                // Optionally clear the file object.
-                this.announcementForm.file = null;
+                    this.closeModal();
+                    this.successMessage = "Announcement updated successfully!";
+                    setTimeout(() => (this.successMessage = ""), 4000);
+                    this.announcementForm.reset();
+                    this.extraContent = { title: "", body: "" };
+                    this.fileName = '';
                 },
                 onError: () => {
-                this.successMessage = "Error updating announcement. Try again!";
+                    this.successMessage = "Error updating announcement. Try again!";
                 },
             });
+        },
+        confirmDeleteAnnouncement(announcementId) {
+            // Store the announcement ID and show the confirmation modal
+            this.announcementToDelete = announcementId;
+            this.showConfirm = true;
+        },
+        handleConfirmDelete() {
+            // User confirmed: perform deletion logic
+            this.announcementForm.delete(`/announcements/${this.announcementToDelete}`, {
+                onSuccess: () => {
+                this.successMessage = "Announcement deleted successfully!";
+                setTimeout(() => { this.successMessage = ""; }, 4000);
+                },
+                onError: () => {
+                this.successMessage = "Error deleting announcement. Please try again!";
+                setTimeout(() => { this.successMessage = ""; }, 4000);
+                },
+            });
+            // Reset the state
+            this.announcementToDelete = null;
+            this.showConfirm = false;
+        },
+        handleCancelDelete() {
+            // User cancelled: just hide the confirmation modal
+            this.announcementToDelete = null;
+            this.showConfirm = false;
         },
         fetchAnnouncements(page) {
             this.loading = true;
@@ -311,7 +357,8 @@ export default {
     components: {
         DaisyTable,
         DaisyModal,
-        DaisyCardAnnouncement
+        DaisyCardAnnouncement,
+        DaisyConfirm
     },
 };
 </script>
