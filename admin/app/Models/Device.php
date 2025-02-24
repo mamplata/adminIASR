@@ -9,9 +9,10 @@ class Device extends Model
     protected $table = 'devices';
 
     protected $fillable = [
-        'MachineId',
-        'HardwareUID',
+        'name',
+        'machineId',
+        'hardwareUID',
         'MACAdress',
-        'DeviceFingerprint'
+        'deviceFingerprint'
     ];
 }

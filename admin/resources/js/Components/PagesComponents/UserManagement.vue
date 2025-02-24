@@ -67,7 +67,7 @@
             @change-page="fetchUsers" />
 
         <!-- Add User Modal -->
-        <DaisyModal :isDarkMode="isDarkMode" ref="modal" title="Add User">
+        <DaisyModal ref="modal" title="Add User">
             <template #default>
                 <form @submit.prevent="saveUser">
                     <label class="label text-gray-700 dark:text-gray-300">Name</label>

@@ -46,13 +46,21 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });
 
+// REGISTERED CARDS
 Route::middleware(['auth'])->group(function () {
-    // REGISTERED CARDS
+
     Route::get('/registered-cards', [RegisteredCardController::class, 'index'])->name('registered_cards.index');
     Route::post('/registered-cards', [RegisteredCardController::class, 'store'])->name('registered_cards.store');
-    // Devices
+
+});
+
+// Devices
+Route::middleware(['auth'])->group(function () {
+   
     Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
     Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
+    Route::put('/devices/{device}', [DeviceController::class, 'update'])->name('devices.update');
+    Route::delete('/devices/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');
 });
 
 require __DIR__ . '/auth.php';

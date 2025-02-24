@@ -16,9 +16,7 @@ class DeviceController extends Controller
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('machineId', 'LIKE', "%{$search}%")
-                    ->orWhere('hardwareUID', 'LIKE', "%{$search}%")
-                    ->orWhere('MACAdress', 'LIKE', "%{$search}%");
+                $q->where('name', 'LIKE', "%{$search}%");
             });
         }
 
@@ -26,6 +24,7 @@ class DeviceController extends Controller
             ->appends(['search' => $request->input('search')])
             ->through(fn($device) => [
                 'id' => $device->id,
+                'name' => $device->name,
                 'machineId' => $device->machineId,
                 'hardwareUID' => $device->hardwareUID,
                 'MACAdress' => $device->MACAdress,
@@ -41,6 +40,7 @@ class DeviceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'name' => 'required|string',
             'machineId' => 'required|string',
             'hardwareUID' => 'required|string',
             'MACAdress' => 'required|string',
@@ -50,5 +50,27 @@ class DeviceController extends Controller
         Device::create($validated);
 
         return redirect()->route('devices.index')->with('success', 'Device created!');
+    }
+
+    public function update(Request $request, Device $device)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'machineId' => 'required|string',
+            'hardwareUID' => 'required|string',
+            'MACAdress' => 'required|string',
+            'deviceFingerprint' => 'required|string',
+        ]);
+
+        $device->update($validated);
+
+        return redirect()->route('devices.index')->with('success', 'Device updated!');
+    }
+
+    public function destroy(Device $device)
+    {
+        $device->delete();
+
+        return redirect()->route('devices.index')->with('success', 'Device deleted!');
     }
 }
