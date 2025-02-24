@@ -13,34 +13,54 @@ class AnnouncementController extends Controller
     public function index(Request $request)
     {
         $query = Announcement::orderBy('created_at', 'desc');
-
+    
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('publisher', 'LIKE', "%{$search}%");
             });
         }
-
+    
         if ($request->filled('department')) {
             $query->where('department', $request->department);
         }
-
+    
         $searchDepartments = Announcement::distinct()->pluck('department')->toArray();
-
+    
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            // Both dates provided: filter between start and end
+            $query->whereBetween('publication_date', [
+                $request->start_date . ' 00:00:00',
+                $request->end_date . ' 23:59:59'
+            ]);
+        } elseif ($request->filled('start_date')) {
+            // Only start_date provided: filter records from the start_date onward
+            $query->where('publication_date', '>=', $request->start_date . ' 00:00:00');
+        } elseif ($request->filled('end_date')) {
+            // Only end_date provided: filter records up to the end_date
+            $query->where('publication_date', '<=', $request->end_date . ' 23:59:59');
+        }
+        
+    
         $announcements = $query->latest()
             ->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn ($user) => [
-                'id' => $user->id,
-                'department' => $user->department,
-                'publisher' => $user->publisher,
-                'type' => $user->type,
-                'content' => $user->content,
-                'publication_date' => $user->publication_date->format('l, F j, Y g:i A'),
+            ->through(fn ($announcement) => [
+                'id'                => $announcement->id,
+                'department'        => $announcement->department,
+                'publisher'         => $announcement->publisher,
+                'type'              => $announcement->type,
+                'content'           => $announcement->content,
+                'publication_date'  => $announcement->publication_date->format('l, F j, Y g:i A'),
             ]);
-
-        return Inertia::render('Announcements/Index', ['announcements' => $announcements, 'searchDepartments' => $searchDepartments, 'search' => $request->input('search')]);
+    
+        // Example return using Inertia.js
+        return inertia('Announcements/Index', [
+            'announcements'     => $announcements,
+            'searchDepartments' => $searchDepartments,
+        ]);
     }
+    
 
     public function store(Request $request)
     {

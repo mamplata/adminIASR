@@ -25,12 +25,18 @@ class AuditLogController extends Controller
             $query->where('admin_id', $request->admin_id);
         }
 
-        // Apply date range filter if provided
         if ($request->filled('start_date') && $request->filled('end_date')) {
+            // Both dates provided: filter between start and end
             $query->whereBetween('created_at', [
                 $request->start_date . ' 00:00:00',
                 $request->end_date . ' 23:59:59'
             ]);
+        } elseif ($request->filled('start_date')) {
+            // Only start_date provided: filter records from the start_date onward
+            $query->where('created_at', '>=', $request->start_date . ' 00:00:00');
+        } elseif ($request->filled('end_date')) {
+            // Only end_date provided: filter records up to the end_date
+            $query->where('created_at', '<=', $request->end_date . ' 23:59:59');
         }
 
         // Fetch distinct actions, models, and admins for dropdown selection
