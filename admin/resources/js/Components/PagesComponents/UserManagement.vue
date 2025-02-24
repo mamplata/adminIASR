@@ -3,7 +3,8 @@
         <!-- Search Input -->
         <div class="flex mb-2">
             <input v-model="searchQuery" type="text" placeholder="Search by name or email"
-                class="w-full p-2 border border-gray-300 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+
             <button @click="fetchUsers(1)" :disabled="loading"
                 class="btn text-white btn-success shadow-lg hover:bg-[#20714c] ml-2">
                 <span v-if="loading" class="loading loading-spinner loading-sm"></span>

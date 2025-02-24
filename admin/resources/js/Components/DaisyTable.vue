@@ -77,11 +77,18 @@ export default {
         lastPage: {
             type: Number,
             required: true
+        },
+        excludedColumns: {
+            type: Array,
+            default: () => []
         }
     },
     computed: {
         columns() {
-            return this.data.length > 0 ? Object.keys(this.data[0]) : [];
+            if (this.data.length > 0) {
+            return Object.keys(this.data[0]).filter(column => !this.excludedColumns.includes(column));
+            }
+            return [];
         },
         actionsSlot() {
             return !!this.$slots.actions;

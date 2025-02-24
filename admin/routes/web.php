@@ -40,8 +40,8 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
-    Route::put('/announcements/{announcements}', [AnnouncementController::class, 'update'])->name('announcements.update');
-    Route::delete('/usannouncementsers/{announcements}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+    Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
+    Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
 });
 
 require __DIR__ . '/auth.php';
