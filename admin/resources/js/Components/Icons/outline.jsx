@@ -128,6 +128,90 @@ export const AnnouncementIcon = defineComponent({
     },
 })
 
+export const CardIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Card Outline */}
+                <rect
+                    x="2"
+                    y="4"
+                    width="20"
+                    height="16"
+                    rx="2"
+                    ry="2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                {/* Card Stripe */}
+                <line
+                    x1="2"
+                    y1="10"
+                    x2="22"
+                    y2="10"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
+        )
+    },
+})
+
+export const DeviceIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Monitor Screen */}
+                <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="12"
+                    rx="2"
+                    ry="2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                />
+                {/* Monitor Stand */}
+                <line
+                    x1="12"
+                    y1="16"
+                    x2="12"
+                    y2="20"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
+                <line
+                    x1="8"
+                    y1="20"
+                    x2="16"
+                    y2="20"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                />
+            </svg>
+        )
+    },
+})
+
 export const ArrowsInnerIcon = defineComponent({
     setup() {
         return () => (

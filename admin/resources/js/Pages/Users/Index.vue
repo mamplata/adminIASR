@@ -23,6 +23,6 @@ import UserManagement from '@/Components/PagesComponents/UserManagement.vue';
 
 <script>
 export default {
-    props: { users: Object }, // Make sure this 'users' is passed from the parent correctly
+    props: { users: Object },
 };
 </script>
