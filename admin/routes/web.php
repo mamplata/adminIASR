@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\RegisteredCardController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\DeviceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,12 +38,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
 });
 
-//ANNOUNCEMENTS
+// ANNOUNCEMENTS
 Route::middleware(['auth'])->group(function () {
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
     Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+});
+
+Route::middleware(['auth'])->group(function () {
+    // REGISTERED CARDS
+    Route::get('/registered-cards', [RegisteredCardController::class, 'index'])->name('registered_cards.index');
+    Route::post('/registered-cards', [RegisteredCardController::class, 'store'])->name('registered_cards.store');
+    // Devices
+    Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
+    Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
 });
 
 require __DIR__ . '/auth.php';

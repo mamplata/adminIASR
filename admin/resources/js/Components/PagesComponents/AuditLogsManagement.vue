@@ -127,7 +127,7 @@ export default {
             };
 
             // Perform the search
-            router.get(route('logs.audit-logs.index'), filters).then(response => {
+            router.get(route('logs.audit-logs.index'), filters, { preserveState: true }).then(response => {
                 if (response.props.auditLogs.data.length === 0) {
                     this.noData = true;  // No results, so show "Data not available"
                 }
