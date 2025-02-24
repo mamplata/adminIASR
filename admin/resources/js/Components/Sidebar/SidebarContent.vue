@@ -21,7 +21,21 @@ import { TemplateIcon } from '@heroicons/vue/outline'
             </template>
         </SidebarLink>
 
-        <SidebarLink title="Announcements" :href="route('announcements.index')" :active="route().current('announcements.index')">
+        <SidebarLink title="Announcements" :href="route('announcements.index')"
+            :active="route().current('announcements.index')">
+            <template #icon>
+                <AnnouncementIcon class="flex-shrink-0 w-6 h-6" aria-hidden="true" />
+            </template>
+        </SidebarLink>
+
+        <SidebarLink title="Registered Card" :href="route('registered_cards.index')"
+            :active="route().current('registered_cards.index')">
+            <template #icon>
+                <AnnouncementIcon class="flex-shrink-0 w-6 h-6" aria-hidden="true" />
+            </template>
+        </SidebarLink>
+
+        <SidebarLink title="Device" :href="route('devices.index')" :active="route().current('devices.index')">
             <template #icon>
                 <AnnouncementIcon class="flex-shrink-0 w-6 h-6" aria-hidden="true" />
             </template>
