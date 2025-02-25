@@ -106,9 +106,10 @@
 
                     <!-- Publication Date -->
                     <label class="label text-gray-900 dark:text-white">Publication Date</label>
-                    <input v-model="announcementForm.publication_date" type="date"
-                        class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
-                        required />
+                    <input v-model="announcementForm.publication_date" type="date" :min="minPublicationDate" class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800
+                    dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300
+                    dark:focus:border-blue-400 dark:focus:ring-blue-500" required />
+
 
                     <!-- Type (text/image) -->
                     <label class="label text-gray-900 dark:text-white">Type</label>
@@ -238,6 +239,17 @@ export default {
             if (dd < 10) dd = `0${dd}`;
 
             return `${yyyy}-${mm}-${dd}`;
+        },
+        minPublicationDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            let mm = today.getMonth() + 1; // Months are zero-based
+            let dd = today.getDate();
+
+            if (mm < 10) mm = `0${mm}`;
+            if (dd < 10) dd = `0${dd}`;
+
+            return `${yyyy}-${mm}-${dd}`;  // Returns today's date as the min date (today or future)
         },
     },
     methods: {
