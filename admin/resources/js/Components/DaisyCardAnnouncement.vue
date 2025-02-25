@@ -8,15 +8,14 @@
                 <img :src="pncLogo" alt="PNC Logo" class="absolute top-2 right-2 w-6 h-6" />
 
                 <!-- Flex container with overflow handling -->
-                <div class="d-flex justify-center align-center"
-                    style="height: auto; overflow: hidden; flex-direction: column;">
-                    <div class="card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600 text-wrap">
-                        <h4 class="card-title font-semibold text-gray-800 dark:text-white">
+                <div class="">
+                    <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
+                        <h3 class="font-semibold text-gray-800 dark:text-white whitespace-normal break-words">
                             {{ announcement.content.title }}
-                        </h4>
+                        </h3>
                     </div>
-                    <div class="card-body px-4 py-2 text-wrap">
-                        <p class="text-gray-600 dark:text-gray-400">
+                    <div class="card-body m-5 px-4 py-2">
+                        <p class="text-gray-600 dark:text-gray-400 whitespace-normal break-words">
                             {{ announcement.content.body }}
                         </p>
                     </div>
@@ -38,15 +37,17 @@
                 </div>
             </div>
 
-            <div class="modal-action">
+            <!-- Modal action with button right-aligned -->
+            <div class="modal-action flex justify-end">
                 <button @click="closeCard" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </dialog>
+
 </template>
 
 <script>
-import pncBg from '../../../resources/assets/img/pnc-bg.jpg';
+import pncBg from '../../assets/img/pnc-bg.jpg';
 import pncLogo from '../../assets/img/pnc-logo.png';
 
 export default {
