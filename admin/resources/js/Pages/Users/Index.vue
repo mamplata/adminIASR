@@ -1,7 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import { useForm, router } from '@inertiajs/vue3';
-import UserManagement from '@/Components/PagesComponents/UserManagement.vue';
 import Users from '@/Components/PagesComponents/Users/Users.vue';
 </script>
 

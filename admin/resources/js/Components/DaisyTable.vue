@@ -1,6 +1,6 @@
 <template>
     <div class="overflow-x-auto">
-        <table v-if="data.length > 0" class="min-w-full bg-white dark:bg-gray-900 shadow-md rounded-lg">
+        <table v-if="data.length > 0" class="table w-full bg-white dark:bg-gray-900 shadow-md rounded-lg">
             <!-- Table Head -->
             <thead>
                 <tr class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-b">
@@ -18,7 +18,7 @@
             <tbody>
                 <tr v-for="(row, index) in data" :key="index"
                     class="border-b dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150">
-                    <td v-for="column in columns" :key="column" class="px-4 py-2">
+                    <td v-for="column in columns" :key="column" class="px-4 py-2 whitespace-normal break-words">
                         {{ row[column] }}
                     </td>
                     <td v-if="actionsSlot" class="px-4 py-2">
@@ -86,7 +86,7 @@ export default {
     computed: {
         columns() {
             if (this.data.length > 0) {
-            return Object.keys(this.data[0]).filter(column => !this.excludedColumns.includes(column));
+                return Object.keys(this.data[0]).filter(column => !this.excludedColumns.includes(column));
             }
             return [];
         },

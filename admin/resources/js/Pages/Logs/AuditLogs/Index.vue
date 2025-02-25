@@ -1,5 +1,5 @@
 <script setup>
-import AuditLogsManagement from '@/Components/PagesComponents/AuditLogsManagement.vue';
+import AuditLogs from '@/Components/PagesComponents/AuditLogs/AuditLogs.vue';
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import { useForm, router } from '@inertiajs/vue3';
 </script>
@@ -16,25 +16,19 @@ import { useForm, router } from '@inertiajs/vue3';
             </template>
 
             <!-- Passing the users prop to the UserManagement component -->
-            <AuditLogsManagement 
-                :auditLogs="auditLogs"
-                :filters="filters"
-                :admins="admins"
-                :actions="actions"
-                :models="models"
-            />
+            <AuditLogs :auditLogs="auditLogs" :filters="filters" :admins="admins" :actions="actions" :models="models" />
         </AuthenticatedLayout>
     </div>
 </template>
 
 <script>
 export default {
-    props: { 
-        auditLogs: Object, 
-        filters: Object, 
-        admins: Array, 
-        actions: Array, 
-        models: Array 
+    props: {
+        auditLogs: Object,
+        filters: Object,
+        admins: Array,
+        actions: Array,
+        models: Array
     }
 };
 </script>
