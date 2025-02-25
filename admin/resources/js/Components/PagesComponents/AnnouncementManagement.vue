@@ -1,7 +1,7 @@
 <template>
     <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
-         <!-- First Row: Search by Publisher & Department -->
-         <div class="flex flex-col md:flex-row gap-2 mb-4">
+        <!-- First Row: Search by Publisher & Department -->
+        <div class="flex flex-col md:flex-row gap-2 mb-4">
             <!-- Search by Publisher -->
             <input v-model="searchQuery" type="text" placeholder="Search publisher"
                 class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
@@ -22,12 +22,12 @@
         <div class="flex flex-col md:flex-row items-center gap-2 mb-4">
             <label class="whitespace-nowrap">Range Date:</label>
             <!-- Start Date with min and max -->
-            <input v-model="startDate" type="date" :min="minStartDate" :max="maxStartDate"
+            <input v-model="startDate" type="date" :max="maxStartDate"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                        focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- End Date with min and max -->
-            <input v-model="endDate" type="date" :min="minEndDate" :max="maxEndDate"
+            <input v-model="endDate" type="date" :max="maxEndDate"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                        focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
@@ -202,7 +202,7 @@ export default {
             currentRow: null,
             isEditing: false,
             uploadImage: "Upload Image",
-            hasImage: false, 
+            hasImage: false,
             showConfirm: false,
             announcementToDelete: null,
             startDate: "",
@@ -249,7 +249,7 @@ export default {
                 this.announcementForm.department = row.department;
 
                 let dateObj = new Date(row.publication_date);
-                let formattedDate = dateObj.toISOString().split('T')[0];  
+                let formattedDate = dateObj.toISOString().split('T')[0];
                 this.announcementForm.publication_date = formattedDate;
                 this.announcementForm.type = row.type;
                 if (row.type === 'text') {
@@ -287,7 +287,7 @@ export default {
             const file = event.target.files[0];
             if (!file) return;
             this.fileName = file.name;
-            this.announcementForm.file = file; 
+            this.announcementForm.file = file;
         },
         saveAnnouncement() {
             if (this.announcementForm.type === 'text') {
@@ -298,7 +298,7 @@ export default {
             } else if (this.announcementForm.type === 'image') {
                 this.announcementForm.content = this.announcementForm.file;
             }
-           
+
             this.announcementForm.post('/announcements', {
                 forceFormData: true,
                 onSuccess: () => {

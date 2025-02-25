@@ -8,6 +8,6 @@
     background-color: transparent !important;
 }
 
-:root.dark input[type="date"]::-webkit-calendar-picker-indicator {
+html:not(.dark) input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
 }
