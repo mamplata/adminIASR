@@ -13,20 +13,20 @@ class AnnouncementController extends Controller
     public function index(Request $request)
     {
         $query = Announcement::orderBy('created_at', 'desc');
-    
+
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('publisher', 'LIKE', "%{$search}%");
             });
         }
-    
+
         if ($request->filled('department')) {
             $query->where('department', $request->department);
         }
-    
+
         $searchDepartments = Announcement::distinct()->pluck('department')->toArray();
-    
+
         if ($request->filled('start_date') && $request->filled('end_date')) {
             // Both dates provided: filter between start and end
             $query->whereBetween('publication_date', [
@@ -40,27 +40,27 @@ class AnnouncementController extends Controller
             // Only end_date provided: filter records up to the end_date
             $query->where('publication_date', '<=', $request->end_date . ' 23:59:59');
         }
-        
-    
+
+
         $announcements = $query->latest()
             ->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn ($announcement) => [
+            ->through(fn($announcement) => [
                 'id'                => $announcement->id,
                 'department'        => $announcement->department,
                 'publisher'         => $announcement->publisher,
                 'type'              => $announcement->type,
                 'content'           => $announcement->content,
-                'publication_date'  => $announcement->publication_date->format('l, F j, Y g:i A'),
+                'publication_date'  => $announcement->publication_date->format('l, F j, Y'),
             ]);
-    
+
         // Example return using Inertia.js
         return inertia('Announcements/Index', [
             'announcements'     => $announcements,
             'searchDepartments' => $searchDepartments,
         ]);
     }
-    
+
 
     public function store(Request $request)
     {
@@ -110,7 +110,7 @@ class AnnouncementController extends Controller
             'publication_date' => 'required|date',
             'content'          => 'required', // For text type, this is JSON
         ];
-    
+
         // For image type, if a new file is provided, add file-specific validations.
         if ($request->type === 'image') {
             if ($request->hasFile('content')) {
@@ -119,9 +119,9 @@ class AnnouncementController extends Controller
             }
             // No additional rules for file_path, as we might not send a new file.
         }
-    
+
         $validated = $request->validate($rules);
-    
+
         if ($request->type === 'image') {
             if ($request->hasFile('content')) {
                 // Delete the previous file if it exists (even if coming from a text-to-image switch)
@@ -165,12 +165,12 @@ class AnnouncementController extends Controller
                 'body'  => $content['body'],
             ];
         }
-    
+
         // Update the announcement with the validated data.
         $announcement->update($validated);
-    
+
         return redirect()->route('announcements.index')
-                         ->with('success', 'Announcement updated!');
+            ->with('success', 'Announcement updated!');
     }
 
     public function destroy(Announcement $announcement)
@@ -184,11 +184,11 @@ class AnnouncementController extends Controller
                 Storage::disk('public')->delete($relativePath);
             }
         }
-        
+
         // Delete the announcement record from the database
         $announcement->delete();
-        
+
         return redirect()->route('announcements.index')
-                        ->with('success', 'Announcement deleted!');
-    }    
+            ->with('success', 'Announcement deleted!');
+    }
 }
