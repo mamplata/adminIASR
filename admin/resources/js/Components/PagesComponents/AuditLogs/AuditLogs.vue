@@ -9,9 +9,10 @@
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
             @change-page="fetchLogs" :excludedColumns="['details']">
             <template #actions="{ row }">
-                <button class="btn btn-primary" @click="showDetails(row.details)">
+                <button v-if="row.details != null" class="btn btn-primary" @click="showDetails(row.details)">
                     View Details
                 </button>
+                <p v-else>No details</p>
             </template>
         </DaisyTable>
 
