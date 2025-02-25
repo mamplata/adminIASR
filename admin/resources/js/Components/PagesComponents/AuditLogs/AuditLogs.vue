@@ -4,10 +4,10 @@
 
         <AuditLogFilterPanel v-model:selectedAction="selectedAction" v-model:selectedModel="selectedModel"
             v-model:selectedAdmin="selectedAdmin" v-model:startDate="startDate" v-model:endDate="endDate"
-            :actions="actions" :models="models" :admins="admins" @search="onSearch" @reset="onReset" />
+            :actions="actions" :models="models" :admins="admins" @search="fetchLogs(1)" @reset="resetSearch" />
 
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
-            @change-page="fetchLogs" excluded-columns="[details]">
+            @change-page="fetchLogs" :excludedColumns="['details']">
             <template #actions="{ row }">
                 <button class="btn btn-primary" @click="showDetails(row.details)">
                     View Details
@@ -48,7 +48,7 @@ const selectedAdmin = ref('');
 const startDate = ref('');
 const endDate = ref('');
 const noData = ref(false);
-const resetting = ref(false);
+const loading = ref(false);
 
 // For modal: stores details for the selected row
 const selectedDetails = ref(null);
@@ -60,18 +60,7 @@ function showDetails(details) {
 
 // Fetch logs using the current filter values
 function fetchLogs(page) {
-    if (
-        !selectedAction.value &&
-        !selectedModel.value &&
-        !selectedAdmin.value &&
-        !startDate.value &&
-        !endDate.value &&
-        !resetting.value
-    ) {
-        noData.value = true;
-        return;
-    }
-    noData.value = false;
+    loading.value = true; // Start loading
 
     const filters = {
         action: selectedAction.value,
@@ -82,28 +71,21 @@ function fetchLogs(page) {
         page: page,
     };
 
-    router
-        .get(route('logs.audit-logs.index'), filters, { preserveState: true })
-        .then((response) => {
-            if (response.props.auditLogs.data.length === 0) {
-                noData.value = true;
-            }
-        });
+    router.get(route('logs.audit-logs.index'), filters, {
+        preserveState: true,
+        onFinish: () => {
+            loading.value = false; // Ensure loading is turned off
+        }
+    });
 }
 
-function onSearch() {
-    fetchLogs(1);
-}
 
-function onReset() {
+function resetSearch() {
     selectedAction.value = '';
     selectedModel.value = '';
     selectedAdmin.value = '';
     startDate.value = '';
     endDate.value = '';
-    noData.value = false;
-    resetting.value = true;
     fetchLogs(1);
-    resetting.value = false;
 }
 </script>
