@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NFC Card Reader</title>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        background-color: #f4f4f4;
+        padding: 10px;
+        margin: 5px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>List of NFC Cards</h1>
+    <ul id="cardList">
+      <!-- The list of detected card UIDs will be added here -->
+    </ul>
+
+    <script>
+      const socket = io("http://localhost:3000"); // Connect to your Express server
+
+      socket.on("newCard", (uid) => {
+        // Create a new list item for the detected card UID
+        const cardList = document.getElementById("cardList");
+        const listItem = document.createElement("li");
+        listItem.textContent = uid;
+        cardList.appendChild(listItem);
+      });
+    </script>
+  </body>
+</html>

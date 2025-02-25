@@ -19,7 +19,8 @@
                     </button>
                 </div>
                 <div>
-                    <button @click="openAddModal" class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">
+                    <button @click="openAddModal"
+                        class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">
                         Add Device
                     </button>
                 </div>
@@ -54,7 +55,7 @@
 
         <!-- Device Table with Edit & Delete Actions -->
         <DaisyTable :data="devices.data" :currentPage="devices.current_page" :lastPage="devices.last_page"
-            @change-page="fetchDevices">
+            @change-page="fetchDevices" :excluded-columns="['id']">
             <!-- Assuming DaisyTable supports an "actions" slot for each row -->
             <template #actions="{ row }">
                 <button @click="editDevice(row)" class="btn btn-info text-white mr-2">
@@ -134,13 +135,13 @@ export default {
             // Flag to determine if we are editing or adding a device.
             editMode: false,
             // Form initialization for both add and edit.
-            deviceForm: useForm({ 
-                id: null, 
-                name: "", 
-                machineId: "", 
-                hardwareUID: "", 
-                MACAdress: "", 
-                deviceFingerprint: "" 
+            deviceForm: useForm({
+                id: null,
+                name: "",
+                machineId: "",
+                hardwareUID: "",
+                MACAdress: "",
+                deviceFingerprint: ""
             }),
         };
     },

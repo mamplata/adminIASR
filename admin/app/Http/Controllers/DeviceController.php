@@ -2,74 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Devices\CreateUpdateRequest;
 use App\Models\Device;
+use App\Services\DeviceService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DeviceController extends Controller
 {
+    protected $deviceService;
+
+    public function __construct(DeviceService $deviceService)
+    {
+        $this->deviceService = $deviceService;
+    }
+
     public function index(Request $request)
     {
-        $query = Device::orderBy('created_at', 'desc');
-
-        // Optional search filtering across key columns
-        if ($request->has('search') && !empty($request->input('search'))) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $devices = $query->paginate(5)
-            ->appends(['search' => $request->input('search')])
-            ->through(fn($device) => [
-                'id' => $device->id,
-                'name' => $device->name,
-                'machineId' => $device->machineId,
-                'hardwareUID' => $device->hardwareUID,
-                'MACAdress' => $device->MACAdress,
-                'deviceFingerprint' => $device->deviceFingerprint,
-            ]);
+        $devices = $this->deviceService->getDevices($request);
 
         return Inertia::render('Devices/Index', [
             'devices' => $devices,
-            'search' => $request->input('search')
+            'search'  => $request->input('search')
         ]);
     }
 
-    public function store(Request $request)
+    public function store(CreateUpdateRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'machineId' => 'required|string',
-            'hardwareUID' => 'required|string',
-            'MACAdress' => 'required|string',
-            'deviceFingerprint' => 'required|string',
-        ]);
-
-        Device::create($validated);
+        $validated = $request->validated();
+        $this->deviceService->createDevice($validated);
 
         return redirect()->route('devices.index')->with('success', 'Device created!');
     }
 
-    public function update(Request $request, Device $device)
+    public function update(CreateUpdateRequest $request, Device $device)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'machineId' => 'required|string',
-            'hardwareUID' => 'required|string',
-            'MACAdress' => 'required|string',
-            'deviceFingerprint' => 'required|string',
-        ]);
-
-        $device->update($validated);
+        $validated = $request->validated();
+        $this->deviceService->updateDevice($device, $validated);
 
         return redirect()->route('devices.index')->with('success', 'Device updated!');
     }
 
     public function destroy(Device $device)
     {
-        $device->delete();
+        $this->deviceService->deleteDevice($device);
 
         return redirect()->route('devices.index')->with('success', 'Device deleted!');
     }

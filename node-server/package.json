@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "macaddress": "^0.5.3",
+    "ndef": "^0.2.0",
+    "nfc-pcsc": "^0.8.1",
+    "node-machine-id": "^1.1.12",
+    "pcsclite": "^1.0.1",
+    "readline-sync": "^1.4.10",
+    "socket.io": "^4.8.1",
+    "systeminformation": "^5.25.11"
+  }
+}
