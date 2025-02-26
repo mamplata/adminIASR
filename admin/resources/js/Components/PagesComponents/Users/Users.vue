@@ -1,8 +1,8 @@
 <template>
-    <div class="p-6 overflow-hidden rounded-md shadow-md">
-        <!-- SearchBar Component -->
-        <SearchBar v-model="searchQuery" :loading="loading" @search="fetchUsers(1)" @reset="resetSearch()"
-            @add-user="openModal" />
+  <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
+    <!-- SearchBar Component -->
+    <SearchBar v-model="searchQuery" :loading="loading" @search="fetchUsers(1)" @reset="resetSearch()"
+      @add-user="openModal" />
 
         <!-- Success Notification -->
         <transition name="fade">

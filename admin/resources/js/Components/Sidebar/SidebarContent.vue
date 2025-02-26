@@ -5,6 +5,7 @@ import { AnnouncementIcon, CardIcon, DashboardIcon, DeviceIcon, UserIcon } from 
 import SidebarCollapsible from '@/Components/Sidebar/SidebarCollapsible.vue'
 import SidebarCollapsibleItem from '@/Components/Sidebar/SidebarCollapsibleItem.vue'
 import { TemplateIcon } from '@heroicons/vue/outline'
+import { sidebarState } from '@/Composables'
 </script>
 
 <template>
@@ -41,7 +42,7 @@ import { TemplateIcon } from '@heroicons/vue/outline'
             </template>
         </SidebarLink>
 
-        <SidebarCollapsible title="Logs" :active="route().current('logs.*')">
+        <SidebarCollapsible @click="sidebarState.isOpen = true" title="Logs" :active="route().current('logs.*')">
             <template #icon>
                 <TemplateIcon class="flex-shrink-0 w-6 h-6" aria-hidden="true" />
             </template>
@@ -49,6 +50,7 @@ import { TemplateIcon } from '@heroicons/vue/outline'
             <SidebarCollapsibleItem :href="route('logs.audit-logs.index')" title="Audit Logs"
                 :active="route().current('logs.audit-logs.index')" />
         </SidebarCollapsible>
+
 
     </PerfectScrollbar>
 </template>
