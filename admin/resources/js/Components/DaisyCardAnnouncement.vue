@@ -10,12 +10,13 @@
                 <!-- Flex container with overflow handling -->
                 <div class="">
                     <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
-                        <h3 class="font-semibold text-gray-800 dark:text-white whitespace-normal break-words">
+                        <h3
+                            class="font-semibold text-gray-800 dark:text-white whitespace-normal break-words text-center">
                             {{ announcement.content.title }}
                         </h3>
                     </div>
                     <div class="card-body m-5 px-4 py-2">
-                        <p class="text-gray-600 dark:text-gray-400 whitespace-normal break-words">
+                        <p class="text-gray-600 dark:text-gray-400 whitespace-normal break-words text-justify">
                             {{ announcement.content.body }}
                         </p>
                     </div>
@@ -79,27 +80,6 @@ export default {
 <style scoped>
 .modal::backdrop {
     background: rgba(0, 0, 0, 0.5);
-}
-
-/* Flex container settings */
-.d-flex {
-    display: flex;
-    flex-direction: column;
-    /* Stack content vertically */
-    height: auto;
-    /* Ensure the container grows with the content */
-    overflow: hidden;
-    /* Prevent overflow outside the container */
-}
-
-.justify-center {
-    justify-content: center;
-    /* Center content vertically */
-}
-
-.align-center {
-    align-items: center;
-    /* Center content horizontally */
 }
 
 .card-body {
