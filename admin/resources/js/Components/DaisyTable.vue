@@ -1,14 +1,14 @@
 <template>
     <div class="overflow-x-auto">
-        <table v-if="data.length > 0" class="table w-full bg-white dark:bg-gray-900 shadow-md rounded-lg">
+        <table v-if="data.length > 0" class="table w-full bg-white dark:bg-gray-900 shadow-md rounded-lg text-center">
             <!-- Table Head -->
             <thead>
                 <tr class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-b">
-                    <th v-for="column in columns" :key="column" class="px-4 py-2 text-left font-semibold uppercase">
+                    <th v-for="column in columns" :key="column" class="px-4 py-2 font-semibold uppercase">
                         {{ formatHeader(column) }}
                         <!-- Optionally, add sort icons here for future enhancements -->
                     </th>
-                    <th v-if="actionsSlot" class="px-4 py-2 text-left font-semibold uppercase">
+                    <th v-if="actionsSlot" class="px-4 py-2 font-semibold uppercase">
                         Actions
                     </th>
                 </tr>
