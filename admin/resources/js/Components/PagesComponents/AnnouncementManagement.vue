@@ -248,9 +248,17 @@ export default {
 
             if (mm < 10) mm = `0${mm}`;
             if (dd < 10) dd = `0${dd}`;
+            const todayFormatted = `${yyyy}-${mm}-${dd}`;
 
-            return `${yyyy}-${mm}-${dd}`;  // Returns today's date as the min date (today or future)
-        },
+            // If editing and the current publication date is less than today,
+            // use the publication date as the minimum.
+            if (this.isEditing && this.announcementForm.publication_date < todayFormatted) {
+                return this.announcementForm.publication_date;
+            }
+
+            // Otherwise, use today's date.
+            return todayFormatted;
+        }
     },
     methods: {
         openModal(action, row = null) {
@@ -261,8 +269,10 @@ export default {
                 this.announcementForm.department = row.department;
 
                 let dateObj = new Date(row.publication_date);
-                let formattedDate = dateObj.toISOString().split('T')[0];
-                this.announcementForm.publication_date = formattedDate;
+                let year = dateObj.getFullYear();
+                let month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+                let day = ("0" + dateObj.getDate()).slice(-2);
+                this.announcementForm.publication_date = `${year}-${month}-${day}`;
                 this.announcementForm.type = row.type;
                 if (row.type === 'text') {
                     try {
