@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue';
-import AnnouncementManagement from '@/Components/PagesComponents/AnnouncementManagement.vue';
+import Announcements from '@/Components/PagesComponents/Announcements/Announcements.vue';
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import AnnouncementManagement from '@/Components/PagesComponents/AnnouncementMan
             </template>
 
 
-            <AnnouncementManagement :announcements="announcements" :searchDepartments="searchDepartments" />
+            <Announcements :announcements="announcements" :searchDepartments="searchDepartments" />
         </AuthenticatedLayout>
     </div>
 </template>

@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 overflow-hidden rounded-md shadow-md">
+    <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
 
         <!-- SearchBar Component -->
         <DeviceSearchBar v-model="searchQuery" :loading="loading" @search="fetchDevices(1)" @reset="resetSearch()"
@@ -16,10 +16,10 @@
         <DeviceTable :devices="devices" @change-page="fetchDevices" @edit-device="editDevice"
             @delete-device="openDeleteConfirm" />
 
-        <!-- Add/Edit Device Modal (Using DeviceModal) -->
-        <DeviceModal ref="modal" :title="editMode ? 'Edit Device' : 'Add Device'" :deviceForm="deviceForm"
-            :gettingInfo="gettingInfo" @cancel="closeModal" @save="saveDevice" @get-info="getDeviceInfo" />
-
+        <DaisyModal ref="modalRef" title="Add Device">
+            <DeviceModal :title="editMode ? 'Edit Device' : 'Add Device'" :deviceForm="deviceForm"
+                :gettingInfo="gettingInfo" @cancel="closeModal" @save="saveDevice" @get-info="getDeviceInfo" />
+        </DaisyModal>
 
         <!-- DaisyConfirm for Delete Confirmation -->
         <DaisyConfirm :visible="confirmVisible" title="Delete Device"
@@ -36,6 +36,7 @@ import DaisyConfirm from '@/Components//DaisyConfirm.vue';
 import DeviceSearchBar from './DeviceSearchBar.vue';
 import DeviceTable from './DeviceTable.vue';
 import DeviceModal from './DeviceModal.vue';
+import DaisyModal from '@/Components/DaisyModal.vue';
 
 // Define props
 const props = defineProps({
@@ -52,7 +53,7 @@ const editMode = ref(false);
 const gettingInfo = ref(false);
 
 // Reference to the modal component
-const modal = ref(null);
+const modalRef = ref(null);
 
 // Initialize the form using Inertia's useForm
 const deviceForm = useForm({
@@ -97,7 +98,7 @@ onUnmounted(() => {
 
 // Functions
 function closeModal() {
-    modal.value.closeModal();
+    modalRef.value.closeModal();
     editMode.value = false;
     deviceForm.reset();
 }
@@ -105,7 +106,7 @@ function closeModal() {
 function openModal() {
     editMode.value = false;
     deviceForm.reset();
-    modal.value.showModal();
+    modalRef.value.showModal();
 }
 
 function editDevice(device) {
@@ -117,7 +118,7 @@ function editDevice(device) {
     deviceForm.hardwareUID = device.hardwareUID;
     deviceForm.MACAdress = device.MACAdress;
     deviceForm.deviceFingerprint = device.deviceFingerprint;
-    modal.value.showModal();
+    modalRef.value.showModal();
 }
 
 function saveDevice() {
@@ -125,7 +126,7 @@ function saveDevice() {
         // Update existing device using a PUT request.
         deviceForm.put(`/devices/${deviceForm.id}`, {
             onSuccess: () => {
-                modal.value.closeModal();
+                modalRef.value.closeModal();
                 successMessage.value = "Device updated successfully!";
                 setTimeout(() => (successMessage.value = ""), 4000);
                 deviceForm.reset();
@@ -144,7 +145,7 @@ function saveDevice() {
         // Create a new device using a POST request.
         deviceForm.post('/devices', {
             onSuccess: () => {
-                modal.value.closeModal();
+                modalRef.value.closeModal();
                 successMessage.value = "Device added successfully!";
                 setTimeout(() => (successMessage.value = ""), 4000);
                 deviceForm.reset();
@@ -156,21 +157,6 @@ function saveDevice() {
                     successMessage.value = "Error adding user. Try again!";
                     setTimeout(() => (successMessage.value = ""), 4000);
                 }
-            }
-        });
-    }
-}
-
-function deleteDevice(id) {
-    if (confirm("Are you sure you want to delete this device?")) {
-        router.delete(`/devices/${id}`, {
-            onSuccess: () => {
-                successMessage.value = "Device deleted successfully!";
-                fetchDevices(currentPage.value);
-                setTimeout(() => (successMessage.value = ""), 4000);
-            },
-            onError: () => {
-                successMessage.value = "Error deleting device. Try again!";
             }
         });
     }

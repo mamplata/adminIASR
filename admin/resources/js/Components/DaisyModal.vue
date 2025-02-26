@@ -14,18 +14,29 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        title: { type: String, default: "Modal" },
+<script setup>
+import { ref, defineExpose } from 'vue';
+
+const props = defineProps({
+    title: {
+        type: String,
+        default: "Modal",
     },
-    methods: {
-        showModal() {
-            this.$refs.modal.showModal();
-        },
-        closeModal() {
-            this.$refs.modal.close();
-        },
-    },
-};
+});
+
+const modal = ref(null);
+
+function showModal() {
+    modal.value.showModal();
+}
+
+function closeModal() {
+    modal.value.close();
+}
+
+// Expose methods so the parent component can call them
+defineExpose({
+    showModal,
+    closeModal,
+});
 </script>

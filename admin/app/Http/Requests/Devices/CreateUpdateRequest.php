@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Devices;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateUpdateRequest extends FormRequest
 {
@@ -15,11 +16,27 @@ class CreateUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'              => 'required|string',
-            'machineId'         => 'required|string|unique:devices,machineId',
-            'hardwareUID'       => 'required|string|unique:devices,hardwareUID',
-            'MACAdress'         => 'required|string|unique:devices,MACAdress',
-            'deviceFingerprint' => 'required|string|unique:devices,deviceFingerprint',
+            'name' => 'required|string',
+            'machineId' => [
+                'required',
+                'string',
+                Rule::unique('devices')->ignore($this->route('device')),
+            ],
+            'hardwareUID' => [
+                'required',
+                'string',
+                Rule::unique('devices')->ignore($this->route('device')),
+            ],
+            'MACAdress' => [
+                'required',
+                'string',
+                Rule::unique('devices')->ignore($this->route('device')),
+            ],
+            'deviceFingerprint' => [
+                'required',
+                'string',
+                Rule::unique('devices')->ignore($this->route('device')),
+            ],
         ];
     }
 

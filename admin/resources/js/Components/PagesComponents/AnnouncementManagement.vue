@@ -5,12 +5,12 @@
             <!-- Search by Publisher -->
             <input v-model="searchQuery" type="text" placeholder="Search publisher"
                 class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- Department Dropdown -->
             <select v-model="selectedDepartment"
                 class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500">
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500">
                 <option value="" disabled>Select Department</option>
                 <option v-for="department in searchDepartments" :key="department" :value="department">
                     {{ department }}
@@ -24,12 +24,12 @@
             <!-- Start Date with min and max -->
             <input v-model="startDate" type="date" :max="maxStartDate"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- End Date with min and max -->
             <input v-model="endDate" type="date" :max="maxEndDate"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- Flex Container for Search & Reset Buttons -->
             <div class="flex space-x-2 w-full md:w-auto">
@@ -85,7 +85,7 @@
             @close="selectedAnnouncement = null" />
 
         <!-- Modal for Creating an Announcement -->
-        <DaisyModal ref="modal" :title="currentAction">
+        <DaisyModal ref="modalRef" :title="currentAction">
             <template #default>
                 <form @submit.prevent="isEditing ? updateAnnouncement() : saveAnnouncement()">
                     <!-- Publisher -->
@@ -107,9 +107,8 @@
                     <!-- Publication Date -->
                     <label class="label text-gray-900 dark:text-white">Publication Date</label>
                     <input v-model="announcementForm.publication_date" type="date" :min="minPublicationDate" class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800
-                    dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300
-                    dark:focus:border-blue-400 dark:focus:ring-blue-500" required />
-
+          dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300
+          dark:focus:border-blue-400 dark:focus:ring-blue-500" required />
 
                     <!-- Type (text/image) -->
                     <label class="label text-gray-900 dark:text-white">Type</label>
@@ -166,262 +165,269 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed } from 'vue';
+import { useForm, router } from '@inertiajs/vue3';
 import DaisyTable from '@/Components/DaisyTable.vue';
 import DaisyModal from '@/Components/DaisyModal.vue';
-import { useForm, router } from '@inertiajs/vue3';
 import DaisyCardAnnouncement from '@/Components/DaisyCardAnnouncement.vue';
 import DaisyConfirm from '../DaisyConfirm.vue';
 
-export default {
-    props: {
-        announcements: Object,
-        searchDepartments: Array,
-    },
-    data() {
-        return {
-            searchQuery: "",
-            loading: false,
-            selectedDepartment: "",
-            successMessage: "",
-            announcementForm: useForm({
-                publisher: "",
-                department: "",
-                publication_date: "",
-                type: "",
-                content: "",
-                file: null,
-            }),
-            fileName: '',
-            extraContent: {
-                title: "",
-                body: "",
-            },
-            departments: ['CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'],
-            selectedAnnouncement: null,
-            currentAction: "Add",
-            currentRow: null,
-            isEditing: false,
-            uploadImage: "Upload Image",
-            hasImage: false,
-            showConfirm: false,
-            announcementToDelete: null,
-            startDate: "",
-            endDate: "",
-        };
-    },
-    computed: {
-        isFileRequired() {
-            return this.announcementForm.type === 'image' && (!this.isEditing || !this.hasImage);
-        },
-        maxStartDate() {
-            if (this.endDate) {
-                return this.endDate; // if endDate is selected, use it as maxStartDate
+// Define props
+const props = defineProps({
+    announcements: Object,
+    searchDepartments: Array,
+});
+
+// State variables
+const searchQuery = ref("");
+const loading = ref(false);
+const selectedDepartment = ref("");
+const successMessage = ref("");
+
+const announcementForm = useForm({
+    publisher: "",
+    department: "",
+    publication_date: "",
+    type: "",
+    content: "",
+    file: null,
+});
+
+const fileName = ref('');
+const extraContent = reactive({
+    title: "",
+    body: "",
+});
+
+const departments = ['CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'];
+const selectedAnnouncement = ref(null);
+const currentAction = ref("Add");
+const currentRow = ref(null);
+const isEditing = ref(false);
+const uploadImage = ref("Upload Image");
+const hasImage = ref(false);
+const showConfirm = ref(false);
+const announcementToDelete = ref(null);
+const startDate = ref("");
+const endDate = ref("");
+
+// Reference for the modal component
+const modalRef = ref(null);
+
+// Computed properties
+const maxStartDate = computed(() => {
+    if (endDate.value) {
+        return endDate.value;
+    }
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    let mm = today.getMonth() + 1;
+    let dd = today.getDate();
+    if (mm < 10) mm = `0${mm}`;
+    if (dd < 10) dd = `0${dd}`;
+    return `${yyyy}-${mm}-${dd}`;
+});
+
+const maxEndDate = computed(() => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    let mm = today.getMonth() + 1;
+    let dd = today.getDate();
+    if (mm < 10) mm = `0${mm}`;
+    if (dd < 10) dd = `0${dd}`;
+    return `${yyyy}-${mm}-${dd}`;
+});
+
+const minPublicationDate = computed(() => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    let mm = today.getMonth() + 1;
+    let dd = today.getDate();
+    if (mm < 10) mm = `0${mm}`;
+    if (dd < 10) dd = `0${dd}`;
+    const todayFormatted = `${yyyy}-${mm}-${dd}`;
+
+    if (isEditing.value && announcementForm.publication_date < todayFormatted) {
+        return announcementForm.publication_date;
+    }
+    return todayFormatted;
+});
+
+const isFileRequired = computed(() => {
+    return announcementForm.type === 'image' && (!isEditing.value || !hasImage.value);
+});
+
+// Methods
+function openModal(action, row = null) {
+    resetForm();
+    if (action === 'Edit' && row) {
+        isEditing.value = true;
+        announcementForm.publisher = row.publisher;
+        announcementForm.department = row.department;
+
+        const dateObj = new Date(row.publication_date);
+        const year = dateObj.getFullYear();
+        const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+        const day = ("0" + dateObj.getDate()).slice(-2);
+        announcementForm.publication_date = `${year}-${month}-${day}`;
+        announcementForm.type = row.type;
+        if (row.type === 'text') {
+            try {
+                extraContent.title = row.content.title;
+                extraContent.body = row.content.body;
+            } catch (e) {
+                console.error('Failed parsing text announcement content', e);
             }
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            let mm = today.getMonth() + 1; // Months are zero-based
-            let dd = today.getDate();
-
-            if (mm < 10) mm = `0${mm}`;
-            if (dd < 10) dd = `0${dd}`;
-
-            return `${yyyy}-${mm}-${dd}`;
-        },
-        // Computed property to get today's date for max date in endDate input
-        maxEndDate() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            let mm = today.getMonth() + 1; // Months are zero-based
-            let dd = today.getDate();
-
-            if (mm < 10) mm = `0${mm}`;
-            if (dd < 10) dd = `0${dd}`;
-
-            return `${yyyy}-${mm}-${dd}`;
-        },
-        minPublicationDate() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            let mm = today.getMonth() + 1; // Months are zero-based
-            let dd = today.getDate();
-
-            if (mm < 10) mm = `0${mm}`;
-            if (dd < 10) dd = `0${dd}`;
-            const todayFormatted = `${yyyy}-${mm}-${dd}`;
-
-            // If editing and the current publication date is less than today,
-            // use the publication date as the minimum.
-            if (this.isEditing && this.announcementForm.publication_date < todayFormatted) {
-                return this.announcementForm.publication_date;
-            }
-
-            // Otherwise, use today's date.
-            return todayFormatted;
+        } else {
+            uploadImage.value = "Upload New Image (Optional)";
+            hasImage.value = true;
+            announcementForm.content = row.content;
         }
-    },
-    methods: {
-        openModal(action, row = null) {
-            this.resetForm();
-            if (action === 'Edit' && row) {
-                this.isEditing = true;
-                this.announcementForm.publisher = row.publisher;
-                this.announcementForm.department = row.department;
+        currentRow.value = row;
+    } else {
+        currentRow.value = null;
+    }
+    currentAction.value = action + " Announcement";
+    // Set mode if needed on modalRef
+    if (modalRef.value) {
+        modalRef.value.mode = action;
+        modalRef.value.showModal();
+    }
+}
 
-                let dateObj = new Date(row.publication_date);
-                let year = dateObj.getFullYear();
-                let month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
-                let day = ("0" + dateObj.getDate()).slice(-2);
-                this.announcementForm.publication_date = `${year}-${month}-${day}`;
-                this.announcementForm.type = row.type;
-                if (row.type === 'text') {
-                    try {
-                        this.extraContent.title = row.content.title;
-                        this.extraContent.body = row.content.body;
-                    } catch (e) {
-                        console.error('Failed parsing text announcement content', e);
-                    }
-                } else {
-                    this.uploadImage = "Upload New Image (Optional)";
-                    this.hasImage = true;
-                    this.announcementForm.content = row.content;
-                }
-                this.currentRow = row;
-            } else {
-                this.currentRow = null;
+function closeModal() {
+    isEditing.value = false;
+    uploadImage.value = "Upload New Image";
+    announcementForm.content = '';
+    if (modalRef.value) {
+        modalRef.value.closeModal();
+    }
+}
+
+function resetForm() {
+    announcementForm.reset();
+    extraContent.title = "";
+    extraContent.body = "";
+    fileName.value = '';
+}
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    fileName.value = file.name;
+    announcementForm.file = file;
+}
+
+function saveAnnouncement() {
+    if (announcementForm.type === 'text') {
+        announcementForm.content = JSON.stringify({
+            title: extraContent.title,
+            body: extraContent.body,
+        });
+    } else if (announcementForm.type === 'image') {
+        announcementForm.content = announcementForm.file;
+    }
+    announcementForm.post('/announcements', {
+        forceFormData: true,
+        onSuccess: () => {
+            closeModal();
+            successMessage.value = "Announcement added successfully!";
+            setTimeout(() => (successMessage.value = ""), 4000);
+            announcementForm.reset();
+            extraContent.title = "";
+            extraContent.body = "";
+            fileName.value = '';
+        },
+        onError: () => {
+            successMessage.value = "Error adding announcement. Try again!";
+        },
+    });
+}
+
+function updateAnnouncement() {
+    if (announcementForm.type === 'text') {
+        announcementForm.content = JSON.stringify({
+            title: extraContent.title,
+            body: extraContent.body,
+        });
+    } else if (announcementForm.type === 'image') {
+        if (announcementForm.file != null) {
+            announcementForm.content = announcementForm.file;
+        }
+    }
+    announcementForm.post(`/announcements/${currentRow.value.id}`, {
+        _method: 'PUT',
+        forceFormData: true,
+        onSuccess: () => {
+            closeModal();
+            successMessage.value = "Announcement updated successfully!";
+            setTimeout(() => (successMessage.value = ""), 4000);
+            announcementForm.reset();
+            extraContent.title = "";
+            extraContent.body = "";
+            fileName.value = '';
+        },
+        onError: () => {
+            successMessage.value = "Error updating announcement. Try again!";
+        },
+    });
+}
+
+function confirmDeleteAnnouncement(announcementId) {
+    announcementToDelete.value = announcementId;
+    showConfirm.value = true;
+}
+
+function handleConfirmDelete() {
+    announcementForm.delete(`/announcements/${announcementToDelete.value}`, {
+        onSuccess: () => {
+            successMessage.value = "Announcement deleted successfully!";
+            setTimeout(() => { successMessage.value = ""; }, 4000);
+        },
+        onError: () => {
+            successMessage.value = "Error deleting announcement. Please try again!";
+            setTimeout(() => { successMessage.value = ""; }, 4000);
+        },
+    });
+    announcementToDelete.value = null;
+    showConfirm.value = false;
+}
+
+function handleCancelDelete() {
+    announcementToDelete.value = null;
+    showConfirm.value = false;
+}
+
+function fetchAnnouncements(page) {
+    loading.value = true;
+    router.get(
+        '/announcements',
+        {
+            page,
+            search: searchQuery.value,
+            department: selectedDepartment.value,
+            start_date: startDate.value || null,
+            end_date: endDate.value || null,
+        },
+        {
+            preserveState: true,
+            onFinish: () => {
+                loading.value = false;
             }
-            this.currentAction = action + " Announcement";
-            this.$refs.modal.mode = action;
-            this.$refs.modal.showModal();
-        },
-        closeModal() {
-            this.isEditing = false;
-            this.uploadImage = "Upload New Image";
-            this.announcementForm.content = '';
-            this.$refs.modal.closeModal();
-        },
-        resetForm() {
-            this.announcementForm.reset();
-            this.extraContent = { title: "", body: "" };
-            this.fileName = '';
-        },
-        handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            this.fileName = file.name;
-            this.announcementForm.file = file;
-        },
-        saveAnnouncement() {
-            if (this.announcementForm.type === 'text') {
-                this.announcementForm.content = JSON.stringify({
-                    title: this.extraContent.title,
-                    body: this.extraContent.body,
-                });
-            } else if (this.announcementForm.type === 'image') {
-                this.announcementForm.content = this.announcementForm.file;
-            }
+        }
+    );
+}
 
-            this.announcementForm.post('/announcements', {
-                forceFormData: true,
-                onSuccess: () => {
-                    this.closeModal();
-                    this.successMessage = "Announcement added successfully!";
-                    setTimeout(() => (this.successMessage = ""), 4000);
-                    this.announcementForm.reset();
-                    this.extraContent = { title: "", body: "" };
-                    this.fileName = '';
-                },
-                onError: () => {
-                    this.successMessage = "Error adding announcement. Try again!";
-                },
-            });
-        },
-        updateAnnouncement() {
-            if (this.announcementForm.type === 'text') {
-                this.announcementForm.content = JSON.stringify({
-                    title: this.extraContent.title,
-                    body: this.extraContent.body,
-                });
-            } else if (this.announcementForm.type === 'image') {
-                if (this.announcementForm.file != null) {
-                    this.announcementForm.content = this.announcementForm.file;
-                }
-            }
+function resetSearch() {
+    searchQuery.value = "";
+    selectedDepartment.value = "";
+    startDate.value = "";
+    endDate.value = "";
+    fetchAnnouncements(1);
+}
 
-            this.announcementForm.post(`/announcements/${this.currentRow.id}`, {
-                _method: 'PUT',
-                forceFormData: true,
-                onSuccess: () => {
-                    this.closeModal();
-                    this.successMessage = "Announcement updated successfully!";
-                    setTimeout(() => (this.successMessage = ""), 4000);
-                    this.announcementForm.reset();
-                    this.extraContent = { title: "", body: "" };
-                    this.fileName = '';
-                },
-                onError: () => {
-                    this.successMessage = "Error updating announcement. Try again!";
-                },
-            });
-        },
-        confirmDeleteAnnouncement(announcementId) {
-            this.announcementToDelete = announcementId;
-            this.showConfirm = true;
-        },
-        handleConfirmDelete() {
-            this.announcementForm.delete(`/announcements/${this.announcementToDelete}`, {
-                onSuccess: () => {
-                    this.successMessage = "Announcement deleted successfully!";
-                    setTimeout(() => { this.successMessage = ""; }, 4000);
-                },
-                onError: () => {
-                    this.successMessage = "Error deleting announcement. Please try again!";
-                    setTimeout(() => { this.successMessage = ""; }, 4000);
-                },
-            });
-            this.announcementToDelete = null;
-            this.showConfirm = false;
-        },
-        handleCancelDelete() {
-            this.announcementToDelete = null;
-            this.showConfirm = false;
-        },
-        fetchAnnouncements(page) {
-            this.loading = true;
-
-            router.get(
-                '/announcements',
-                {
-                    page,
-                    search: this.searchQuery,
-                    department: this.selectedDepartment,
-                    start_date: this.startDate || null,
-                    end_date: this.endDate || null,
-                },
-                {
-                    preserveState: true,
-                    onFinish: () => {
-                        this.loading = false;
-                    }
-                }
-            );
-        },
-        resetSearch() {
-            this.searchQuery = "";
-            this.selectedDepartment = "";
-            this.startDate = "";
-            this.endDate = "";
-            this.fetchAnnouncements(1);
-        },
-        viewAnnouncement(row) {
-            this.selectedAnnouncement = row;
-        },
-    },
-    components: {
-        DaisyTable,
-        DaisyModal,
-        DaisyCardAnnouncement,
-        DaisyConfirm
-    },
-};
+function viewAnnouncement(row) {
+    selectedAnnouncement.value = row;
+}
 </script>
