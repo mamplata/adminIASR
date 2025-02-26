@@ -14,9 +14,7 @@
       'input input-bordered rounded bg-white text-gray-900 w-full mb-1 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500',
       form.errors.email ? 'border-red-500' : 'border-gray-500'
     ]" required />
-    <div v-if="form.errors.email" class="text-sm mb-2 text-red-500 dark:text-white">
-      {{ form.errors.email }}
-    </div>
+    <div v-if="form.errors.email" class="text-sm mb-2 text-red-500 dark:text-white">{{ form.errors.email }}</div>
 
     <!-- Password Field -->
     <label class="label text-gray-700 dark:text-gray-300">Password</label>
@@ -25,6 +23,15 @@
       form.errors.password ? 'border-red-500' : 'border-gray-500'
     ]" required />
     <div v-if="form.errors.password" class="text-sm mb-2 text-red-500 dark:text-white">{{ form.errors.password }}</div>
+
+    <!-- Confirm Password Field -->
+    <label class="label text-gray-700 dark:text-gray-300">Confirm Password</label>
+    <input v-model="form.confirmPassword" type="password" :class="[
+      'input input-bordered rounded bg-white text-gray-900 w-full mb-1 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500',
+      form.errors.confirmPassword ? 'border-red-500' : 'border-gray-500'
+    ]" required />
+    <div v-if="form.errors.confirmPassword" class="text-sm mb-2 text-red-500 dark:text-white">{{
+      form.errors.confirmPassword }}</div>
 
     <!-- Modal Actions -->
     <div class="modal-action mt-4">
