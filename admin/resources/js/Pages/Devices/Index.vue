@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue';
-import DevicesManagement from '@/Components/PagesComponents/DevicesManagement.vue';
+import Devices from '@/Components/PagesComponents/Devices/Devices.vue';
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import DevicesManagement from '@/Components/PagesComponents/DevicesManagement.vu
             </template>
 
             <!-- Passing the users prop to the UserManagement component -->
-            <DevicesManagement :devices="devices" />
+            <Devices :devices="devices" />
         </AuthenticatedLayout>
     </div>
 </template>
