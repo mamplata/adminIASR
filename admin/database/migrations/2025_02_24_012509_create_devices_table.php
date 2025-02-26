@@ -10,10 +10,11 @@ class CreateDevicesTable extends Migration
     {
         Schema::create('devices', function (Blueprint $table) {
             $table->id();
-            $table->string('machineId');
-            $table->string('hardwareUID');
-            $table->string('MACAdress');
-            $table->string('deviceFingerprint');
+            $table->string('name');
+            $table->string('machineId')->unique();
+            $table->string('hardwareUID')->unique();
+            $table->string('MACAdress')->unique();
+            $table->string('deviceFingerprint')->unique();
             $table->timestamps();
         });
     }

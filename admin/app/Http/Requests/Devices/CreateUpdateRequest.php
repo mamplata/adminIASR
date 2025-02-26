@@ -16,10 +16,10 @@ class CreateUpdateRequest extends FormRequest
     {
         return [
             'name'              => 'required|string',
-            'machineId'         => 'required|string',
-            'hardwareUID'       => 'required|string',
-            'MACAdress'         => 'required|string',
-            'deviceFingerprint' => 'required|string',
+            'machineId'         => 'required|string|unique:devices,machineId',
+            'hardwareUID'       => 'required|string|unique:devices,hardwareUID',
+            'MACAdress'         => 'required|string|unique:devices,MACAdress',
+            'deviceFingerprint' => 'required|string|unique:devices,deviceFingerprint',
         ];
     }
 
@@ -28,9 +28,13 @@ class CreateUpdateRequest extends FormRequest
         return [
             'name.required'              => 'Please provide the device name.',
             'machineId.required'         => 'The machine ID is required.',
+            'machineId.unique'           => 'This machine ID is already in use.',
             'hardwareUID.required'       => 'Hardware UID cannot be empty.',
+            'hardwareUID.unique'         => 'This hardware UID is already registered.',
             'MACAdress.required'         => 'A valid MAC address is required.',
+            'MACAdress.unique'           => 'This MAC address is already in use.',
             'deviceFingerprint.required' => 'The device fingerprint must be provided.',
+            'deviceFingerprint.unique'   => 'This device fingerprint is already taken.',
         ];
     }
 }

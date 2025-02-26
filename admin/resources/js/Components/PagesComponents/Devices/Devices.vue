@@ -132,8 +132,12 @@ function saveDevice() {
                 editMode.value = false;
                 fetchDevices(1);
             },
-            onError: () => {
-                successMessage.value = "Error updating device. Try again!";
+            onError: (errors) => {
+                // Only show a generic error if there are no field-specific validation errors.
+                if (Object.keys(errors).length === 0) {
+                    successMessage.value = "Error adding user. Try again!";
+                    setTimeout(() => (successMessage.value = ""), 4000);
+                }
             }
         });
     } else {
@@ -146,8 +150,12 @@ function saveDevice() {
                 deviceForm.reset();
                 fetchDevices(1);
             },
-            onError: () => {
-                successMessage.value = "Error adding device. Try again!";
+            onError: (errors) => {
+                // Only show a generic error if there are no field-specific validation errors.
+                if (Object.keys(errors).length === 0) {
+                    successMessage.value = "Error adding user. Try again!";
+                    setTimeout(() => (successMessage.value = ""), 4000);
+                }
             }
         });
     }

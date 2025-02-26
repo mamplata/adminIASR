@@ -12,30 +12,45 @@
                     <input v-model="deviceForm.name" type="text"
                         class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
+                    <div v-if="deviceForm.errors.name" class="text-sm mb-2 text-red-500 dark:text-white">{{
+                        deviceForm.errors.name
+                        }}</div>
 
                     <!-- Machine ID -->
                     <label class="label text-gray-700 dark:text-gray-300">Machine ID</label>
                     <input v-model="deviceForm.machineId" type="text"
                         class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
+                    <div v-if="deviceForm.errors.machineId" class="text-sm mb-2 text-red-500 dark:text-white">{{
+                        deviceForm.errors.machineId
+                        }}</div>
 
                     <!-- Hardware UID -->
                     <label class="label text-gray-700 dark:text-gray-300">Hardware UID</label>
                     <input v-model="deviceForm.hardwareUID" type="text"
                         class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
+                    <div v-if="deviceForm.errors.hardwareUID" class="text-sm mb-2 text-red-500 dark:text-white">{{
+                        deviceForm.errors.hardwareUID
+                    }}</div>
 
                     <!-- MAC Address -->
                     <label class="label text-gray-700 dark:text-gray-300">MAC Address</label>
                     <input v-model="deviceForm.MACAdress" type="text"
                         class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
+                    <div v-if="deviceForm.errors.MACAdress" class="text-sm mb-2 text-red-500 dark:text-white">{{
+                        deviceForm.errors.MACAdress
+                    }}</div>
 
                     <!-- Device Fingerprint -->
                     <label class="label text-gray-700 dark:text-gray-300">Device Fingerprint</label>
                     <input v-model="deviceForm.deviceFingerprint" type="text"
                         class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
+                    <div v-if="deviceForm.errors.deviceFingerprint" class="text-sm mb-2 text-red-500 dark:text-white">{{
+                        deviceForm.errors.deviceFingerprint
+                        }}</div>
 
                     <div class="flex justify-center mt-4">
                         <!-- Get Info Button -->

@@ -73,7 +73,6 @@ function saveUser() {
         successMessage.value = "Error adding user. Try again!";
         setTimeout(() => (successMessage.value = ""), 4000);
       }
-
     }
   });
 }
