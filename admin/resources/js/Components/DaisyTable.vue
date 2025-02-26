@@ -86,7 +86,7 @@ export default {
     computed: {
         columns() {
             if (this.data.length > 0) {
-                return Object.keys(this.data[0]).filter(column => !this.excludedColumns.includes(column));
+                return Object.keys(this.data[0]).filter(column => column !== 'id' && !this.excludedColumns.includes(column));
             }
             return [];
         },

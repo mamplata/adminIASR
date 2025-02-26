@@ -51,7 +51,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-  
+
 // Listen for socket connections
 io.on("connection", (socket) => {
   console.log("New client connected");
@@ -60,6 +60,7 @@ io.on("connection", (socket) => {
   socket.on("getDeviceInfo", async () => {
     try {
       const details = await generateFingerprintDetails();
+      console.log(details);
       // Emit the details back to the client
       socket.emit("deviceInfo", details);
     } catch (error) {

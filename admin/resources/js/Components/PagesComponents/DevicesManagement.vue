@@ -61,7 +61,7 @@
                 <button @click="editDevice(row)" class="btn btn-info text-white mr-2">
                     Edit
                 </button>
-                <button @click="deleteDevice(row.id)" class="btn btn-error text-white">
+                <button @click="openDeleteConfirm(row.id)" class="btn btn-error text-white">
                     Delete
                 </button>
             </template>
@@ -101,6 +101,15 @@
                         class="input input-bordered border border-gray-500 rounded bg-white text-gray-900 w-full mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
 
+                    <div class="flex justify-center mt-4">
+                        <!-- Get Info Button -->
+                        <button type="button" @click="getDeviceInfo" class="btn btn-info mb-4" :disabled="gettingInfo">
+                            <span v-if="gettingInfo" class="loading loading-spinner loading-sm"></span>
+                            <span v-else>Get This Device Info</span>
+                        </button>
+
+                    </div>
+
                     <!-- Modal Actions -->
                     <div class="modal-action">
                         <button type="button" @click="closeModal"
@@ -116,127 +125,197 @@
                 </form>
             </template>
         </DaisyModal>
+
+
+        <!-- DaisyConfirm for Delete Confirmation -->
+        <DaisyConfirm :visible="confirmVisible" title="Delete Device"
+            message="Are you sure you want to delete this device?" @confirm="handleDeleteConfirm"
+            @cancel="handleDeleteCancel" />
     </div>
 </template>
 
-<script>
-import DaisyTable from '@/Components/DaisyTable.vue';
+<script setup>
+import { ref, onUnmounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
+import { io } from 'socket.io-client';
+import DaisyTable from '@/Components/DaisyTable.vue';
 import DaisyModal from '@/Components/DaisyModal.vue';
+import DaisyConfirm from '../DaisyConfirm.vue';
 
-export default {
-    props: { devices: Object, search: String },
-    data() {
-        return {
-            searchQuery: this.search || "",
-            currentPage: 1,
-            loading: false,
-            successMessage: "",
-            // Flag to determine if we are editing or adding a device.
-            editMode: false,
-            // Form initialization for both add and edit.
-            deviceForm: useForm({
-                id: null,
-                name: "",
-                machineId: "",
-                hardwareUID: "",
-                MACAdress: "",
-                deviceFingerprint: ""
-            }),
-        };
-    },
-    methods: {
-        closeModal() {
-            this.$refs.modal.closeModal();
-            // Reset edit mode on modal close
-            this.editMode = false;
-            this.deviceForm.reset();
-        },
-        openAddModal() {
-            // Ensure form is reset and editMode is off before adding a new device.
-            this.editMode = false;
-            this.deviceForm.reset();
-            this.$refs.modal.showModal();
-        },
-        editDevice(device) {
-            // Enable edit mode and pre-fill the form with the selected device data.
-            this.editMode = true;
-            this.deviceForm.reset();
-            this.deviceForm.id = device.id;
-            this.deviceForm.name = device.name;
-            this.deviceForm.machineId = device.machineId;
-            this.deviceForm.hardwareUID = device.hardwareUID;
-            this.deviceForm.MACAdress = device.MACAdress;
-            this.deviceForm.deviceFingerprint = device.deviceFingerprint;
-            this.$refs.modal.showModal();
-        },
-        saveDevice() {
-            if (this.editMode) {
-                // Update existing device using a PUT request.
-                this.deviceForm.put(`/devices/${this.deviceForm.id}`, {
-                    onSuccess: () => {
-                        this.$refs.modal.closeModal();
-                        this.successMessage = "Device updated successfully!";
-                        setTimeout(() => (this.successMessage = ""), 4000);
-                        this.deviceForm.reset();
-                        this.editMode = false;
-                        this.fetchDevices(1);
-                    },
-                    onError: () => {
-                        this.successMessage = "Error updating device. Try again!";
-                    }
-                });
-            } else {
-                // Create a new device using a POST request.
-                this.deviceForm.post('/devices', {
-                    onSuccess: () => {
-                        this.$refs.modal.closeModal();
-                        this.successMessage = "Device added successfully!";
-                        setTimeout(() => (this.successMessage = ""), 4000);
-                        this.deviceForm.reset();
-                        this.fetchDevices(1);
-                    },
-                    onError: () => {
-                        this.successMessage = "Error adding device. Try again!";
-                    }
-                });
+// Define props
+const props = defineProps({
+    devices: Object,
+    search: String,
+});
+
+// Refs and reactive state
+const searchQuery = ref(props.search || "");
+const currentPage = ref(1);
+const loading = ref(false);
+const successMessage = ref("");
+const editMode = ref(false);
+const gettingInfo = ref(false);
+
+// Reference to the modal component
+const modal = ref(null);
+
+// Initialize the form using Inertia's useForm
+const deviceForm = useForm({
+    id: null,
+    name: "",
+    machineId: "",
+    hardwareUID: "",
+    MACAdress: "",
+    deviceFingerprint: ""
+});
+
+// Initialize the socket connection
+const socket = io("http://localhost:3000");
+
+// Function to trigger the getDeviceInfo event
+function getDeviceInfo() {
+    gettingInfo.value = true;
+    socket.emit("getDeviceInfo");
+}
+
+// Listen for the response from the server
+socket.on("deviceInfo", (details) => {
+    // Map server details to form fields
+    deviceForm.name = details.deviceName;
+    deviceForm.machineId = details.machineId;
+    deviceForm.hardwareUID = details.hardwareUUID;
+    deviceForm.MACAdress = details.macAddress;
+    deviceForm.deviceFingerprint = details.deviceFingerprint;
+    gettingInfo.value = false;
+});
+
+// Listen for any errors from the server
+socket.on("error", (errorMessage) => {
+    successMessage.value = errorMessage;
+    gettingInfo.value = false;
+});
+
+// Clean up the socket connection when the component is unmounted
+onUnmounted(() => {
+    socket.disconnect();
+});
+
+// Functions
+function closeModal() {
+    modal.value.closeModal();
+    editMode.value = false;
+    deviceForm.reset();
+}
+
+function openAddModal() {
+    editMode.value = false;
+    deviceForm.reset();
+    modal.value.showModal();
+}
+
+function editDevice(device) {
+    editMode.value = true;
+    deviceForm.reset();
+    deviceForm.id = device.id;
+    deviceForm.name = device.name;
+    deviceForm.machineId = device.machineId;
+    deviceForm.hardwareUID = device.hardwareUID;
+    deviceForm.MACAdress = device.MACAdress;
+    deviceForm.deviceFingerprint = device.deviceFingerprint;
+    modal.value.showModal();
+}
+
+function saveDevice() {
+    if (editMode.value) {
+        // Update existing device using a PUT request.
+        deviceForm.put(`/devices/${deviceForm.id}`, {
+            onSuccess: () => {
+                modal.value.closeModal();
+                successMessage.value = "Device updated successfully!";
+                setTimeout(() => (successMessage.value = ""), 4000);
+                deviceForm.reset();
+                editMode.value = false;
+                fetchDevices(1);
+            },
+            onError: () => {
+                successMessage.value = "Error updating device. Try again!";
             }
-        },
-        deleteDevice(id) {
-            if (confirm("Are you sure you want to delete this device?")) {
-                router.delete(`/devices/${id}`, {
-                    onSuccess: () => {
-                        this.successMessage = "Device deleted successfully!";
-                        this.fetchDevices(this.currentPage);
-                        setTimeout(() => (this.successMessage = ""), 4000);
-                    },
-                    onError: () => {
-                        this.successMessage = "Error deleting device. Try again!";
-                    }
-                });
+        });
+    } else {
+        // Create a new device using a POST request.
+        deviceForm.post('/devices', {
+            onSuccess: () => {
+                modal.value.closeModal();
+                successMessage.value = "Device added successfully!";
+                setTimeout(() => (successMessage.value = ""), 4000);
+                deviceForm.reset();
+                fetchDevices(1);
+            },
+            onError: () => {
+                successMessage.value = "Error adding device. Try again!";
             }
+        });
+    }
+}
+
+function deleteDevice(id) {
+    if (confirm("Are you sure you want to delete this device?")) {
+        router.delete(`/devices/${id}`, {
+            onSuccess: () => {
+                successMessage.value = "Device deleted successfully!";
+                fetchDevices(currentPage.value);
+                setTimeout(() => (successMessage.value = ""), 4000);
+            },
+            onError: () => {
+                successMessage.value = "Error deleting device. Try again!";
+            }
+        });
+    }
+}
+
+function fetchDevices(page) {
+    loading.value = true;
+    router.get(`/devices`, { page: page, search: searchQuery.value }, {
+        preserveState: true,
+        onFinish: () => {
+            loading.value = false;
+        }
+    });
+}
+
+function resetSearch() {
+    searchQuery.value = "";
+    fetchDevices(1);
+}
+
+// For delete confirmation
+const confirmVisible = ref(false);
+const deleteId = ref(null);
+
+// Instead of using confirm(), open the confirmation modal
+function openDeleteConfirm(id) {
+    deleteId.value = id;
+    confirmVisible.value = true;
+}
+
+// Handle confirmation from DaisyConfirm
+function handleDeleteConfirm() {
+    router.delete(`/devices/${deleteId.value}`, {
+        onSuccess: () => {
+            successMessage.value = "Device deleted successfully!";
+            fetchDevices(currentPage.value);
+            setTimeout(() => (successMessage.value = ""), 4000);
         },
-        changePage(page) {
-            this.currentPage = page;
-            this.fetchDevices(page);
-        },
-        fetchDevices(page) {
-            this.loading = true;
-            router.get(`/devices`, { page: page, search: this.searchQuery }, {
-                preserveState: true,
-                onFinish: () => {
-                    this.loading = false;
-                }
-            });
-        },
-        resetSearch() {
-            this.searchQuery = "";
-            this.fetchDevices(1);
-        },
-    },
-    components: {
-        DaisyTable,
-        DaisyModal,
-    },
-};
+        onError: () => {
+            successMessage.value = "Error deleting device. Try again!";
+        }
+    });
+    confirmVisible.value = false;
+    deleteId.value = null;
+}
+
+function handleDeleteCancel() {
+    confirmVisible.value = false;
+    deleteId.value = null;
+}
 </script>
