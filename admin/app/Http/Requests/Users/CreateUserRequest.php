@@ -22,6 +22,7 @@ class CreateUserRequest extends FormRequest
                 'min:8',
                 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/',
             ],
+
         ];
     }
 
@@ -40,6 +41,7 @@ class CreateUserRequest extends FormRequest
             'password.string' => 'The password must be a valid string.',
             'password.min' => 'The password must be at least :min characters long.',
             'password.regex' => 'The password must contain at least one letter and one number.',
+
         ];
     }
 }
