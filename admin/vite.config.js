@@ -20,4 +20,7 @@ export default defineConfig({
 
         vueJSX(),
     ],
+     optimizeDeps: {
+        include: ['socket.io-client'],
+    },
 })
