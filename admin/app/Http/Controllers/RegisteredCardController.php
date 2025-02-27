@@ -16,7 +16,10 @@ class RegisteredCardController extends Controller
         // Optional search filtering by uid
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
-            $query->where('uid', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('studentId', 'LIKE', "%{$search}%")
+                    ->orWhere('uid', 'LIKE', "%{$search}%");
+            });
         }
 
         $registeredCards = $query->paginate(5)
