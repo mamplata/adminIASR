@@ -31,10 +31,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/components/buttons', function () {
-    return Inertia::render('Components/Buttons');
-})->middleware(['auth', 'verified'])->name('components.buttons');
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
 });

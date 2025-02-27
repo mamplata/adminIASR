@@ -77,6 +77,7 @@ const submit = () => {
                         <LoginIcon aria-hidden="true" :class="iconSizeClasses" />
                         <span>Log in</span>
                     </Button>
+
                 </div>
             </div>
         </form>
