@@ -61,7 +61,7 @@ const baseClasses = [
 ]
 
 const variantClasses = (variant) => ({
-    'bg-purple-500 text-white hover:bg-purple-600 focus:ring-purple-500': variant == 'primary',
+    'bg-green-600 text-white hover:bg-green-700 focus:ring-purple-500': variant == 'primary',
     'bg-white text-gray-500 hover:bg-gray-100 focus:ring-purple-500 dark:text-gray-400 dark:bg-dark-eval-1 dark:hover:bg-dark-eval-2 dark:hover:text-gray-200':
         variant == 'secondary',
     'bg-green-500 text-white hover:bg-green-600 focus:ring-green-500': variant == 'success',
@@ -76,15 +76,15 @@ const classes = computed(() => [
     ...baseClasses,
     iconOnly
         ? {
-                'p-1.5': size == 'sm',
-                'p-2': size == 'base',
-                'p-3': size == 'lg',
-            }
+            'p-1.5': size == 'sm',
+            'p-2': size == 'base',
+            'p-3': size == 'lg',
+        }
         : {
-                'px-2.5 py-1.5 text-sm': size == 'sm',
-                'px-4 py-2 text-base': size == 'base',
-                'px-5 py-2 text-xl': size == 'lg',
-            },
+            'px-2.5 py-1.5 text-sm': size == 'sm',
+            'px-4 py-2 text-base': size == 'base',
+            'px-5 py-2 text-xl': size == 'lg',
+        },
     variantClasses(variant),
     {
         'rounded-md': !squared && !pill,
@@ -112,38 +112,21 @@ const handleClick = (e) => {
     emit('click', e)
 }
 
-const Tag = external ?  'a' : Link
+const Tag = external ? 'a' : Link
 </script>
 
 <template>
-    <component
-        :is="Tag"
-        v-if="href"
-        :href="!disabled ? href : null"
-        :class="classes"
-        :aria-disabled="disabled.toString()"
-    >
-        <span
-            v-if="srText"
-            class="sr-only"
-        >
+    <component :is="Tag" v-if="href" :href="!disabled ? href : null" :class="classes"
+        :aria-disabled="disabled.toString()">
+        <span v-if="srText" class="sr-only">
             {{ srText }}
         </span>
 
         <slot :iconSizeClasses="iconSizeClasses" />
     </component>
 
-    <button
-        v-else
-        :type="type"
-        :class="classes"
-        @click="handleClick"
-        :disabled="disabled"
-    >
-        <span
-            v-if="srText"
-            class="sr-only"
-        >
+    <button v-else :type="type" :class="classes" @click="handleClick" :disabled="disabled">
+        <span v-if="srText" class="sr-only">
             {{ srText }}
         </span>
 

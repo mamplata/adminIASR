@@ -30,10 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/components/buttons', function () {
-    return Inertia::render('Components/Buttons');
-})->middleware(['auth', 'verified'])->name('components.buttons');
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
 });
@@ -48,15 +44,12 @@ Route::middleware(['auth'])->group(function () {
 
 // REGISTERED CARDS
 Route::middleware(['auth'])->group(function () {
-
     Route::get('/registered-cards', [RegisteredCardController::class, 'index'])->name('registered_cards.index');
     Route::post('/registered-cards', [RegisteredCardController::class, 'store'])->name('registered_cards.store');
-
 });
 
 // Devices
 Route::middleware(['auth'])->group(function () {
-   
     Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
     Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
     Route::put('/devices/{device}', [DeviceController::class, 'update'])->name('devices.update');
