@@ -53,7 +53,6 @@ Route::middleware(['auth'])->group(function () {
 
 // Devices
 Route::middleware(['auth'])->group(function () {
-
     Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
     Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
     Route::put('/devices/{device}', [DeviceController::class, 'update'])->name('devices.update');
@@ -64,7 +63,6 @@ use Faker\Factory as Faker;
 
 Route::middleware(['auth'])->group(
     function () {
-
         Route::post('/student-infos', [StudentInfoController::class, 'store'])->name('student-infos.store');
         Route::get('student-infos/check', [StudentInfoController::class, 'check'])->name('student-infos.check');
     }
@@ -72,7 +70,6 @@ Route::middleware(['auth'])->group(
 
 Route::get('students/{studentId}', function ($studentId) {
     $faker = Faker::create();
-
     $dummyData = [
         'studentId'  => $studentId,
         'lname'      => $faker->lastName,
