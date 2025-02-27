@@ -10,19 +10,10 @@ const os = require("os"); // Import the OS module
 async function generateFingerprintDetails() {
   try {
     // Get the machine ID
-    const machineId = machineIdSync();
-
-    // Get the hardware UUID via systeminformation
+    const machineId = machineIdSync({ original: true });
+    const macAddress = await macaddress.one();
     const uuidData = await si.uuid();
-    const hardwareUUID = uuidData.os || uuidData.hardware || 'unknown';
-
-    // Get the MAC address
-    const macAddress = await new Promise((resolve, reject) => {
-      macaddress.one((err, mac) => {
-        if (err) return reject(err);
-        resolve(mac);
-      });
-    });
+    const hardwareUUID = uuidData.hardware || '';
 
     // Get device name using os module
     const deviceName = os.hostname();

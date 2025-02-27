@@ -72,7 +72,8 @@ const submit = () => {
                 </div>
 
                 <div>
-                    <Button class="justify-center gap-2 w-full" :disabled="form.processing" v-slot="{ iconSizeClasses }">
+                    <Button class="justify-center gap-2 w-full" :disabled="form.processing"
+                        v-slot="{ iconSizeClasses }">
                         <LoginIcon aria-hidden="true" :class="iconSizeClasses" />
                         <span>Log in</span>
                     </Button>

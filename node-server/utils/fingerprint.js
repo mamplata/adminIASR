@@ -1,3 +1,4 @@
+//fingerprint.js
 const { machineIdSync } = require("node-machine-id");
 const macaddress = require("macaddress");
 const si = require("systeminformation");
@@ -14,7 +15,7 @@ async function generateFingerprint() {
     const uuidData = await si.uuid();
     const hardwareUUID = uuidData.hardware || '';
 
-    const combined = machineId + mac + hardwareUUID;
+    const combined = machineId + hardwareUUID + mac;
     return crypto.createHash('sha256').update(combined).digest('hex');
   } catch (err) {
     console.error("❌ Error generating fingerprint:", err);

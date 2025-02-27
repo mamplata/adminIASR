@@ -43,6 +43,22 @@ class StudentInfoController extends Controller
         ]);
     }
 
+    public function check(Request $request)
+    {
+        $studentId = $request->input('studentId');
+        $student = StudentInfo::where('studentId', $studentId)->first();
+
+        if (!$student) {
+            return response()->json([
+                'error' => 'Student not found'
+            ], 200);
+        }
+
+        return response()->json([
+            'student' => $student
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -56,7 +72,7 @@ class StudentInfoController extends Controller
 
         StudentInfo::create($validated);
 
-        return redirect()->route('student_infos.index')
+        return redirect()->route('registered-cards.index')
             ->with('success', 'Student Info created!');
     }
 }

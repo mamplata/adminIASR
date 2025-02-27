@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\StudentInfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,18 +50,46 @@ Route::middleware(['auth'])->group(function () {
 // REGISTERED CARDS
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/registered-cards', [RegisteredCardController::class, 'index'])->name('registered_cards.index');
-    Route::post('/registered-cards', [RegisteredCardController::class, 'store'])->name('registered_cards.store');
-
+    Route::get('/registered-cards', [RegisteredCardController::class, 'index'])->name('registered-cards.index');
+    Route::post('/registered-cards', [RegisteredCardController::class, 'store'])->name('registered-cards.store');
+    Route::get('/register-cards/checkStudentID', [RegisteredCardController::class, 'checkStudentID'])->name('registered-cards.checkStudentID');
 });
 
 // Devices
 Route::middleware(['auth'])->group(function () {
-   
+
     Route::get('/devices', [DeviceController::class, 'index'])->name('devices.index');
     Route::post('/devices', [DeviceController::class, 'store'])->name('devices.store');
     Route::put('/devices/{device}', [DeviceController::class, 'update'])->name('devices.update');
     Route::delete('/devices/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');
 });
+
+use Faker\Factory as Faker;
+
+Route::middleware(['auth'])->group(
+    function () {
+
+        Route::post('/student-infos', [StudentInfoController::class, 'store'])->name('student-infos.store');
+        Route::get('student-infos/check', [StudentInfoController::class, 'check'])->name('student-infos.check');
+    }
+);
+
+Route::get('students/{studentId}', function ($studentId) {
+    $faker = Faker::create();
+
+    $dummyData = [
+        'studentId'  => $studentId,
+        'lname'      => $faker->lastName,
+        'fname'      => $faker->firstName,
+        'program'    => $faker->randomElement(['bsit', 'bscs']),
+        'department' => 'ccs',
+        'yearLevel'  => $faker->randomElement(['1', '2', '3', '4']),
+    ];
+
+    return response()->json([
+        'student' => $dummyData
+    ]);
+})->name('students.fetch');
+
 
 require __DIR__ . '/auth.php';

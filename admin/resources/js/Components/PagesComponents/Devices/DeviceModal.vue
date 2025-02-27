@@ -1,8 +1,5 @@
 <template>
     <form @submit.prevent="emitSave">
-        <!-- Modal Title -->
-        <h2 class="text-lg font-bold">{{ title }}</h2>
-
         <!-- Name Field -->
         <label class="label text-gray-700 dark:text-gray-300">Name</label>
         <input v-model="deviceForm.name" type="text" :class="[
@@ -80,10 +77,6 @@
 import { defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
-    title: {
-        type: String,
-        default: 'Modal'
-    },
     deviceForm: {
         type: Object,
         required: true

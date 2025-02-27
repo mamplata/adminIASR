@@ -76,15 +76,15 @@ const classes = computed(() => [
     ...baseClasses,
     iconOnly
         ? {
-                'p-1.5': size == 'sm',
-                'p-2': size == 'base',
-                'p-3': size == 'lg',
-            }
+            'p-1.5': size == 'sm',
+            'p-2': size == 'base',
+            'p-3': size == 'lg',
+        }
         : {
-                'px-2.5 py-1.5 text-sm': size == 'sm',
-                'px-4 py-2 text-base': size == 'base',
-                'px-5 py-2 text-xl': size == 'lg',
-            },
+            'px-2.5 py-1.5 text-sm': size == 'sm',
+            'px-4 py-2 text-base': size == 'base',
+            'px-5 py-2 text-xl': size == 'lg',
+        },
     variantClasses(variant),
     {
         'rounded-md': !squared && !pill,
@@ -112,38 +112,21 @@ const handleClick = (e) => {
     emit('click', e)
 }
 
-const Tag = external ?  'a' : Link
+const Tag = external ? 'a' : Link
 </script>
 
 <template>
-    <component
-        :is="Tag"
-        v-if="href"
-        :href="!disabled ? href : null"
-        :class="classes"
-        :aria-disabled="disabled.toString()"
-    >
-        <span
-            v-if="srText"
-            class="sr-only"
-        >
+    <component :is="Tag" v-if="href" :href="!disabled ? href : null" :class="classes"
+        :aria-disabled="disabled.toString()">
+        <span v-if="srText" class="sr-only">
             {{ srText }}
         </span>
 
         <slot :iconSizeClasses="iconSizeClasses" />
     </component>
 
-    <button
-        v-else
-        :type="type"
-        :class="classes"
-        @click="handleClick"
-        :disabled="disabled"
-    >
-        <span
-            v-if="srText"
-            class="sr-only"
-        >
+    <button v-else :type="type" :class="classes" @click="handleClick" :disabled="disabled">
+        <span v-if="srText" class="sr-only">
             {{ srText }}
         </span>
 

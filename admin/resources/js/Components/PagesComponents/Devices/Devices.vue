@@ -16,9 +16,9 @@
         <DeviceTable :devices="devices" @change-page="fetchDevices" @edit-device="editDevice"
             @delete-device="openDeleteConfirm" />
 
-        <DaisyModal ref="modalRef" title="Add Device">
-            <DeviceModal :title="editMode ? 'Edit Device' : 'Add Device'" :deviceForm="deviceForm"
-                :gettingInfo="gettingInfo" @cancel="closeModal" @save="saveDevice" @get-info="getDeviceInfo" />
+        <DaisyModal ref="modalRef" :title="editMode ? 'Edit Device' : 'Add Device'">
+            <DeviceModal :deviceForm="deviceForm" :gettingInfo="gettingInfo" @cancel="closeModal" @save="saveDevice"
+                @get-info="getDeviceInfo" />
         </DaisyModal>
 
         <!-- DaisyConfirm for Delete Confirmation -->
