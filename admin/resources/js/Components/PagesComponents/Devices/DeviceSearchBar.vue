@@ -20,7 +20,7 @@
             <div>
                 <button @click="$emit('add-device')"
                     class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">
-                    Add Device
+                    Get This Device info
                 </button>
             </div>
         </div>
@@ -41,7 +41,7 @@
             </button>
         </div>
         <button @click="emitAddDevice" class="btn text-white btn-success shadow-lg hover:bg-[#20714c] mb-2">
-            Add Device
+            Get This Device info
         </button>
     </div>
 </template>

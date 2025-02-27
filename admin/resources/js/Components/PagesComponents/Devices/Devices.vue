@@ -1,9 +1,14 @@
 <template>
     <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
-
         <!-- SearchBar Component -->
-        <DeviceSearchBar v-model="searchQuery" :loading="loading" @search="fetchDevices(1)" @reset="resetSearch()"
-            @add-device="openModal" />
+        <DeviceSearchBar v-model="searchQuery" :loading="loading" @search="fetchDevices(1)" @reset="resetSearch"
+            @add-device="getDeviceInfo" />
+
+        <!-- Loading Animation -->
+        <div v-if="gettingInfo" class="loading-container my-4">
+            <div class="loading-spinner"></div>
+            <p>Processing registration...</p>
+        </div>
 
         <!-- Success Notification -->
         <transition name="fade">
@@ -13,13 +18,7 @@
         </transition>
 
         <!-- Device Table -->
-        <DeviceTable :devices="devices" @change-page="fetchDevices" @edit-device="editDevice"
-            @delete-device="openDeleteConfirm" />
-
-        <DaisyModal ref="modalRef" :title="editMode ? 'Edit Device' : 'Add Device'">
-            <DeviceModal :deviceForm="deviceForm" :gettingInfo="gettingInfo" @cancel="closeModal" @save="saveDevice"
-                @get-info="getDeviceInfo" />
-        </DaisyModal>
+        <DeviceTable :devices="devices" @change-page="fetchDevices" @delete-device="openDeleteConfirm" />
 
         <!-- DaisyConfirm for Delete Confirmation -->
         <DaisyConfirm :visible="confirmVisible" title="Delete Device"
@@ -32,32 +31,23 @@
 import { ref, onUnmounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { io } from 'socket.io-client';
-import DaisyConfirm from '@/Components//DaisyConfirm.vue';
+import DaisyConfirm from '@/Components/DaisyConfirm.vue';
 import DeviceSearchBar from './DeviceSearchBar.vue';
 import DeviceTable from './DeviceTable.vue';
-import DeviceModal from './DeviceModal.vue';
-import DaisyModal from '@/Components/DaisyModal.vue';
 
-// Define props
 const props = defineProps({
     devices: Object,
     search: String,
 });
 
-// Refs and reactive state
 const searchQuery = ref(props.search || "");
 const currentPage = ref(1);
 const loading = ref(false);
 const successMessage = ref("");
-const editMode = ref(false);
 const gettingInfo = ref(false);
 
-// Reference to the modal component
-const modalRef = ref(null);
-
-// Initialize the form using Inertia's useForm
+// Use Inertia's useForm for the device data.
 const deviceForm = useForm({
-    id: null,
     name: "",
     machineId: "",
     hardwareUID: "",
@@ -65,103 +55,60 @@ const deviceForm = useForm({
     deviceFingerprint: ""
 });
 
-// Initialize the socket connection
+// Initialize socket connection.
 const socket = io("http://localhost:3000");
 
-// Function to trigger the getDeviceInfo event
+// Function to trigger the getDeviceInfo event via socket.
 function getDeviceInfo() {
     gettingInfo.value = true;
     socket.emit("getDeviceInfo");
 }
 
-// Listen for the response from the server
+// When device details are received from the socket,
+// populate the form and immediately call saveDevice.
 socket.on("deviceInfo", (details) => {
-    // Map server details to form fields
     deviceForm.name = details.deviceName;
     deviceForm.machineId = details.machineId;
     deviceForm.hardwareUID = details.hardwareUUID;
     deviceForm.MACAdress = details.macAddress;
     deviceForm.deviceFingerprint = details.deviceFingerprint;
     gettingInfo.value = false;
+    saveDevice();
 });
 
-// Listen for any errors from the server
+// Handle socket error responses.
 socket.on("error", (errorMessage) => {
     successMessage.value = errorMessage;
     gettingInfo.value = false;
 });
 
-// Clean up the socket connection when the component is unmounted
+// Clean up the socket connection when the component unmounts.
 onUnmounted(() => {
     socket.disconnect();
 });
 
-// Functions
-function closeModal() {
-    modalRef.value.closeModal();
-    editMode.value = false;
-    deviceForm.reset();
-}
-
-function openModal() {
-    editMode.value = false;
-    deviceForm.reset();
-    modalRef.value.showModal();
-}
-
-function editDevice(device) {
-    editMode.value = true;
-    deviceForm.reset();
-    deviceForm.id = device.id;
-    deviceForm.name = device.name;
-    deviceForm.machineId = device.machineId;
-    deviceForm.hardwareUID = device.hardwareUID;
-    deviceForm.MACAdress = device.MACAdress;
-    deviceForm.deviceFingerprint = device.deviceFingerprint;
-    modalRef.value.showModal();
-}
-
+// Save device by sending a POST request to the /devices endpoint.
+// The backend uses updateOrCreateDevice to either create a new record or update an existing one.
 function saveDevice() {
-    if (editMode.value) {
-        // Update existing device using a PUT request.
-        deviceForm.put(`/devices/${deviceForm.id}`, {
-            onSuccess: () => {
-                modalRef.value.closeModal();
-                successMessage.value = "Device updated successfully!";
-                setTimeout(() => (successMessage.value = ""), 4000);
-                deviceForm.reset();
-                editMode.value = false;
-                fetchDevices(1);
-            },
-            onError: (errors) => {
-                // Only show a generic error if there are no field-specific validation errors.
-                if (Object.keys(errors).length === 0) {
-                    successMessage.value = "Error adding user. Try again!";
-                    setTimeout(() => (successMessage.value = ""), 4000);
-                }
+    deviceForm.post('/devices', {
+        onSuccess: () => {
+            successMessage.value = "Device saved successfully!";
+            setTimeout(() => (successMessage.value = ""), 4000);
+            deviceForm.reset();
+            fetchDevices(1);
+        },
+        onError: (errors) => {
+            if (errors.machineId || errors.hardwareUID) {
+                successMessage.value = "Device Already Exist";
+            } else {
+                successMessage.value = "Error saving device. Try again!";
             }
-        });
-    } else {
-        // Create a new device using a POST request.
-        deviceForm.post('/devices', {
-            onSuccess: () => {
-                modalRef.value.closeModal();
-                successMessage.value = "Device added successfully!";
-                setTimeout(() => (successMessage.value = ""), 4000);
-                deviceForm.reset();
-                fetchDevices(1);
-            },
-            onError: (errors) => {
-                // Only show a generic error if there are no field-specific validation errors.
-                if (Object.keys(errors).length === 0) {
-                    successMessage.value = "Error adding user. Try again!";
-                    setTimeout(() => (successMessage.value = ""), 4000);
-                }
-            }
-        });
-    }
+            setTimeout(() => (successMessage.value = ""), 4000);
+        }
+    });
 }
 
+// Fetch devices with search and pagination.
 function fetchDevices(page) {
     loading.value = true;
     router.get(`/devices`, { page: page, search: searchQuery.value }, {
@@ -177,17 +124,15 @@ function resetSearch() {
     fetchDevices(1);
 }
 
-// For delete confirmation
+// Delete confirmation handling.
 const confirmVisible = ref(false);
 const deleteId = ref(null);
 
-// Instead of using confirm(), open the confirmation modal
 function openDeleteConfirm(id) {
     deleteId.value = id;
     confirmVisible.value = true;
 }
 
-// Handle confirmation from DaisyConfirm
 function handleDeleteConfirm() {
     router.delete(`/devices/${deleteId.value}`, {
         onSuccess: () => {
@@ -208,3 +153,29 @@ function handleDeleteCancel() {
     deleteId.value = null;
 }
 </script>
+
+<style scoped>
+.loading-container {
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 5px solid #ccc;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+</style>

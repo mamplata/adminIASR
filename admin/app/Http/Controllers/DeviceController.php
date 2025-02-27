@@ -27,20 +27,15 @@ class DeviceController extends Controller
         ]);
     }
 
-    public function store(CreateUpdateRequest $request)
+    // Combined store function for both creation and update
+    public function store(CreateUpdateRequest $request, Device $device = null)
     {
         $validated = $request->validated();
-        $this->deviceService->createDevice($validated);
+        $device    = $this->deviceService->updateOrCreateDevice($validated, $device);
 
-        return redirect()->route('devices.index')->with('success', 'Device created!');
-    }
+        $message = $device->wasRecentlyCreated ? 'Device created!' : 'Device updated!';
 
-    public function update(CreateUpdateRequest $request, Device $device)
-    {
-        $validated = $request->validated();
-        $this->deviceService->updateDevice($device, $validated);
-
-        return redirect()->route('devices.index')->with('success', 'Device updated!');
+        return redirect()->route('devices.index')->with('success', $message);
     }
 
     public function destroy(Device $device)
