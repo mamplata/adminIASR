@@ -16,13 +16,6 @@ class CreateUserRequest extends FormRequest
         return [
             'name'           => 'required|string|max:255',
             'email'          => 'required|email|unique:users',
-            'password'       => [
-                'required',
-                'string',
-                'min:8',
-                'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/',
-            ],
-            'confirmPassword' => 'required|same:password',
         ];
     }
 
@@ -36,14 +29,6 @@ class CreateUserRequest extends FormRequest
             'email.required'          => 'An email address is required.',
             'email.email'             => 'Please enter a valid email address.',
             'email.unique'            => 'This email address is already taken.',
-
-            'password.required'       => 'A password is required.',
-            'password.string'         => 'The password must be a valid string.',
-            'password.min'            => 'The password must be at least :min characters long.',
-            'password.regex'          => 'The password must contain at least one letter and one number.',
-
-            'confirmPassword.required' => 'Please confirm your password.',
-            'confirmPassword.same'    => 'The password confirmation does not match.',
         ];
     }
 }

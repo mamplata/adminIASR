@@ -1,5 +1,5 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3'
+import { Link, useForm } from '@inertiajs/vue3'
 import { MailIcon, PaperAirplaneIcon } from '@heroicons/vue/outline'
 import InputIconWrapper from '@/Components/InputIconWrapper.vue'
 import Button from '@/Components/Button.vue'
@@ -24,7 +24,8 @@ const submit = () => {
 <template>
     <GuestLayout title="Forgot Password">
         <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.
+            Forgot your password? No problem. Just let us know your email address and we will email you a password reset
+            link that will allow you to choose a new one.
         </div>
 
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
@@ -41,15 +42,24 @@ const submit = () => {
                         <template #icon>
                             <MailIcon aria-hidden="true" class="w-5 h-5" />
                         </template>
-                        <Input withIcon id="email" type="email" class="block w-full" placeholder="Email" v-model="form.email" required autofocus autocomplete="username" />
+                        <Input withIcon id="email" type="email" class="block w-full" placeholder="Email"
+                            v-model="form.email" required autofocus autocomplete="username" />
                     </InputIconWrapper>
                 </div>
 
                 <div>
-                    <Button class="justify-center gap-2 w-full" :disabled="form.processing" v-slot="{ iconSizeClasses }">
+                    <Button class="justify-center gap-2 w-full" :disabled="form.processing"
+                        v-slot="{ iconSizeClasses }">
                         <PaperAirplaneIcon aria-hidden="true" :class="iconSizeClasses" />
                         <span>Email Password Reset Link</span>
                     </Button>
+                </div>
+
+                <!-- Button to go back to login -->
+                <div class="mt-4 text-center">
+                    <Link href="/login" class="text-sm text-blue-500 hover:underline">
+                    Back to Login
+                    </Link>
                 </div>
             </div>
         </form>
