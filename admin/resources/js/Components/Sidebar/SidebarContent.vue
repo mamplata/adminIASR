@@ -29,8 +29,8 @@ import { sidebarState } from '@/Composables'
             </template>
         </SidebarLink>
 
-        <SidebarLink title="Registered Card" :href="route('registered_cards.index')"
-            :active="route().current('registered_cards.index')">
+        <SidebarLink title="Registered Card" :href="route('registered-cards.index')"
+            :active="route().current('registered-cards.index')">
             <template #icon>
                 <CardIcon class="flex-shrink-0 w-6 h-6" aria-hidden="true" />
             </template>

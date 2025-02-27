@@ -28,16 +28,24 @@ class DeviceService
             ]);
     }
 
-    public function createDevice(array $data)
+    public function updateOrCreateDevice(array $data, Device $device = null)
     {
-        return Device::create($data);
+        if ($device) {
+            return Device::updateOrCreate(
+                ['id' => $device->id],
+                $data
+            );
+        }
+
+        return Device::updateOrCreate(
+            [
+                'machineId'         => $data['machineId'],
+                'hardwareUID'       => $data['hardwareUID'],
+            ],
+            $data
+        );
     }
 
-    public function updateDevice(Device $device, array $data)
-    {
-        $device->update($data);
-        return $device;
-    }
 
     public function deleteDevice(Device $device)
     {
