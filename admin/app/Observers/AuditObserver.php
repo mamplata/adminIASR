@@ -15,6 +15,12 @@ class AuditObserver
 
     public function updated(Model $model)
     {
+
+        // Check if the 'password' attribute is in the changes
+        if ($model->isDirty('password')) {
+            // Skip logging if the password is being updated
+            return;
+        }
         $this->logAudit('update', $model, $model->getChanges()); // Log only changes
     }
 

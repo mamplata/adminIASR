@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Users\CreateUserRequest;
-use App\Http\Requests\Users\SearchUsersRequest;
 use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Requests\Users\SearchUsersRequest;
+use App\Mail\PasswordReset;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -27,10 +27,14 @@ class UserController extends Controller
 
     public function store(CreateUserRequest $request, UserService $userService)
     {
-        // The validated() method will only return the data that passed validation
-        $userService->createUser($request->validated());
+        // Create the new user with a temporary password
+        $user = $userService->createUser($request->validated());
 
+        // Send the password reset email
+        Mail::to($user->email)->send(new PasswordReset($user));
+
+        // Redirect with a success message
         return redirect()->route('users.index')
-            ->with('success', 'User added successfully!');
+            ->with('success', 'User added successfully! A password reset email has been sent.');
     }
 }
