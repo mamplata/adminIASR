@@ -4,7 +4,7 @@
         <div class="flex flex-col space-y-2">
             <div>
                 <input :value="modelValue" @input="updateValue($event.target.value)" type="text"
-                    placeholder="Search by name or email"
+                    placeholder="Search by device name"
                     class="w-full p-2 border border-gray-300 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div class="flex space-x-2">
