@@ -1,62 +1,34 @@
-<template>
-    <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
-        <!-- SearchBar Component -->
-        <SearchBar v-model="searchQuery" :loading="loading" @search="fetchCards(1)" @reset="resetSearch"
-            @add-card="openModal" />
-
-        <!-- Success Notification -->
-        <transition name="fade">
-            <div v-if="successMessage" class="alert alert-success shadow-lg mb-4">
-                <span>{{ successMessage }}</span>
-            </div>
-        </transition>
-
-        <!-- Card Table -->
-        <DaisyTable :data="registeredCards.data" :currentPage="registeredCards.current_page"
-            :lastPage="registeredCards.last_page" @change-page="fetchCards" />
-
-        <!-- Add Card Modal -->
-        <DaisyModal ref="modalRef" title="Add Card">
-            <template #default>
-                <CardForm :form="cardForm" @submit="saveCard" @cancel="closeModal" />
-            </template>
-        </DaisyModal>
-    </div>
-</template>
-
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useForm, router } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import { io } from "socket.io-client";
-import SearchBar from "./SearchBar.vue";
-import CardForm from "./CardForm.vue";
-import DaisyTable from "@/Components/DaisyTable.vue";
+import axios from "axios";
 import DaisyModal from "@/Components/DaisyModal.vue";
 
-// Props passed from the server
-const props = defineProps({
-    registeredCards: Object,
-    search: {
-        type: String,
-        default: "",
-    },
-});
-
-// Local state for search and notifications
-const searchQuery = ref(props.search);
-const loading = ref(false);
-const successMessage = ref("");
-
-// Use a form with fields matching the CardForm (studentId and uid)
-const cardForm = useForm({ studentId: "", uid: "" });
-
-// Socket.io instance
+// Reactive variables
+const studentID = ref("");
+const nfcStatus = ref("");
+const nfcError = ref("");
+const isLoading = ref(false);
 let socket = null;
 
-// Reference to the modal component
-const modalRef = ref(null);
+// Modal-related reactive variables
+const modalStudentInfo = ref(null); // Holds student info when loaded
+const cardExists = ref(false);        // Tracks if a card already exists
 
-// Connect to the socket.io server and define event handlers
+// Reference to the DaisyModal component instance
+const modalRef = ref(null);
+const modalRef1 = ref(null);
+const modalRef2 = ref(null);
+
+// Form for NFC registration
+const form = useForm({
+    studentId: "",
+    uid: "",
+});
+
+const registrationSuccess = ref(false);
+
 onMounted(() => {
     socket = io("http://localhost:3000");
 
@@ -64,26 +36,54 @@ onMounted(() => {
         console.log("Connected to Socket.io server");
     });
 
-    // When an NFC card is scanned, update the form fields
-    socket.on("cardScanned", (data) => {
-        console.log("Card scanned event received", data);
-        cardForm.studentId = data.studentId;
-        cardForm.uid = data.uid;
-    });
-
-    // Listen for NFC status messages from the server
     socket.on("nfcStatus", (message) => {
-        successMessage.value = message;
+        nfcStatus.value = message;
     });
 
-    // Listen for NFC errors
+    socket.on("cardScanned", (data) => {
+        isLoading.value = true;
+        form.studentId = data.studentId;
+        form.uid = data.uid;
+
+        form.post(route("registered-cards.store"), {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                registrationSuccess.value = true;
+                // No errors, proceed with NFC writing.
+                socket.emit("dbStored", data);
+                nfcStatus.value = "✅ Database stored successfully!";
+            },
+            onError: (errors) => {
+                registrationSuccess.value = false;
+                nfcStatus.value =
+                    "❌ Registration Failed: " + Object.values(errors).join(", ");
+                socket.emit("registrationFailed", { error: errors });
+            },
+            onFinish: async () => {
+                // Asynchronous delay of 1 second before finalizing
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+                isLoading.value = false;
+                isScanning.value = false;
+                if (registrationSuccess.value) {
+                    modalRef.value.closeModal();
+                    // Reset state if needed
+                    modalStudentInfo.value = null;
+                    studentID.value = "";
+                    registrationSuccess.value = false;
+                }
+            },
+        });
+    });
+
+
+    socket.on("studentRegistered", (student) => {
+        nfcStatus.value = `✅ Student Registered Successfully and Card Written! Student ID: ${student.studentId} UID: ${student.uid}`;
+    });
+
     socket.on("nfcError", (error) => {
-        successMessage.value = "NFC Error: " + error;
-    });
-
-    // When a card is successfully registered via NFC, show a confirmation
-    socket.on("cardRegistered", (card) => {
-        successMessage.value = "✅ Card Registered Successfully!";
+        console.error("NFC Error:", error);
+        nfcError.value = error;
     });
 
     socket.on("disconnect", () => {
@@ -91,63 +91,191 @@ onMounted(() => {
     });
 });
 
-// Disconnect the socket when the component unmounts
+// Opens the modal and resets its state.
+const openStudentModal = () => {
+    modalStudentInfo.value = null;
+    studentID.value = "";
+    isScanning.value = false;
+    nfcStatus.value = "";
+    nfcError.value = "";
+    modalRef.value.showModal();
+};
+
+// Called when the user enters a Student ID and clicks "Tap Your Card Now".
+const registerStudent = async () => {
+    if (!studentID.value) {
+        alert("Please enter a Student ID first.");
+        return;
+    }
+
+    try {
+        const checkStudentResponse = await axios.get(route("student-infos.check"), {
+            params: { studentId: studentID.value },
+        });
+
+        if (checkStudentResponse.data.error) {
+            console.log("Student not found locally. Fetching from external API...");
+            const fetchResponse = await axios.get(
+                route("students.fetch", { studentId: studentID.value })
+            );
+            const studentData = fetchResponse.data.student;
+            modalStudentInfo.value = studentData;
+
+            await router.post(route("student-infos.store"), {
+                studentId: studentData.studentId,
+                fName: studentData.fname,
+                lName: studentData.lname,
+                program: studentData.program,
+                department: studentData.department,
+                yearLevel: studentData.yearLevel,
+            });
+
+            console.log("Student info stored successfully.");
+        } else {
+            console.log("Student info found locally.");
+            modalStudentInfo.value = checkStudentResponse.data.student;
+        }
+
+        const checkCardResponse = await axios.get(
+            route("registered-cards.checkStudentID"),
+            {
+                params: { studentId: studentID.value },
+            }
+        );
+        cardExists.value = checkCardResponse.data.exists;
+        modalRef.value.closeModal();
+        modalRef1.value.showModal();
+    } catch (error) {
+        console.error("Error verifying student info:", error);
+        nfcStatus.value = "❌ Error verifying student info!";
+    }
+};
+
+// Called when the user confirms registration after reviewing student info.
+const confirmRegistration = () => {
+    modalRef1.value.closeModal();
+    modalRef2.value.showModal();
+    socket.emit("registerStudent", studentID.value);
+    nfcStatus.value = "⏳ Waiting for NFC tap...";
+};
+
+// Cancels the registration process.
+const cancelRegistration = () => {
+    modalRef.value.closeModal();
+    modalRef1.value.closeModal();
+    modalRef2.value.closeModal();
+    nfcStatus.value = "Registration cancelled.";
+};
+
 onUnmounted(() => {
     if (socket) {
         socket.disconnect();
     }
 });
 
-// Open the modal to add a new card
-function openModal() {
-    modalRef.value.showModal();
-}
-
-// Close the modal
-function closeModal() {
-    modalRef.value.closeModal();
-}
-
-// Save the card: submit the form data and emit a socket event after DB storage
-function saveCard() {
-    cardForm.post("/registered-cards", {
-        preserveState: true,
-        onSuccess: () => {
-            closeModal();
-            successMessage.value = "Card added successfully!";
-            // Emit an event to the socket server after a successful DB operation
-            socket.emit("dbStored", cardForm.data);
-            setTimeout(() => (successMessage.value = ""), 4000);
-            cardForm.reset();
-        },
-        onError: (errors) => {
-            if (Object.keys(errors).length === 0) {
-                successMessage.value = "Error adding card. Try again!";
-                setTimeout(() => (successMessage.value = ""), 4000);
-            }
-        },
-    });
-}
-
-// Fetch cards (with pagination and search support)
-function fetchCards(page) {
-    loading.value = true;
-    router.get(
-        `/registered-cards`,
-        { page: page, search: searchQuery.value || "" },
-        {
-            preserveState: true,
-            onFinish: () => {
-                loading.value = false;
-            },
-        }
-    );
-    console.log(searchQuery.value);
-}
-
-// Reset the search and fetch the first page
-function resetSearch() {
-    searchQuery.value = "";
-    fetchCards(1);
-}
+// Props from the server (if any)
+const props = defineProps({
+    registeredCards: Object,
+});
 </script>
+
+<template>
+    <div class="p-6 text-gray-900">
+        <div class="container dark:text-white">
+            <!-- Button to open the modal -->
+            <button class="btn btn-primary mb-4" @click="openStudentModal">
+                Register Student
+            </button>
+
+            <!-- DaisyModal Component Usage -->
+            <DaisyModal title="Student Registration" ref="modalRef">
+                <!-- Stage 1: Student ID Input -->
+                <div>
+                    <h3 class="font-bold text-lg">Enter Student ID</h3>
+                    <div class="py-2">
+                        <input type="text" class="input input-bordered dark:text-black w-full mb-2" v-model="studentID"
+                            placeholder="Student ID" />
+                    </div>
+                    <div class="modal-action">
+                        <button class="btn" @click="cancelRegistration">Cancel</button>
+                        <button class="btn btn-primary" @click="registerStudent" :disabled="isLoading">
+                            Tap Your Card Now
+                        </button>
+                    </div>
+                </div>
+            </DaisyModal>
+
+            <DaisyModal title="Student Registration" ref="modalRef1">
+                <!-- Stage 2: Student Info and Confirmation -->
+                <div>
+                    <h3 class="font-bold text-lg">Student Information</h3>
+                    <div class="py-2">
+                        <p>
+                            <strong>Student ID:</strong>
+                            {{ modalStudentInfo ? modalStudentInfo.studentId : studentID }}
+                        </p>
+                        <p v-if="modalStudentInfo">
+                            <strong>Name:</strong> {{ modalStudentInfo.fName }} {{ modalStudentInfo.lName }}
+                        </p>
+                        <p v-if="modalStudentInfo">
+                            <strong>Program:</strong> {{ modalStudentInfo.program }}
+                        </p>
+                        <p>
+                            <strong>Status:</strong>
+                            <span v-if="cardExists" class="text-warning"> Card already exists.</span>
+                            <span v-else class="text-success"> New registration.</span>
+                        </p>
+                    </div>
+                    <div class="modal-action">
+                        <button class="btn" @click="cancelRegistration">Cancel</button>
+                        <button class="btn btn-primary" @click="confirmRegistration">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </DaisyModal>
+
+
+            <DaisyModal title="Student Registration" ref="modalRef2">
+                <!-- Stage 3: Scanning State -->
+                <div>
+                    <h3 class="font-bold text-lg">Waiting for NFC Tap</h3>
+                    <div class="py-2 flex flex-col items-center">
+                        <div class="loading-spinner"></div>
+                        <p class="mt-2">{{ nfcStatus }}</p>
+
+                    </div>
+                    <div class="modal-action">
+                        <button class="btn" @click="cancelRegistration">Cancel</button>
+                    </div>
+                </div>
+            </DaisyModal>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.loading-container {
+    text-align: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 5px solid #ccc;
+    border-top: 5px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+</style>

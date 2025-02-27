@@ -14,6 +14,8 @@ let socket = null;
 const showModal = ref(false);
 const modalStudentInfo = ref(null); // to store fetched or local student info
 const cardExists = ref(false);        // to track if a card already exists
+
+// Form for NFC registration (remains the same)
 const form = useForm({
     studentId: '',
     uid: '',
@@ -71,6 +73,15 @@ onMounted(() => {
     });
 });
 
+// Opens the modal in its initial (student input) state.
+const openStudentModal = () => {
+    // Reset modal state so it shows the student ID input first.
+    modalStudentInfo.value = null;
+    studentID.value = "";
+    showModal.value = true;
+};
+
+// Called when the user enters a Student ID and clicks "Tap Your Card Now".
 const registerStudent = async () => {
     if (!studentID.value) {
         alert("Please enter a Student ID first.");
@@ -78,7 +89,7 @@ const registerStudent = async () => {
     }
 
     try {
-        // First, check for local student info.
+        // Check for local student info.
         const checkStudentResponse = await axios.get(route('student-infos.check'), {
             params: { studentId: studentID.value }
         });
@@ -106,29 +117,27 @@ const registerStudent = async () => {
             modalStudentInfo.value = checkStudentResponse.data.student;
         }
 
-        // Then, check if a registered card already exists for this student.
+        // Check if a registered card already exists for this student.
         const checkCardResponse = await axios.get(route('registered-cards.checkStudentID'), {
             params: { studentId: studentID.value }
         });
         cardExists.value = checkCardResponse.data.exists;
-
-        // Now show the modal with student info and card status.
-        showModal.value = true;
+        // Once student info is loaded, the modal content updates.
     } catch (error) {
         console.error("Error verifying student info:", error);
         nfcStatus.value = "❌ Error verifying student info!";
     }
 };
 
+// Called when the user confirms registration after reviewing student info.
 const confirmRegistration = () => {
-    // User confirmed to proceed.
     showModal.value = false;
     socket.emit("registerStudent", studentID.value);
     nfcStatus.value = "⏳ Waiting for NFC tap...";
 };
 
+// Cancels the registration process.
 const cancelRegistration = () => {
-    // User cancelled the process.
     showModal.value = false;
     nfcStatus.value = "Registration cancelled.";
 };
@@ -139,6 +148,7 @@ onUnmounted(() => {
     }
 });
 
+// Props from the server
 const props = defineProps({
     registeredCards: Object,
 });
@@ -147,43 +157,54 @@ const props = defineProps({
 <template>
     <div class="p-6 text-gray-900">
         <div class="container dark:text-white">
-            <!-- Input Section -->
-            <div class="input-section mb-4">
-                <label class="block mb-2">Enter Student ID:</label>
-                <input class="input input-bordered dark:text-black w-full mb-2" v-model="studentID"
-                    placeholder="Student ID" />
-                <button class="btn btn-primary" @click="registerStudent" :disabled="isLoading">
-                    Tap Your Card Now
-                </button>
-            </div>
+            <!-- Button to open the modal -->
+            <button class="btn btn-primary mb-4" @click="openStudentModal">
+                Register Student
+            </button>
 
-            <!-- DaisyUI Modal -->
+            <!-- Modal for Student Registration -->
             <input type="checkbox" id="modal" class="modal-toggle" v-model="showModal" />
             <div class="modal dark:text-black" v-if="showModal">
                 <div class="modal-box">
-                    <h3 class="font-bold text-lg">Student Information</h3>
-                    <div class="py-2">
-                        <p>
-                            <strong>Student ID:</strong> {{ modalStudentInfo?.studentId || studentID }}
-                        </p>
-                        <p>
-                            <strong>Name:</strong>
-                            {{ modalStudentInfo?.fName }} {{ modalStudentInfo?.lName }}
-                        </p>
-                        <p>
-                            <strong>Program:</strong> {{ modalStudentInfo?.program }}
-                        </p>
-                        <p>
-                            <strong>Status:</strong>
-                            <span v-if="cardExists" class="text-warning"> Card already exists.</span>
-                            <span v-else class="text-success"> New registration.</span>
-                        </p>
+                    <!-- When no student info is loaded, show the Student ID input -->
+                    <div v-if="!modalStudentInfo">
+                        <h3 class="font-bold text-lg">Enter Student ID</h3>
+                        <div class="py-2">
+                            <input type="text" class="input input-bordered dark:text-black w-full mb-2"
+                                v-model="studentID" placeholder="Student ID" />
+                        </div>
+                        <div class="modal-action">
+                            <button class="btn" @click="cancelRegistration">Cancel</button>
+                            <button class="btn btn-primary" @click="registerStudent" :disabled="isLoading">
+                                Tap Your Card Now
+                            </button>
+                        </div>
                     </div>
-                    <div class="modal-action">
-                        <button class="btn" @click="cancelRegistration">Cancel</button>
-                        <button class="btn btn-primary" @click="confirmRegistration">
-                            Continue
-                        </button>
+                    <!-- Once student info is loaded, show the details and confirmation options -->
+                    <div v-else>
+                        <h3 class="font-bold text-lg">Student Information</h3>
+                        <div class="py-2">
+                            <p>
+                                <strong>Student ID:</strong> {{ modalStudentInfo.studentId || studentID }}
+                            </p>
+                            <p>
+                                <strong>Name:</strong> {{ modalStudentInfo.fName }} {{ modalStudentInfo.lName }}
+                            </p>
+                            <p>
+                                <strong>Program:</strong> {{ modalStudentInfo.program }}
+                            </p>
+                            <p>
+                                <strong>Status:</strong>
+                                <span v-if="cardExists" class="text-warning"> Card already exists.</span>
+                                <span v-else class="text-success"> New registration.</span>
+                            </p>
+                        </div>
+                        <div class="modal-action">
+                            <button class="btn" @click="cancelRegistration">Cancel</button>
+                            <button class="btn btn-primary" @click="confirmRegistration">
+                                Continue
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
