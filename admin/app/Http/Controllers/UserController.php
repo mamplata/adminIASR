@@ -30,9 +30,6 @@ class UserController extends Controller
         // Create the new user with a temporary password
         $user = $userService->createUser($request->validated());
 
-        // Send the password reset email
-        Mail::to($user->email)->send(new PasswordReset($user));
-
         // Redirect with a success message
         return redirect()->route('users.index')
             ->with('success', 'User added successfully! A password reset email has been sent.');

@@ -13,7 +13,19 @@
 
         <!-- Device Table -->
         <DaisyTable :data="registeredCards.data" :currentPage="registeredCards.current_page"
-            :lastPage="registeredCards.last_page" @change-page="fetchRegisteredCards" />
+            :lastPage="registeredCards.last_page" @change-page="fetchRegisteredCards">
+            <template #actions="{ row }">
+                <div class="flex justify-center">
+                    <button @click="confirmDelete(row.id)"
+                        class="btn text-white btn-error shadow-lg hover:bg-red-700 mb-2">
+                        Delete
+                    </button>
+                </div>
+            </template>
+        </DaisyTable>
+
+        <DaisyConfirm :visible="showConfirm" title="Delete Card" message="Are you sure you want to delete this card?"
+            @confirm="handleConfirmDelete" @cancel="handleCancelDelete" />
 
         <!-- DaisyModal Component Usage -->
         <DaisyModal title="Student Registration" ref="modalRef">
@@ -23,7 +35,8 @@
 
         <DaisyModal title="Student Registration" ref="modalRef1">
             <ConfirmStudentInfo :studentID="studentID" :modalStudentInfo="modalStudentInfo" :cardExists="cardExists"
-                @cancel-registration="cancelRegistration" @confirm-registration="confirmRegistration" />
+                :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration"
+                @confirm-registration="confirmRegistration" />
         </DaisyModal>
 
 
@@ -44,6 +57,7 @@ import DaisyModal from '@/Components/DaisyModal.vue';
 import EnterStudentForm from "./EnterStudentForm.vue";
 import ConfirmStudentInfo from "./ConfirmStudentInfo.vue";
 import NfcScanningState from "./NfcScanningState.vue";
+import DaisyConfirm from "@/Components/DaisyConfirm.vue";
 
 // Define props passed from the server
 const props = defineProps({
@@ -139,11 +153,15 @@ onMounted(() => {
                 await new Promise((resolve) => setTimeout(resolve, 2000));
                 isLoading.value = false;
                 if (registrationSuccess.value) {
-                    modalRef.value.closeModal();
+                    modalRef2.value.closeModal();
                     // Reset state if needed
                     modalStudentInfo.value = null;
                     studentID.value = "";
                     registrationSuccess.value = false;
+                } else {
+                    // Registration failed; go back to the confirm student info modal
+                    modalRef2.value.closeModal();
+                    modalRef1.value.showModal();
                 }
             },
         });
@@ -244,5 +262,34 @@ onUnmounted(() => {
         socket.disconnect();
     }
 });
+
+const cardToDelete = ref(null);
+const showConfirm = ref(false);
+
+function confirmDelete(cardId) {
+    cardToDelete.value = cardId;
+    showConfirm.value = true;
+}
+
+function handleConfirmDelete() {
+    router.delete(`/registered-cards/${cardToDelete.value}`, {
+        onSuccess: () => {
+            successMessage.value = "Card deleted successfully!";
+            setTimeout(() => { successMessage.value = ""; }, 4000);
+        },
+        onError: () => {
+            successMessage.value = "Error deleting card. Please try again!";
+            setTimeout(() => { successMessage.value = ""; }, 4000);
+        },
+    });
+    cardToDelete.value = null;
+    showConfirm.value = false;
+}
+
+function handleCancelDelete() {
+    cardToDelete.value = null;
+    showConfirm.value = false;
+}
+
 
 </script>

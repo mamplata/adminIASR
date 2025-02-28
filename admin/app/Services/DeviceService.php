@@ -13,7 +13,10 @@ class DeviceService
 
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
-            $query->where('name', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('MACAdress', 'LIKE', "%{$search}%");
+            });
         }
 
         return $query->paginate(5)
@@ -21,9 +24,9 @@ class DeviceService
             ->through(fn($device) => [
                 'id'                => $device->id,
                 'name'              => $device->name,
+                'MACAdress'         => $device->MACAdress,
                 'machineId'         => $device->machineId,
                 'hardwareUID'       => $device->hardwareUID,
-                'MACAdress'         => $device->MACAdress,
                 'deviceFingerprint' => $device->deviceFingerprint,
             ]);
     }

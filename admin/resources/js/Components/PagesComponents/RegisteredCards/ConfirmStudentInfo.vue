@@ -18,6 +18,9 @@
                 <span v-else class="text-success"> New registration.</span>
             </p>
         </div>
+        <div>
+            <p v-if="nfcStatus" class="mt-2">{{ nfcStatus }}</p>
+        </div>
         <div class="modal-action">
             <button class="btn" @click="handleCancel">Cancel</button>
             <button class="btn btn-primary" @click="handleConfirm">
@@ -43,6 +46,10 @@ const props = defineProps({
     cardExists: {
         type: Boolean,
         default: false
+    },
+    nfcStatus: {
+        type: String,
+        default: ''
     }
 })
 

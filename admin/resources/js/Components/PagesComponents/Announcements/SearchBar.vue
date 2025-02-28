@@ -38,7 +38,7 @@
                     <span v-if="loading" class="loading loading-spinner loading-sm"></span>
                     <span v-else>Search</span>
                 </button>
-                <button @click="onReset" class="flex-1 btn text-white btn-secondary shadow-lg hover:bg-[#7b7b7b]">
+                <button @click="onReset" class="flex-1 btn text-dark btn-neutral shadow-lg hover:bg-[#7b7b7b]">
                     Reset
                 </button>
             </div>
