@@ -26,8 +26,8 @@ class RegisteredCardController extends Controller
             ->appends(['search' => $request->input('search')])
             ->through(fn($card) => [
                 'id'        => $card->id,
-                'uid'       => $card->uid,
                 'studentId' => $card->studentId,
+                'uid'       => $card->uid,
             ]);
 
         return Inertia::render('RegisteredCards/Index', [
@@ -81,5 +81,14 @@ class RegisteredCardController extends Controller
 
         return redirect()->route('registered-cards.index')
             ->with('success', 'Registered card updated or created successfully!');
+    }
+
+    public function destroy($id)
+    {
+        $card = RegisteredCard::findOrFail($id);
+        $card->delete();
+
+        return redirect()->route('registered-cards.index')
+            ->with('success', 'Registered card deleted successfully!');
     }
 }

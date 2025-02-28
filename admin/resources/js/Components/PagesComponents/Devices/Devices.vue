@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { io } from 'socket.io-client';
 import DaisyConfirm from '@/Components/DaisyConfirm.vue';
@@ -55,40 +55,52 @@ const deviceForm = useForm({
     deviceFingerprint: ""
 });
 
-// Initialize socket connection.
-const socket = io("http://localhost:3000");
+let socket = null;
+
+onMounted(() => {
+    // Initialize socket connection when component is mounted.
+    socket = io("http://172.16.37.5:3000");
+
+    socket.on("connect", () => {
+        console.log("Connected to Socket.io server");
+    });
+
+    socket.on("deviceInfo", (details) => {
+        deviceForm.name = details.deviceName;
+        deviceForm.machineId = details.machineId;
+        deviceForm.hardwareUID = details.hardwareUUID;
+        deviceForm.MACAdress = details.macAddress;
+        deviceForm.deviceFingerprint = details.deviceFingerprint;
+        gettingInfo.value = false;
+        saveDevice();
+    });
+
+    socket.on("error", (errorMessage) => {
+        successMessage.value = errorMessage;
+        gettingInfo.value = false;
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Disconnected from server");
+    });
+});
+
+onUnmounted(() => {
+    // Clean up the socket connection when the component unmounts.
+    if (socket) {
+        socket.disconnect();
+    }
+});
 
 // Function to trigger the getDeviceInfo event via socket.
 function getDeviceInfo() {
     gettingInfo.value = true;
-    socket.emit("getDeviceInfo");
+    if (socket) {
+        socket.emit("getDeviceInfo");
+    }
 }
 
-// When device details are received from the socket,
-// populate the form and immediately call saveDevice.
-socket.on("deviceInfo", (details) => {
-    deviceForm.name = details.deviceName;
-    deviceForm.machineId = details.machineId;
-    deviceForm.hardwareUID = details.hardwareUUID;
-    deviceForm.MACAdress = details.macAddress;
-    deviceForm.deviceFingerprint = details.deviceFingerprint;
-    gettingInfo.value = false;
-    saveDevice();
-});
-
-// Handle socket error responses.
-socket.on("error", (errorMessage) => {
-    successMessage.value = errorMessage;
-    gettingInfo.value = false;
-});
-
-// Clean up the socket connection when the component unmounts.
-onUnmounted(() => {
-    socket.disconnect();
-});
-
 // Save device by sending a POST request to the /devices endpoint.
-// The backend uses updateOrCreateDevice to either create a new record or update an existing one.
 function saveDevice() {
     deviceForm.post('/devices', {
         onSuccess: () => {
@@ -153,6 +165,7 @@ function handleDeleteCancel() {
     deleteId.value = null;
 }
 </script>
+
 
 <style scoped>
 .loading-container {

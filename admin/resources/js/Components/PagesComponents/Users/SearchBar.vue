@@ -3,22 +3,21 @@
   <div class="sm:hidden mb-2">
     <div class="flex flex-col space-y-2">
       <div>
-        <input :value="modelValue" @input="updateValue($event.target.value)" type="text"
-          placeholder="Search by name or email"
+        <input :value="modelValue" @input="onInput" type="text" placeholder="Search by name or email"
           class="w-full p-2 border border-gray-300 rounded bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
       </div>
       <div class="flex space-x-2">
-        <button @click="$emit('search')" :disabled="loading"
+        <button @click="emitSearch" :disabled="loading"
           class="flex-1 btn text-white btn-success shadow-lg hover:bg-[#20714c]">
           <span v-if="loading" class="loading loading-spinner loading-sm"></span>
           <span v-else>Search</span>
         </button>
-        <button @click="handleReset" class="flex-1 btn text-white btn-secondary shadow-lg hover:bg-gray-400">
+        <button @click="emitReset" class="flex-1 btn text-white btn-neutral shadow-lg hover:bg-gray-400">
           Reset
         </button>
       </div>
       <div>
-        <button @click="$emit('add-user')" class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">
+        <button @click="emitAddUser" class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">
           Add User
         </button>
       </div>
@@ -35,7 +34,7 @@
         <span v-if="loading" class="loading loading-spinner loading-sm"></span>
         <span v-else>Search</span>
       </button>
-      <button @click="emitReset" class="btn text-white btn-secondary shadow-lg hover:bg-gray-400 ml-2">
+      <button @click="emitReset" class="btn text-white btn-neutral shadow-lg hover:bg-gray-400 ml-2">
         Reset
       </button>
     </div>

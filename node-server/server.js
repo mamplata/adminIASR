@@ -1,52 +1,80 @@
-//server.js
+// server.js
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
+const os = require("os");
+const crypto = require("crypto");
+const { machineIdSync } = require("node-machine-id");
+const macaddress = require("macaddress");
+const si = require("systeminformation");
+
+// Import your custom utilities
 const { generateFingerprint } = require("./utils/fingerprint");
-const { initializeNFC, pendingStudent } = require("./utils/nfcHandler"); // ✅ Import correctly
+const { initializeNFC, pendingStudent } = require("./utils/nfcHandler");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:8000", "http://127.0.0.1:8000"],
+    origin: "http://172.16.37.5:8000", // Only allow the network origin
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
   },
 });
 
-// Check device fingerprint before initializing NFC
+
+// Always initialize NFC scanning, no device checking required.
 (async () => {
   try {
-    const deviceFingerprint = await generateFingerprint();
-    console.log("Generated Device Fingerprint:", deviceFingerprint);
 
-    // Replace with your stored registered fingerprint
-    const registeredFingerprint = 'ea8b5e51ceaf56b93bbe0bacf330f144fc1b809932a2088a90601a1b9015d320';
-
-    if (deviceFingerprint !== registeredFingerprint) {
-      console.error("❌ Device not registered. Blocking NFC access.");
-      return; // Stop execution to prevent NFC initialization
-    }
-
-    console.log("✅ Device is registered. Enabling NFC scanning...");
+    console.log("✅ NFC scanning enabled...");
     initializeNFC(io);
   } catch (err) {
     console.error("❌ Initialization error:", err);
   }
 })();
 
-// Socket.io setup
+// Function to generate detailed fingerprint info (for getDeviceInfo event)
+async function generateFingerprintDetails() {
+  try {
+    const machineId = machineIdSync({ original: true });
+    const macAddress = await macaddress.one();
+    const uuidData = await si.uuid();
+    const hardwareUUID = uuidData.hardware || '';
+    const deviceName = os.hostname();
+    const combinedData = machineId + hardwareUUID + macAddress;
+    const deviceFingerprint = crypto
+      .createHash("sha256")
+      .update(combinedData)
+      .digest("hex");
+
+    return { machineId, hardwareUUID, macAddress, deviceFingerprint, deviceName };
+  } catch (error) {
+    throw new Error("Error generating fingerprint details: " + error);
+  }
+}
+
+// Set up Socket.io connections and events
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
+  // NFC related event: student registration
   socket.on("registerStudent", (studentID) => {
     console.log(`Student ID received: ${studentID}`);
-
-    pendingStudent.id = studentID; // ✅ Now updates correctly!
-
+    pendingStudent.id = studentID;
     socket.emit("nfcStatus", "Tap your NFC card now!");
+  });
+
+  // Device info event: return detailed fingerprint info
+  socket.on("getDeviceInfo", async () => {
+    try {
+      const details = await generateFingerprintDetails();
+      console.log("Device details:", details);
+      socket.emit("deviceInfo", details);
+    } catch (error) {
+      socket.emit("error", error.message);
+    }
   });
 
   socket.on("disconnect", () => {
@@ -55,6 +83,7 @@ io.on("connection", (socket) => {
 });
 
 // Start the server
-server.listen(3000, () => {
-  console.log("Socket.io server running on port 3000");
+const PORT = 3000;
+server.listen(PORT, '172.16.37.5', () => {
+  console.log(`Socket.io server running on http://172.16.37.5:${PORT}`);
 });

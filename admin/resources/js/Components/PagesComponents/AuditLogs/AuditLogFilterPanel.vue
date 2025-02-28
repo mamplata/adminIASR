@@ -13,7 +13,7 @@
             <button @click="$emit('search')" class="btn btn-success text-white hover:bg-[#20714c] w-full md:w-auto">
                 Search
             </button>
-            <button @click="$emit('reset')" class="btn btn-secondary text-white hover:bg-[#7b7b7b] w-full md:w-auto">
+            <button @click="$emit('reset')" class="btn btn-neutral text-white hover:bg-[#7b7b7b] w-full md:w-auto">
                 Reset
             </button>
         </div>
