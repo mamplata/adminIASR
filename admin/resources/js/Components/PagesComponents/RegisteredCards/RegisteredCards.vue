@@ -118,7 +118,7 @@ const form = useForm({
 const registrationSuccess = ref(false);
 
 onMounted(() => {
-    socket = io("http://localhost:3000");
+    socket = io("http://172.16.37.5:3000");
 
     socket.on("connect", () => {
         console.log("Connected to Socket.io server");
