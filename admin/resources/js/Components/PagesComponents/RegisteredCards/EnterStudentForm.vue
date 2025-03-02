@@ -1,13 +1,12 @@
 <template>
     <div>
-        <h3 class="font-bold text-lg">Enter Student ID</h3>
         <div class="py-2">
-            <input type="text" class="input input-bordered dark:text-black w-full mb-2" v-model="studentID"
+            <input type="text" class="input input-bordered dark:text-white w-full mb-2" v-model="studentID"
                 placeholder="Student ID" />
         </div>
         <div class="modal-action">
             <button class="btn" @click="handleCancel">Cancel</button>
-            <button class="btn btn-primary" @click="handleRegister" :disabled="isLoading">
+            <button class="btn btn-primary dark:text-white" @click="handleRegister" :disabled="isLoading">
                 Tap Your Card Now
             </button>
         </div>

@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h3 class="font-bold text-lg">Waiting for NFC Tap</h3>
         <div class="py-2 flex flex-col items-center">
             <div class="loading-spinner"></div>
             <p class="mt-2">{{ nfcStatus }}</p>
