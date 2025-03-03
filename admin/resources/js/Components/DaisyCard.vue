@@ -7,7 +7,7 @@
                 </slot>
             </div>
             <div class="card-actions mt-4 flex justify-end">
-                <button @click="closeCard" class="btn btn-secondary text-end">Close</button>
+                <button @click="closeCard" class="btn btn-soft text-end">Close</button>
             </div>
         </div>
     </dialog>

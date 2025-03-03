@@ -43,8 +43,8 @@ importers:
         specifier: ^9.1.2
         version: 9.1.2
       daisyui:
-        specifier: ^4.12.23
-        version: 4.12.23(postcss@8.5.3)
+        specifier: ^5.0.0
+        version: 5.0.0
       laravel-vite-plugin:
         specifier: ^1.2.0
         version: 1.2.0(vite@6.1.1(jiti@1.21.7)(yaml@2.7.0))
@@ -680,9 +680,6 @@ packages:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
-  css-selector-tokenizer@0.8.0:
-    resolution: {integrity: sha512-Jd6Ig3/pe62/qe5SBPTN8h8LeUg/pT4lLgtavPf7updwwHpvFzxvOQBHYj2LZDMjUnBzgvIUSjRcf6oT5HzHFg==}
-
   cssesc@3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
@@ -691,13 +688,8 @@ packages:
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
-  culori@3.3.0:
-    resolution: {integrity: sha512-pHJg+jbuFsCjz9iclQBqyL3B2HLCBF71BwVNujUYEvCeQMvV97R59MNK3R2+jgJ3a1fcZgI9B3vYgz8lzr/BFQ==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  daisyui@4.12.23:
-    resolution: {integrity: sha512-EM38duvxutJ5PD65lO/AFMpcw+9qEy6XAZrTpzp7WyaPeO/l+F/Qiq0ECHHmFNcFXh5aVoALY4MGrrxtCiaQCQ==}
-    engines: {node: '>=16.9.0'}
+  daisyui@5.0.0:
+    resolution: {integrity: sha512-U0K9Bac3Bi3zZGm6ojrw12F0vBHTpEgf46zv/BYxLe07hF0Xnx7emIQliwaRBgJuYhY0BhwQ6wSnq5cJXHA2yA==}
 
   debug@4.3.7:
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
@@ -789,9 +781,6 @@ packages:
   fast-glob@3.3.3:
     resolution: {integrity: sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==}
     engines: {node: '>=8.6.0'}
-
-  fastparse@1.1.2:
-    resolution: {integrity: sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==}
 
   fastq@1.19.0:
     resolution: {integrity: sha512-7SFSRCNjBQIZH/xZR3iy5iQYR8aGBE0h3VG6/cwlbrpdciNYBMotQav8c1XI3HjHH+NikUpP53nPdlZSdWmFzA==}
@@ -2000,25 +1989,11 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  css-selector-tokenizer@0.8.0:
-    dependencies:
-      cssesc: 3.0.0
-      fastparse: 1.1.2
-
   cssesc@3.0.0: {}
 
   csstype@3.1.3: {}
 
-  culori@3.3.0: {}
-
-  daisyui@4.12.23(postcss@8.5.3):
-    dependencies:
-      css-selector-tokenizer: 0.8.0
-      culori: 3.3.0
-      picocolors: 1.1.1
-      postcss-js: 4.0.1(postcss@8.5.3)
-    transitivePeerDependencies:
-      - postcss
+  daisyui@5.0.0: {}
 
   debug@4.3.7:
     dependencies:
@@ -2120,8 +2095,6 @@ snapshots:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.8
-
-  fastparse@1.1.2: {}
 
   fastq@1.19.0:
     dependencies:

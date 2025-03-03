@@ -10,13 +10,12 @@
                 <!-- Flex container with overflow handling -->
                 <div class="">
                     <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
-                        <h3
-                            class="font-semibold text-gray-800 dark:text-white whitespace-normal break-words text-center">
+                        <h3 class="font-semibold text-white whitespace-normal break-words text-center">
                             {{ announcement.content.title }}
                         </h3>
                     </div>
                     <div class="card-body m-5 px-4 py-2">
-                        <p class="text-gray-600 dark:text-gray-400 whitespace-normal break-words text-justify">
+                        <p class="text-white whitespace-normal break-words text-justify">
                             {{ announcement.content.body }}
                         </p>
                     </div>
@@ -40,7 +39,7 @@
 
             <!-- Modal action with button right-aligned -->
             <div class="modal-action flex justify-end">
-                <button @click="closeCard" class="btn btn-secondary">Close</button>
+                <button @click="closeCard" class="btn btn-soft">Close</button>
             </div>
         </div>
     </dialog>

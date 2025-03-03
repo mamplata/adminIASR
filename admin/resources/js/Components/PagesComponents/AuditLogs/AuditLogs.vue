@@ -9,7 +9,7 @@
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
             @change-page="fetchLogs" :excludedColumns="['details']">
             <template #actions="{ row }">
-                <button v-if="row.details != null" class="btn btn-info" @click="showDetails(row.details)">
+                <button v-if="row.details != null" class="btn btn-info text-white" @click="showDetails(row.details)">
                     View Details
                 </button>
                 <p v-else>No details</p>
@@ -93,10 +93,10 @@ function resetSearch() {
 
 <style scoped>
 .selected-details {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  background-color: rgba(0, 0, 0, 0.4);
-  border-radius: 8px;
-  padding: 6px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 6px;
 }
 </style>
