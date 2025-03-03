@@ -16,13 +16,12 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://172.16.37.5:8000", // Only allow the network origin
+    origin: ["http://localhost:8000", "http://127.0.0.1:8000"],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true,
   },
 });
-
 
 // Always initialize NFC scanning, no device checking required.
 (async () => {
@@ -84,6 +83,6 @@ io.on("connection", (socket) => {
 
 // Start the server
 const PORT = 3000;
-server.listen(PORT, '172.16.37.5', () => {
-  console.log(`Socket.io server running on http://172.16.37.5:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Socket.io server running on port ${PORT}`);
 });
