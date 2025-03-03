@@ -59,7 +59,7 @@ let socket = null;
 
 onMounted(() => {
     // Initialize socket connection when component is mounted.
-    socket = io("http://172.16.37.5:3000");
+    socket = io("localhost:3000");
 
     socket.on("connect", () => {
         console.log("Connected to Socket.io server");

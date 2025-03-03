@@ -1,39 +1,67 @@
 <template>
-    <div>
-        <h3 class="font-bold text-lg">Student Information</h3>
-        <div class="py-2">
-            <p>
-                <strong>Student ID:</strong>
-                {{ modalStudentInfo ? modalStudentInfo.studentId : studentID }}
-            </p>
-            <p v-if="modalStudentInfo">
-                <strong>Name:</strong> {{ modalStudentInfo.fName }} {{ modalStudentInfo.lName }}
-            </p>
-            <p v-if="modalStudentInfo">
-                <strong>Program:</strong> {{ modalStudentInfo.program }}
-            </p>
-            <p>
-                <strong>Status:</strong>
-                <span v-if="cardExists" class="text-warning"> Card already exists.</span>
-                <span v-else class="text-success"> New registration.</span>
-            </p>
-        </div>
-        <div>
-            <p v-if="nfcStatus" class="mt-2">{{ nfcStatus }}</p>
-        </div>
-        <div class="modal-action">
+    <div class="p-6 max-w-lg mx-auto rounded-lg uppercase">
+        <!-- Primary Information Section -->
+        <section class="flex flex-col items-center justify-around gap-4">
+            <!-- Student Image -->
+            <div v-if="modalStudentInfo && modalStudentInfo.image" class="flex-shrink-0">
+                <img :src="modalStudentInfo.image" alt="Student Image"
+                    class="w-40 h-40 rounded-full object-cover shadow-lg" />
+            </div>
+
+            <!-- Essential Details -->
+            <div class="flex flex-col text-center">
+                <div v-if="modalStudentInfo">
+                    <span>{{ modalStudentInfo.fName }} {{ modalStudentInfo.lName }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-500 text-sm">
+                        {{ modalStudentInfo ? modalStudentInfo.studentId : studentID }}
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Additional Information Section -->
+        <section class="mt-4 text-justify gap-4">
+            <div v-if="modalStudentInfo">
+                <strong>Program: </strong>
+                <span>{{ modalStudentInfo.program }}</span>
+            </div>
+            <div v-if="modalStudentInfo">
+                <strong>Department: </strong>
+                <span>{{ modalStudentInfo.department }}</span>
+            </div>
+            <div v-if="modalStudentInfo">
+                <strong>Year Level: </strong>
+                <span>{{ modalStudentInfo.yearLevel }}</span>
+            </div>
+            <div v-if="modalStudentInfo">
+                <strong>Semester: </strong>
+                <span>{{ modalStudentInfo.semester }}</span>
+            </div>
+            <div v-if="nfcStatus" class="mt-2">
+                <span>{{ nfcStatus }}</span>
+            </div>
+            <div>
+                <strong>Status: </strong>
+                <span v-if="cardExists" class="text-warning">Card already exists.</span>
+                <span v-else class="text-success">New registration.</span>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <footer class="mt-6 flex justify-end space-x-2">
             <button class="btn" @click="handleCancel">Cancel</button>
-            <button class="btn btn-primary" @click="handleConfirm">
-                Continue
-            </button>
-        </div>
+            <button class="btn btn-primary" @click="handleConfirm">Continue</button>
+        </footer>
     </div>
+
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
-// Define props to receive studentID, modalStudentInfo, and cardExists from parent
+// Define props to receive studentID, modalStudentInfo, cardExists, and nfcStatus from parent
 const props = defineProps({
     studentID: {
         type: String,

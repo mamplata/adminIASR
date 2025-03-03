@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
-            $table->string('department');
+            $table->string('departments');
             $table->string('publisher');
             $table->string('type'); // 'text' or 'image'
             $table->json('content'); // JSON field for text or image metadata

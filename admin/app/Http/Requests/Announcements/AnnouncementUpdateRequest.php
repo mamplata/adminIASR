@@ -14,7 +14,7 @@ class AnnouncementUpdateRequest extends FormRequest
     public function rules()
     {
         $rules = [
-            'department'        => 'required|string',
+            'departments'        => 'required|string',
             'publisher'         => 'required|string',
             'type'              => 'required|in:text,image',
             'publication_date'  => 'required|date',
@@ -32,7 +32,7 @@ class AnnouncementUpdateRequest extends FormRequest
     public function messages()
     {
         return [
-            'department.required'       => 'Department field is required.',
+            'departments.required'       => 'Department field is required.',
             'publisher.required'        => 'Publisher field is required.',
             'type.required'             => 'Type field is required.',
             'type.in'                   => 'Type must be either text or image.',

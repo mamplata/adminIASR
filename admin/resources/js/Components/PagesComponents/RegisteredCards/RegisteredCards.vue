@@ -28,19 +28,19 @@
             @confirm="handleConfirmDelete" @cancel="handleCancelDelete" />
 
         <!-- DaisyModal Component Usage -->
-        <DaisyModal title="Student Registration" ref="modalRef">
+        <DaisyModal title="Enter Student ID" ref="modalRef">
             <EnterStudentForm v-model="studentID" :isLoading="isLoading" @cancel-registration="cancelRegistration"
                 @register-student="registerStudent" />
         </DaisyModal>
 
-        <DaisyModal title="Student Registration" ref="modalRef1">
+        <DaisyModal title="Student Information" ref="modalRef1">
             <ConfirmStudentInfo :studentID="studentID" :modalStudentInfo="modalStudentInfo" :cardExists="cardExists"
                 :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration"
                 @confirm-registration="confirmRegistration" />
         </DaisyModal>
 
 
-        <DaisyModal title="Student Registration" ref="modalRef2">
+        <DaisyModal title="Waiting for NFC Tap" ref="modalRef2">
             <NfcScanningState :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration" />
         </DaisyModal>
     </div>
@@ -118,7 +118,7 @@ const form = useForm({
 const registrationSuccess = ref(false);
 
 onMounted(() => {
-    socket = io("http://172.16.37.5:3000");
+    socket = io("localhost:3000");
 
     socket.on("connect", () => {
         console.log("Connected to Socket.io server");
@@ -218,6 +218,8 @@ const registerStudent = async () => {
                 program: studentData.program,
                 department: studentData.department,
                 yearLevel: studentData.yearLevel,
+                semester: studentData.semester,
+                image: studentData.image
             });
 
             console.log("Student info stored successfully.");
