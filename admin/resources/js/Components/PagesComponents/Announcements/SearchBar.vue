@@ -8,10 +8,10 @@
                focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- Department Dropdown -->
-            <select v-model="localSelectedDepartment"
-                class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500">
+            <select v-model="localSelectedDepartment" class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
+   focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500">
                 <option value="" disabled>Select Department</option>
+                <option value="all">All Departments</option>
                 <option v-for="department in searchDepartments" :key="department" :value="department">
                     {{ department }}
                 </option>

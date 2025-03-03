@@ -29,11 +29,23 @@ class AnnouncementController extends Controller
             });
         }
 
-        if ($request->filled('department')) {
-            $query->where('department', $request->department);
+        if ($request->filled('departments')) {
+            $query->where('departments', $request->departments);
         }
 
-        $searchDepartments = Announcement::distinct()->pluck('department')->toArray();
+        $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
+
+        $searchDepartments = collect($rawDepartments)
+            ->flatMap(function ($deptString) {
+                return explode(',', $deptString);
+            })
+            ->map(function ($dept) {
+                return trim($dept);
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('publication_date', [
@@ -49,9 +61,9 @@ class AnnouncementController extends Controller
         $announcements = $query->latest()
             ->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn($announcement) => [
+            ->through(fn ($announcement) => [
                 'id'                => $announcement->id,
-                'department'        => $announcement->department,
+                'departments'        => $announcement->departments,
                 'publisher'         => $announcement->publisher,
                 'type'              => $announcement->type,
                 'content'           => $announcement->content,

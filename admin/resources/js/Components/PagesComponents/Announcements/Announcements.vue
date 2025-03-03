@@ -59,7 +59,7 @@ const successMessage = ref("");
 
 const announcementForm = useForm({
     publisher: "",
-    department: "",
+    departments: "",
     publication_date: "",
     type: "",
     content: "",
@@ -72,7 +72,7 @@ const extraContent = reactive({
     body: "",
 });
 
-const departments = ['CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'];
+const departments = ['GENERAL', 'CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'];
 const selectedAnnouncement = ref(null);
 const currentAction = ref("Add");
 const currentRow = ref(null);
@@ -136,7 +136,7 @@ function openModal(action, row = null) {
     if (action === 'Edit' && row) {
         isEditing.value = true;
         announcementForm.publisher = row.publisher;
-        announcementForm.department = row.department;
+        announcementForm.departments = row.departments;
 
         const dateObj = new Date(row.publication_date);
         const year = dateObj.getFullYear();
@@ -278,7 +278,7 @@ function fetchAnnouncements(page) {
         {
             page,
             search: searchQuery.value,
-            department: selectedDepartment.value,
+            departments: selectedDepartment.value,
             start_date: startDate.value || null,
             end_date: endDate.value || null,
         },

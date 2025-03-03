@@ -10,7 +10,7 @@ class Announcement extends Model
     use HasFactory;
 
     protected $fillable = [
-        'department',
+        'departments',
         'publisher',
         'type',
         'content',
