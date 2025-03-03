@@ -16,8 +16,9 @@ class CreateStudentInfosTable extends Migration
             $table->string('program');
             $table->string('department');
             $table->string('yearLevel');
-            $table->string('semester');  // semester info (e.g., "2nd Semester 2024-2025")
-            $table->longText('image');   // image column as long text
+            $table->string('semester');
+            $table->string('year');
+            $table->longText('image');
             $table->timestamps();
         });
     }

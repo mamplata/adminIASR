@@ -16,24 +16,25 @@
             </template>
         </DaisyTable>
 
-        <!-- Modal: rendered only if a details value is selected -->
         <DaisyCard v-if="selectedDetails" @close="selectedDetails = null">
             <div>
                 <h4 class="font-semibold text-gray-800 dark:text-white mb-2">
                     Audit Log Details
                 </h4>
-                <p class="selected-details"><code> {{ selectedDetails }} </code></p>
+                <p class="selected-details">
+                    <code v-html="formattedDetails"></code>
+                </p>
             </div>
         </DaisyCard>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AuditLogFilterPanel from './AuditLogFilterPanel.vue';
 import DaisyTable from '@/Components/DaisyTable.vue';
-import DaisyCard from '@/Components/DaisyCard.vue'; // Your modal component
+import DaisyCard from '@/Components/DaisyCard.vue';
 
 const props = defineProps({
     auditLogs: Object,
@@ -58,6 +59,41 @@ const selectedDetails = ref(null);
 function showDetails(details) {
     selectedDetails.value = details;
 }
+
+// Function to capitalize the first letter of each key
+const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+// Computed property to format the JSON data properly
+const formattedDetails = computed(() => {
+    if (!selectedDetails.value) return "";
+
+    let parsedDetails = selectedDetails.value;
+
+    // Ensure selectedDetails is an object and not a string
+    if (typeof parsedDetails === "string") {
+        try {
+            parsedDetails = JSON.parse(parsedDetails);
+        } catch (error) {
+            console.error("Invalid JSON format:", error);
+            return "Invalid data format";
+        }
+    }
+
+    // Format the JSON object into a readable key-value pair with capitalized keys
+    return Object.entries(parsedDetails)
+        .map(([key, value]) => {
+            const formattedKey = capitalizeFirstLetter(key);
+
+            if (typeof value === "object" && value !== null) {
+                // Handle nested objects (e.g., "content" field)
+                return `<strong>${formattedKey}:</strong> ${JSON.stringify(value, null, 2)}`;
+            }
+            return `<strong>${formattedKey}:</strong> ${value}`;
+        })
+        .join("<br>");
+});
 
 // Fetch logs using the current filter values
 function fetchLogs(page) {
@@ -93,10 +129,10 @@ function resetSearch() {
 
 <style scoped>
 .selected-details {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  background-color: rgba(0, 0, 0, 0.4);
-  border-radius: 8px;
-  padding: 6px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 6px;
 }
 </style>

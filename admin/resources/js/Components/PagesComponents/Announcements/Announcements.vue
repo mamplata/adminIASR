@@ -72,7 +72,7 @@ const extraContent = reactive({
     body: "",
 });
 
-const departments = ['GENERAL', 'CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'];
+const departments = ['CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'];
 const selectedAnnouncement = ref(null);
 const currentAction = ref("Add");
 const currentRow = ref(null);
@@ -132,6 +132,7 @@ const isFileRequired = computed(() => {
 
 // Methods
 function openModal(action, row = null) {
+    console.log(announcementForm.departments);
     resetForm();
     if (action === 'Edit' && row) {
         isEditing.value = true;
@@ -172,9 +173,11 @@ function closeModal() {
     isEditing.value = false;
     uploadImage.value = "Upload New Image";
     announcementForm.content = '';
+    announcementForm.departments = '';
     if (modalRef.value) {
         modalRef.value.closeModal();
     }
+    selectedDepartment.value = [];
 }
 
 function resetForm() {
@@ -212,7 +215,11 @@ function saveAnnouncement() {
             fileName.value = '';
         },
         onError: () => {
-            successMessage.value = "Error adding announcement. Try again!";
+            // Only show a generic error if there are no field-specific validation errors.
+            if (Object.keys(errors).length === 0) {
+                successMessage.value = "Error adding announcement. Try again!";
+                setTimeout(() => (successMessage.value = ""), 4000);
+            }
         },
     });
 }
@@ -241,7 +248,11 @@ function updateAnnouncement() {
             fileName.value = '';
         },
         onError: () => {
-            successMessage.value = "Error updating announcement. Try again!";
+            // Only show a generic error if there are no field-specific validation errors.
+            if (Object.keys(errors).length === 0) {
+                successMessage.value = "Error updating announcement. Try again!";
+                setTimeout(() => (successMessage.value = ""), 4000);
+            }
         },
     });
 }

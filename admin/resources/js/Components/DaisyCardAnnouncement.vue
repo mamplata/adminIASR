@@ -40,7 +40,7 @@
 
             <!-- Modal action with button right-aligned -->
             <div class="modal-action flex justify-end">
-                <button @click="closeCard" class="btn btn-secondary">Close</button>
+                <button @click="closeCard" class="btn btn-soft">Close</button>
             </div>
         </div>
     </dialog>

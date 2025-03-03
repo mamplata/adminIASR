@@ -213,12 +213,13 @@ const registerStudent = async () => {
 
             await router.post(route("student-infos.store"), {
                 studentId: studentData.studentId,
-                fName: studentData.fname,
-                lName: studentData.lname,
+                fName: studentData.fName,
+                lName: studentData.lName,
                 program: studentData.program,
                 department: studentData.department,
                 yearLevel: studentData.yearLevel,
                 semester: studentData.semester,
+                year: studentData.year,
                 image: studentData.image
             });
 

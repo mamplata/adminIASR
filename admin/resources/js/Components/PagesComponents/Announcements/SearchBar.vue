@@ -3,15 +3,15 @@
         <!-- First Row: Search by Publisher & Department -->
         <div class="flex flex-col md:flex-row gap-2 mb-4">
             <!-- Search by Publisher -->
-            <input v-model="localSearchQuery" type="text" placeholder="Search publisher"
+            <input v-model="computedSearchQuery" type="text" placeholder="Search publisher"
                 class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- Department Dropdown -->
-            <select v-model="localSelectedDepartment" class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-   focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500">
+            <select v-model="computedSelectedDepartment"
+                class="input input-bordered w-full bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
+                    focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500">
                 <option value="" disabled>Select Department</option>
-                <option value="all">All Departments</option>
                 <option v-for="department in searchDepartments" :key="department" :value="department">
                     {{ department }}
                 </option>
@@ -22,14 +22,14 @@
         <div class="flex flex-col md:flex-row items-center gap-2 mb-4">
             <label class="whitespace-nowrap">Range Date:</label>
             <!-- Start Date with min and max -->
-            <input v-model="localStartDate" type="date" :max="maxStartDate"
+            <input v-model="computedStartDate" type="date" :max="maxStartDate"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- End Date with min and max -->
-            <input v-model="localEndDate" type="date" :max="maxEndDate"
+            <input v-model="computedEndDate" type="date" :max="maxEndDate"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
-               focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
+                       focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- Flex Container for Search & Reset Buttons -->
             <div class="flex space-x-2 w-full md:w-auto">
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed } from 'vue';
 
 // Define props using names that match the parent's usage.
 const props = defineProps({
@@ -77,24 +77,25 @@ const emit = defineEmits([
     'add',
 ]);
 
-// Create local refs for v-model binding.
-const localSearchQuery = ref(props.searchQuery);
-const localSelectedDepartment = ref(props.selectedDepartment);
-const localStartDate = ref(props.startDate);
-const localEndDate = ref(props.endDate);
+// Computed properties for two-way binding.
+const computedSearchQuery = computed({
+    get: () => props.searchQuery,
+    set: (value) => emit('update:searchQuery', value),
+});
 
-// Watch local values and emit updates to the parent.
-watch(localSearchQuery, (newVal) => {
-    emit('update:searchQuery', newVal);
+const computedSelectedDepartment = computed({
+    get: () => props.selectedDepartment,
+    set: (value) => emit('update:selectedDepartment', value),
 });
-watch(localSelectedDepartment, (newVal) => {
-    emit('update:selectedDepartment', newVal);
+
+const computedStartDate = computed({
+    get: () => props.startDate,
+    set: (value) => emit('update:startDate', value),
 });
-watch(localStartDate, (newVal) => {
-    emit('update:startDate', newVal);
-});
-watch(localEndDate, (newVal) => {
-    emit('update:endDate', newVal);
+
+const computedEndDate = computed({
+    get: () => props.endDate,
+    set: (value) => emit('update:endDate', value),
 });
 
 // Button event methods.

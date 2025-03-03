@@ -27,7 +27,7 @@ class StudentInfoController extends Controller
 
         $students = $query->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn ($student) => [
+            ->through(fn($student) => [
                 'id'         => $student->id,
                 'studentId'  => $student->studentId,
                 'fName'      => $student->fName,
@@ -69,6 +69,7 @@ class StudentInfoController extends Controller
             'department' => 'required|string',
             'yearLevel'  => 'required|string',
             'semester'  => 'required|string',
+            'year'  => 'required|string',
             'image'  => 'required|string',
         ]);
 
