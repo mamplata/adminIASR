@@ -63,8 +63,7 @@
 
         <!-- Modal Actions -->
         <div class="modal-action">
-            <button type="button" @click="onCancel"
-                class="btn btn-secondary text-white dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+            <button type="button" @click="onCancel" class="mr-4 hover:underline text-black dark:text-white">
                 Cancel
             </button>
             <button type="submit"

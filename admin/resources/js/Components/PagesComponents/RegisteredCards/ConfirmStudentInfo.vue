@@ -51,7 +51,7 @@
 
         <!-- Action Buttons -->
         <footer class="mt-6 flex justify-end space-x-2">
-            <button class="btn" @click="handleCancel">Cancel</button>
+            <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
             <button class="btn btn-primary" @click="handleConfirm">Continue</button>
         </footer>
     </div>

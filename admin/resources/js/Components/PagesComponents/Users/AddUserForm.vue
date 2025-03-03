@@ -18,8 +18,7 @@
 
         <!-- Modal Actions -->
         <div class="modal-action mt-4">
-            <button type="button" @click="$emit('cancel')"
-                class="btn btn-secondary text-white dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+            <button type="button" @click="$emit('cancel')" class="mr-4 hover:underline text-black dark:text-white">
                 Cancel
             </button>
             <button type="submit"

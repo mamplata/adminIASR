@@ -5,7 +5,7 @@
                 placeholder="Student ID" />
         </div>
         <div class="modal-action">
-            <button class="btn" @click="handleCancel">Cancel</button>
+            <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
             <button class="btn btn-primary dark:text-white" @click="handleRegister" :disabled="isLoading">
                 Tap Your Card Now
             </button>
