@@ -3,7 +3,7 @@
         <!-- Primary Information Section -->
         <section class="flex flex-col items-center justify-around gap-4">
             <!-- Student Image -->
-            <div v-if="modalStudentInfo && modalStudentInfo.image" class="flex-shrink-0">
+            <div v-if="modalStudentInfo && modalStudentInfo.image" class="image flex-shrink-0">
                 <img :src="modalStudentInfo.image" alt="Student Image"
                     class="w-40 h-40 rounded-full object-cover shadow-lg" />
             </div>
@@ -22,7 +22,7 @@
         </section>
 
         <!-- Additional Information Section -->
-        <section class="mt-4 text-justify gap-4">
+        <section class="mt-4 text-justify gap-4 space-y-3">
             <div v-if="modalStudentInfo">
                 <strong>Program: </strong>
                 <span>{{ modalStudentInfo.program }}</span>
@@ -38,6 +38,10 @@
             <div v-if="modalStudentInfo">
                 <strong>Semester: </strong>
                 <span>{{ modalStudentInfo.semester }}</span>
+            </div>
+            <div v-if="modalStudentInfo">
+                <strong>Year: </strong>
+                <span>{{ modalStudentInfo.year }}</span>
             </div>
             <div v-if="nfcStatus" class="mt-2">
                 <span>{{ nfcStatus }}</span>
@@ -93,3 +97,5 @@ function handleConfirm() {
     emit('confirm-registration')
 }
 </script>
+
+<style scoped></style>

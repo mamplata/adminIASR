@@ -16,6 +16,7 @@ class StudentInfo extends Model
         'department',
         'yearLevel',
         'semester',
+        'year',
         'image'
     ];
 

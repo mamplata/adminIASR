@@ -5,13 +5,38 @@
         <input v-model="announcementForm.publisher" type="text"
             class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                    focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" required />
+        <div v-if="announcementForm.errors.publisher" class="text-sm mb-2 text-red-500 dark:text-white">
+            {{ announcementForm.errors.publisher }}
+        </div>
 
-        <!-- Department Multiselect Dropdown (Multiple Selection Enabled) -->
-        <label class="label text-gray-900 dark:text-white">Departments</label>
-        <multiselect v-model="selectedDepartments" :options="departments" :multiple="true"
-            placeholder="Select Departments" class="mb-2" :allow-empty="false" :searchable="true"
-            :clear-on-select="false" :close-on-select="false">
-        </multiselect>
+        <!-- GENERAL Checkbox - Represents All Departments -->
+        <div class="mb-2">
+            <label class="label text-gray-900 dark:text-white">All Departments</label>
+            <div class="flex items-center p-1">
+                <input type="checkbox" value="GENERAL" v-model="selectedDepartments" id="dept-GENERAL"
+                    class="ml-2 form-checkbox h-4 w-4 text-green-600" />
+                <label for="dept-GENERAL" class="ml-2 text-gray-900 dark:text-white">
+                    GENERAL
+                </label>
+            </div>
+        </div>
+
+        <!-- Other Department Checkboxes -->
+        <div>
+            <label class="label text-gray-900 dark:text-white">Departments</label>
+            <div class="grid grid-cols-3 gap-1">
+                <div v-for="dept in departments" :key="dept" class="flex items-center">
+                    <input type="checkbox" :value="dept" v-model="selectedDepartments" :id="'dept-' + dept"
+                        class="ml-3 form-checkbox h-4 w-4 text-green-600" />
+                    <label :for="'dept-' + dept" class="ml-2 text-gray-900 dark:text-white">
+                        {{ dept }}
+                    </label>
+                </div>
+            </div>
+            <div v-if="announcementForm.errors.departments" class="text-sm mb-2 text-red-500 dark:text-white">
+                {{ announcementForm.errors.departments }}
+            </div>
+        </div>
 
         <!-- Optional: Display Comma-Separated String for Debug/Feedback -->
         <p class="mt-2 text-gray-700 dark:text-gray-300">
@@ -23,6 +48,9 @@
         <input v-model="announcementForm.publication_date" type="date" :min="minPublicationDate"
             class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                    focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" required />
+        <div v-if="announcementForm.errors.publication_date" class="text-sm mb-2 text-red-500 dark:text-white">
+            {{ announcementForm.errors.publication_date }}
+        </div>
 
         <!-- Type Dropdown -->
         <label class="label text-gray-900 dark:text-white">Type</label>
@@ -33,6 +61,9 @@
             <option value="text">Text</option>
             <option value="image">Image</option>
         </select>
+        <div v-if="announcementForm.errors.type" class="text-sm mb-2 text-red-500 dark:text-white">
+            {{ announcementForm.errors.type }}
+        </div>
 
         <!-- Conditionally Render Content Fields -->
         <div v-if="announcementForm.type === 'text'">
@@ -41,11 +72,17 @@
             <input v-model="extraContent.title" type="text"
                 class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                        focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" required />
+            <div v-if="announcementForm.errors.title" class="text-sm mb-2 text-red-500 dark:text-white">
+                {{ announcementForm.errors.title }}
+            </div>
             <!-- Text Announcement: Body -->
             <label class="label text-gray-900 dark:text-white">Body</label>
             <textarea v-model="extraContent.body"
                 class="textarea textarea-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                        focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" required></textarea>
+            <div v-if="announcementForm.errors.body" class="text-sm mb-2 text-red-500 dark:text-white">
+                {{ announcementForm.errors.body }}
+            </div>
         </div>
 
         <div v-else-if="announcementForm.type === 'image'">
@@ -74,11 +111,8 @@
         </div>
     </form>
 </template>
-
 <script setup>
 import { ref, computed, watch } from 'vue'
-import Multiselect from 'vue-multiselect'
-import 'vue-multiselect/dist/vue-multiselect.css'
 
 // Props passed from parent component
 const props = defineProps({
@@ -129,28 +163,31 @@ const departmentsString = computed(() => {
 
 // Watch for changes in selectedDepartments to enforce exclusive "GENERAL" behavior.
 watch(selectedDepartments, (newVal, oldVal) => {
-    // When adding an item, compare with old value.
     if (newVal.length > oldVal.length) {
-        // Determine which item was added.
         const added = newVal.filter(x => !oldVal.includes(x))
         if (added.includes('GENERAL')) {
-            // If "GENERAL" was added, reset selection to only "GENERAL".
             selectedDepartments.value = ['GENERAL']
         } else if (oldVal.includes('GENERAL')) {
-            // If "GENERAL" was already selected and a non-"GENERAL" item was added, remove "GENERAL".
             selectedDepartments.value = newVal.filter(x => x !== 'GENERAL')
         }
     }
 })
 
+// Watch for changes in announcementForm.departments when editing
+watch(() => props.announcementForm.departments, (newVal) => {
+    if (newVal) {
+        selectedDepartments.value = newVal.split(', ')
+    }
+}, { immediate: true })
+
 function onCancel() {
+    selectedDepartments.value = [] // Reset selected departments
     emit('cancel')
 }
 
 function onSubmit() {
-    // Convert the selected departments array to a comma-separated string
-    // and assign it to the announcementForm's departments field.
     props.announcementForm.departments = departmentsString.value
+    selectedDepartments.value = [] // Reset selected departments after saving
     emit('save')
 }
 

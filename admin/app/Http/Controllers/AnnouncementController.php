@@ -22,6 +22,7 @@ class AnnouncementController extends Controller
     {
         $query = Announcement::orderBy('created_at', 'desc');
 
+        // 🔹 Search by Publisher (if applicable)
         if ($request->has('search') && !empty($request->input('search'))) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
@@ -29,24 +30,26 @@ class AnnouncementController extends Controller
             });
         }
 
+        // 🔹 Handle Departments Search
         if ($request->filled('departments')) {
-            $query->where('departments', $request->departments);
+            $searchDepartment = trim($request->departments);
+
+            $query->where(function ($q) use ($searchDepartment) {
+                $q->whereRaw("FIND_IN_SET(?, REPLACE(departments, ' ', ''))", [$searchDepartment])
+                    ->orWhere('departments', 'LIKE', "%$searchDepartment%");
+            });
         }
 
+        // 🔹 Get Unique Departments for Filtering
         $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
-
         $searchDepartments = collect($rawDepartments)
-            ->flatMap(function ($deptString) {
-                return explode(',', $deptString);
-            })
-            ->map(function ($dept) {
-                return trim($dept);
-            })
+            ->flatMap(fn($deptString) => explode(',', $deptString)) // Split by comma
+            ->map(fn($dept) => trim($dept)) // Trim spaces
             ->unique()
             ->values()
             ->toArray();
 
-
+        // 🔹 Date Range Filtering
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('publication_date', [
                 $request->start_date . ' 00:00:00',
@@ -58,12 +61,13 @@ class AnnouncementController extends Controller
             $query->where('publication_date', '<=', $request->end_date . ' 23:59:59');
         }
 
+        // 🔹 Paginate Results
         $announcements = $query->latest()
             ->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn ($announcement) => [
+            ->through(fn($announcement) => [
                 'id'                => $announcement->id,
-                'departments'        => $announcement->departments,
+                'departments'       => $announcement->departments,
                 'publisher'         => $announcement->publisher,
                 'type'              => $announcement->type,
                 'content'           => $announcement->content,
