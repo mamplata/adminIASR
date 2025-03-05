@@ -3,6 +3,9 @@
         @change-page="changePage" :excluded-columns="['id']">
         <!-- Actions slot for each device row -->
         <template #actions="{ row }">
+            <button @click="() => emit('edit-device', row)" class="btn btn-primary text-white mr-2">
+                Edit
+            </button>
             <button @click="() => emit('delete-device', row.id)" class="btn btn-error text-white">
                 Delete
             </button>
@@ -21,7 +24,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['delete-device', 'change-page']);
+const emit = defineEmits(['delete-device', 'change-page', 'edit-device']);
 
 function changePage(page) {
     emit('change-page', page);

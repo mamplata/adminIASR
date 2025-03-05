@@ -11,10 +11,9 @@ class CreateDevicesTable extends Migration
         Schema::create('devices', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('machineId')->unique();
-            $table->string('hardwareUID')->unique();
-            $table->string('MACAdress')->unique();
+            $table->string('short_code')->unique();
             $table->string('deviceFingerprint')->unique();
+            $table->string('status')->default('inactive');
             $table->timestamps();
         });
     }

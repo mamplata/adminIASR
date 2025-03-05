@@ -10,9 +10,8 @@ class Device extends Model
 
     protected $fillable = [
         'name',
-        'machineId',
-        'hardwareUID',
-        'MACAdress',
-        'deviceFingerprint'
+        'short_code',
+        'deviceFingerprint',
+        'status'
     ];
 }

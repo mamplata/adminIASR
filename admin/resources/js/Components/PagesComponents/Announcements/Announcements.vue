@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import DaisyModal from '@/Components/DaisyModal.vue';
 import DaisyCardAnnouncement from '@/Components/DaisyCardAnnouncement.vue';
 import DaisyConfirm from '@/Components/DaisyConfirm.vue';
@@ -51,8 +51,12 @@ const props = defineProps({
     searchDepartments: Array,
 });
 
+const { props: page } = usePage();
+
+console.log(page.search);
+
 // State variables
-const searchQuery = ref("");
+const searchQuery = ref(page.search || "");
 const loading = ref(false);
 const selectedDepartment = ref("");
 const successMessage = ref("");

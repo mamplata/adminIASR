@@ -23,15 +23,21 @@ class DeviceController extends Controller
 
         return Inertia::render('Devices/Index', [
             'devices' => $devices,
-            'search'  => $request->input('search')
+            'search'  => $request->input('search'),
+            'status'  => $request->input('status'),
         ]);
     }
 
     // Combined store function for both creation and update
-    public function store(CreateUpdateRequest $request, Device $device = null)
+    public function store(CreateUpdateRequest $request)
     {
+
         $validated = $request->validated();
-        $device    = $this->deviceService->updateOrCreateDevice($validated, $device);
+
+        // If an 'id' is provided, fetch the existing device; otherwise, it's a new device.
+        $device = isset($validated['id']) ? Device::find($validated['id']) : null;
+
+        $device = $this->deviceService->updateOrCreateDevice($validated, $device);
 
         $message = $device->wasRecentlyCreated ? 'Device created!' : 'Device updated!';
 

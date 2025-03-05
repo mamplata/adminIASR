@@ -16,26 +16,12 @@ class CreateUpdateRequest extends FormRequest
     public function rules()
     {
         return [
+            'id' => 'sometimes|nullable|integer', // Allow an id if provided
             'name' => 'required|string',
-            'machineId' => [
+            'status' => [
                 'required',
                 'string',
-                Rule::unique('devices')->ignore($this->route('device')),
-            ],
-            'hardwareUID' => [
-                'required',
-                'string',
-                Rule::unique('devices')->ignore($this->route('device')),
-            ],
-            'MACAdress' => [
-                'required',
-                'string',
-                Rule::unique('devices')->ignore($this->route('device')),
-            ],
-            'deviceFingerprint' => [
-                'required',
-                'string',
-                Rule::unique('devices')->ignore($this->route('device')),
+                Rule::in(['active', 'inactive']),
             ],
         ];
     }
@@ -44,14 +30,8 @@ class CreateUpdateRequest extends FormRequest
     {
         return [
             'name.required'              => 'Please provide the device name.',
-            'machineId.required'         => 'The machine ID is required.',
-            'machineId.unique'           => 'This machine ID is already in use.',
-            'hardwareUID.required'       => 'Hardware UID cannot be empty.',
-            'hardwareUID.unique'         => 'This hardware UID is already registered.',
-            'MACAdress.required'         => 'A valid MAC address is required.',
-            'MACAdress.unique'           => 'This MAC address is already in use.',
-            'deviceFingerprint.required' => 'The device fingerprint must be provided.',
-            'deviceFingerprint.unique'   => 'This device fingerprint is already taken.',
+            'status.required'            => 'The device status is required.',
+            'status.in'                  => 'Invalid status value. Must be active or inactive.',
         ];
     }
 }

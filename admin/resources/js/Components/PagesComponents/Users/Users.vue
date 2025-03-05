@@ -26,7 +26,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import SearchBar from './SearchBar.vue';
 import AddUserForm from './AddUserForm.vue';
 import DaisyTable from '@/Components/DaisyTable.vue';
@@ -41,8 +41,10 @@ const props = defineProps({
     }
 });
 
+const { props: page } = usePage();
+
 // Local state
-const searchQuery = ref(props.search);
+const searchQuery = ref(page.search || "");
 const loading = ref(false);
 const successMessage = ref("");
 const userForm = useForm({ id: null, name: "", email: "", password: "", confirmPassword: "" });

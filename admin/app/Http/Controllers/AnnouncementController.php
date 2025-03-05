@@ -43,8 +43,8 @@ class AnnouncementController extends Controller
         // 🔹 Get Unique Departments for Filtering
         $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
         $searchDepartments = collect($rawDepartments)
-            ->flatMap(fn($deptString) => explode(',', $deptString)) // Split by comma
-            ->map(fn($dept) => trim($dept)) // Trim spaces
+            ->flatMap(fn ($deptString) => explode(',', $deptString)) // Split by comma
+            ->map(fn ($dept) => trim($dept)) // Trim spaces
             ->unique()
             ->values()
             ->toArray();
@@ -65,7 +65,7 @@ class AnnouncementController extends Controller
         $announcements = $query->latest()
             ->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn($announcement) => [
+            ->through(fn ($announcement) => [
                 'id'                => $announcement->id,
                 'departments'       => $announcement->departments,
                 'publisher'         => $announcement->publisher,
@@ -77,6 +77,7 @@ class AnnouncementController extends Controller
         return inertia('Announcements/Index', [
             'announcements'     => $announcements,
             'searchDepartments' => $searchDepartments,
+            'search' =>  $request->input('search')
         ]);
     }
 
