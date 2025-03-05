@@ -3,11 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Users\CreateUserRequest;
-use App\Models\User;
 use App\Services\UserService;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\Users\SearchUsersRequest;
-use App\Mail\PasswordReset;
 use Inertia\Inertia;
 
 class UserController extends Controller

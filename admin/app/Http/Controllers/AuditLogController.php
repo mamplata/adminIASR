@@ -23,7 +23,12 @@ class AuditLogController extends Controller
             'models' => array_values($data['models']),
             'actions' => array_values($data['actions']),
             'admins' => $data['admins'],
-            'auditLogs' => $data['auditLogs']
+            'auditLogs' => $data['auditLogs'],
+            'action' =>  $request->input('action'),
+            'model' =>  $request->input('model'),
+            'admin_id' =>  $request->input('admin_id'),
+            'start_date' =>  $request->input('start_date'),
+            'end_date' =>  $request->input('end_date')
         ]);
     }
 }

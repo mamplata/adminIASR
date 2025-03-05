@@ -2,78 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\StudentInfo;
+use App\Http\Requests\StudentInfos\StoreStudentInfoRequest;
+use App\Services\StudentInfoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class StudentInfoController extends Controller
 {
-    public function index(Request $request)
+    protected $studentInfoService;
+
+    public function __construct(StudentInfoService $studentInfoService)
     {
-        $query = StudentInfo::orderBy('created_at', 'desc');
-
-        // Optional search filtering across multiple columns
-        if ($request->has('search') && !empty($request->input('search'))) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('studentId', 'LIKE', "%{$search}%")
-                    ->orWhere('fName', 'LIKE', "%{$search}%")
-                    ->orWhere('lName', 'LIKE', "%{$search}%")
-                    ->orWhere('program', 'LIKE', "%{$search}%")
-                    ->orWhere('department', 'LIKE', "%{$search}%")
-                    ->orWhere('yearLevel', 'LIKE', "%{$search}%");
-            });
-        }
-
-        $students = $query->paginate(5)
-            ->appends(['search' => $request->input('search')])
-            ->through(fn($student) => [
-                'id'         => $student->id,
-                'studentId'  => $student->studentId,
-                'fName'      => $student->fName,
-                'lName'      => $student->lName,
-                'program'    => $student->program,
-                'department' => $student->department,
-                'yearLevel'  => $student->yearLevel,
-            ]);
-
-        return Inertia::render('StudentInfos/Index', [
-            'students' => $students,
-            'search'   => $request->input('search')
-        ]);
+        $this->studentInfoService = $studentInfoService;
     }
 
     public function check(Request $request)
     {
-        $studentId = $request->input('studentId');
-        $student = StudentInfo::where('studentId', $studentId)->first();
-
-        if (!$student) {
-            return response()->json([
-                'error' => 'Student not found'
-            ], 200);
-        }
-
-        return response()->json([
-            'student' => $student
+        $request->validate([
+            'studentId' => 'required|integer',
         ]);
+
+        return response()->json($this->studentInfoService->checkStudentID($request->studentId));
     }
 
-    public function store(Request $request)
+    public function store(StoreStudentInfoRequest $request)
     {
-        $validated = $request->validate([
-            'studentId'  => 'required|integer|unique:student_infos,studentId',
-            'fName'      => 'required|string',
-            'lName'      => 'required|string',
-            'program'    => 'required|string',
-            'department' => 'required|string',
-            'yearLevel'  => 'required|string',
-            'semester'  => 'required|string',
-            'year'  => 'required|string',
-            'image'  => 'required|string',
-        ]);
-
-        StudentInfo::create($validated);
+        $this->studentInfoService->storeStudentInfo($request->validated());
 
         return redirect()->route('registered-cards.index')
             ->with('success', 'Student Info created!');

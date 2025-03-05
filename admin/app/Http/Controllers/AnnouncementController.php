@@ -77,7 +77,10 @@ class AnnouncementController extends Controller
         return inertia('Announcements/Index', [
             'announcements'     => $announcements,
             'searchDepartments' => $searchDepartments,
-            'search' =>  $request->input('search')
+            'search' =>  $request->input('search'),
+            'departments' =>  $request->input('departments'),
+            'start_date' =>  $request->input('start_date'),
+            'end_date' =>  $request->input('end_date')
         ]);
     }
 

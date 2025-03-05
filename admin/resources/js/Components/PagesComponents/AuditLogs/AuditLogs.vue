@@ -31,10 +31,12 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import AuditLogFilterPanel from './AuditLogFilterPanel.vue';
 import DaisyTable from '@/Components/DaisyTable.vue';
 import DaisyCard from '@/Components/DaisyCard.vue';
+
+const { props: page } = usePage();
 
 const props = defineProps({
     auditLogs: Object,
@@ -44,12 +46,11 @@ const props = defineProps({
 });
 
 // Filter states
-const selectedAction = ref('');
-const selectedModel = ref('');
-const selectedAdmin = ref('');
-const startDate = ref('');
-const endDate = ref('');
-const noData = ref(false);
+const selectedAction = ref(page.action || '');
+const selectedModel = ref(page.model || '');
+const selectedAdmin = ref(page.admin_id || '');
+const startDate = ref(page.start_date || '');
+const endDate = ref(page.end_date || '');
 const loading = ref(false);
 
 // For modal: stores details for the selected row
