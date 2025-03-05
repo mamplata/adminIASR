@@ -16,12 +16,12 @@
             </template>
         </DaisyTable>
 
-        <DaisyCard v-if="selectedDetails" @close="selectedDetails = null">
+        <DaisyCard v-if="selectedDetails" @close="selectedDetails = null" class="border border-gray-500 p-4">
             <div>
                 <h4 class="font-semibold text-gray-800 dark:text-white mb-2">
                     Audit Log Details
                 </h4>
-                <p class="selected-details">
+                <p class="selected-details border border-gray-500 p-1 text-justify">
                     <code v-html="formattedDetails"></code>
                 </p>
             </div>
@@ -131,7 +131,6 @@ function resetSearch() {
 .selected-details {
     white-space: pre-wrap;
     word-wrap: break-word;
-    background-color: rgba(0, 0, 0, 0.4);
     border-radius: 8px;
     padding: 6px;
 }

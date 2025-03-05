@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AuditLog;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AuditLogService
 {
@@ -38,14 +39,36 @@ class AuditLogService
         $models = AuditLog::distinct()->pluck('model')->toArray();
         $admins = User::select('id', 'name')->get();
 
-        $auditLogs = $query->paginate(5)->through(fn($log) => [
-            'action' => $log->action,
-            'model' => $log->model,
-            'model_id' => $log->model_id,
-            'details' => $log->details,
-            'admin' => $log->admin?->name,
-            'created' => $log->created_at->format('l, F j, Y')
-        ]);
+        $auditLogs = $query->paginate(5)->through(function ($log) {
+            $details = $log->details;
+
+            // If details is a JSON string, decode it; if it's an object, cast to array
+            if (is_string($details)) {
+                $details = json_decode($details, true) ?: [];
+            } elseif (is_object($details)) {
+                $details = (array) $details;
+            }
+
+            // Format the date fields if they exist in details
+            foreach (['created_at', 'updated_at', 'publication_date'] as $field) {
+                if (isset($details[$field]) && !empty($details[$field])) {
+                    try {
+                        $details[$field] = Carbon::parse($details[$field])->format('l, F j, Y');
+                    } catch (\Exception $e) {
+                        // If parsing fails, keep the original value
+                    }
+                }
+            }
+
+            return [
+                'action'   => $log->action,
+                'model'    => $log->model,
+                'model_id' => $log->model_id,
+                'details'  => $details,
+                'admin'    => $log->admin?->name,
+                'created'  => $log->created_at->format('l, F j, Y')
+            ];
+        });
 
         return compact('actions', 'models', 'admins', 'auditLogs');
     }
