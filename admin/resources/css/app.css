@@ -1,7 +1,7 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
 @import "perfect-scrollbar/css/perfect-scrollbar.css";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 .dark .ps__rail-y,
 .dark .ps__rail-x {
@@ -14,58 +14,4 @@ input[type="date"] {
 
 html:not(.dark) input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
-}
-
-/* Base styles for the multiselect (light mode) */
-.multiselect {
-    background-clip: border-box;
-    width: 100%;
-    margin-bottom: 0.5rem;
-    background-color: #ffffff;
-    color: #1a202c;
-    border: 1px solid #6b7280;
-    border-radius: 0.5rem;
-}
-
-/* Dark mode base styles */
-html.dark .multiselect {
-    background-color: #1f2937;
-    color: #ffffff;
-    border-color: #4b5563;
-}
-
-/* Focus state in light mode */
-.multiselect:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px #93c5fd;
-}
-
-/* Focus state in dark mode */
-html.dark .multiselect:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 2px #3b82f6;
-}
-
-html.dark .multiselect__content {
-    background-color: #1f2937;
-}
-
-html.dark .multiselect__tags,
-html.dark .multiselect__tags input.multiselect__input {
-    background-color: #1f2937;
-}
-
-html.dark .multiselect__input::placeholder {
-    color: #fff;
-    opacity: 1;
-}
-
-html.dark .multiselect__option {
-    color: #fff;
-}
-
-html.dark .multiselect__option--highlight,
-html.dark .multiselect__option--selected {
-    background-color: #4a5568;
-    color: #fff;
 }

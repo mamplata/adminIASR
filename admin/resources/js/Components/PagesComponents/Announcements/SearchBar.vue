@@ -45,7 +45,7 @@
         </div>
 
         <!-- Add Announcement Button -->
-        <button @click="onAdd" class="btn text-white btn-success shadow-lg hover:bg-[#20714c] mb-2">
+        <button @click="onAdd" class="btn sm:w-full md:w-auto text-white btn-success shadow-lg hover:bg-[#20714c] mb-2">
             Add Announcement
         </button>
     </div>

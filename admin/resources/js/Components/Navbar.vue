@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useFullscreen } from '@vueuse/core'
 import {
@@ -30,6 +30,11 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('scroll', handleScroll)
 })
+
+watch(isDark, (newVal) => {
+    const html = document.documentElement
+    html.setAttribute('data-theme', newVal ? 'dark' : 'light')
+}, { immediate: true })
 </script>
 
 <template>

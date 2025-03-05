@@ -1,12 +1,12 @@
-import { defineConfig } from 'vite'
-import laravel from 'laravel-vite-plugin'
-import vue from '@vitejs/plugin-vue'
-import vueJSX from '@vitejs/plugin-vue-jsx'
+import { defineConfig } from "vite";
+import laravel from "laravel-vite-plugin";
+import vue from "@vitejs/plugin-vue";
+import vueJSX from "@vitejs/plugin-vue-jsx";
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: 'resources/js/app.js',
+            input: "resources/js/app.js",
         }),
 
         vue({
@@ -20,7 +20,7 @@ export default defineConfig({
 
         vueJSX(),
     ],
-     optimizeDeps: {
-        include: ['socket.io-client'],
+    optimizeDeps: {
+        include: ["socket.io-client"],
     },
-})
+});
