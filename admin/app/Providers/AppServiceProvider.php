@@ -3,11 +3,13 @@
 namespace App\Providers;
 
 use App\Models\Announcement;
+use App\Models\Device;
+use App\Models\RegisteredCard;
+use App\Models\StudentInfo;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Models\User;
 use App\Observers\AuditObserver;
-use App\Observers\UserObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
     {
         User::observe(AuditObserver::class);
         Announcement::observe(AuditObserver::class);
+        Device::observe(AuditObserver::class);
+        RegisteredCard::observe(AuditObserver::class);
+        StudentInfo::observe(AuditObserver::class);
         Vite::prefetch(concurrency: 3);
     }
 }
