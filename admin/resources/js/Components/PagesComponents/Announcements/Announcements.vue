@@ -177,7 +177,7 @@ function closeModal() {
     if (modalRef.value) {
         modalRef.value.closeModal();
     }
-    selectedDepartment.value = [];
+    selectedDepartment.value = '';
 }
 
 function resetForm() {
@@ -214,7 +214,7 @@ function saveAnnouncement() {
             extraContent.body = "";
             fileName.value = '';
         },
-        onError: () => {
+        onError: (errors) => {
             // Only show a generic error if there are no field-specific validation errors.
             if (Object.keys(errors).length === 0) {
                 successMessage.value = "Error adding announcement. Try again!";
@@ -247,7 +247,7 @@ function updateAnnouncement() {
             extraContent.body = "";
             fileName.value = '';
         },
-        onError: () => {
+        onError: (errors) => {
             // Only show a generic error if there are no field-specific validation errors.
             if (Object.keys(errors).length === 0) {
                 successMessage.value = "Error updating announcement. Try again!";

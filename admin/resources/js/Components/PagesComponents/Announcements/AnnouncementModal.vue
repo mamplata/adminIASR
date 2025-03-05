@@ -189,6 +189,7 @@ function onSubmit() {
     props.announcementForm.departments = departmentsString.value
     selectedDepartments.value = [] // Reset selected departments after saving
     emit('save')
+    props.announcementForm.departments = ''
 }
 
 function onImageUpload(event) {
