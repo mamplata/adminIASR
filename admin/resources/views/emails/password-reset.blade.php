@@ -142,12 +142,7 @@
                             <p>
                                 Please note that this email is being sent from a no-reply email address, 
                                 and replies to this message will not be received or monitored. 
-                                If you have any questions or concerns, please contact your system administrator 
-                                or help desk.
-                            </p>
-
-                            <p>
-                                If you did not expect this message, you can safely ignore it.
+                                If you have any questions or concerns, please contact your system administrator.
                             </p>
 
                             <!-- Fallback URL -->
