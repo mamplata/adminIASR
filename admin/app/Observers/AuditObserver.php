@@ -15,19 +15,31 @@ class AuditObserver
 
     public function updated(Model $model)
     {
-
-        // Check if 'password' or 'remember_token' is updated
+        // Skip logging if 'password' or 'remember_token' is being updated
         if ($model->isDirty(['password', 'remember_token'])) {
-            // Skip logging if either password or remember_token is being updated
             return;
         }
 
-        $this->logAudit('update', $model, $model->getChanges()); // Log only changes
+        $changes = [];
+        // You can still use a human-readable timestamp for reference if desired
+        $humanReadableTimestamp = $model->updated_at->format('F j, Y, g:i a');
+
+        foreach ($model->getChanges() as $attribute => $newValue) {
+            // Skip updated_at entirely
+            if ($attribute === 'updated_at') {
+                continue;
+            }
+
+            $oldValue = $model->getOriginal($attribute);
+            // Log old → new plus the time of change
+            $changes[$attribute] = $oldValue . ' → ' . $newValue . ' at ' . $humanReadableTimestamp;
+        }
+
+        $this->logAudit('update', $model, $changes);
     }
 
     public function deleted(Model $model)
     {
-        // Adjust logged details as needed; example provided for models with an id and name
         $this->logAudit('delete', $model, [
             'id' => $model->id
         ]);
@@ -43,10 +55,10 @@ class AuditObserver
         }
 
         AuditLog::create([
-            'admin_id' => $adminId, // Authenticated admin performing the delete action
+            'admin_id' => $adminId,          // Authenticated admin performing the action
             'action'   => $action,
-            'model'    => class_basename($model), // Get only the model name
-            'model_id' => $model->id, // Ensure we store ID before deletion
+            'model'    => class_basename($model), // Log only the model name
+            'model_id' => $model->id,        // Store the model ID
             'details'  => json_encode($details),
         ]);
     }
