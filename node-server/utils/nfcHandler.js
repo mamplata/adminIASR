@@ -169,6 +169,47 @@ function initializeNFC(io) {
         io.emit("registrationFailed", { message: err.message });
       }
     });
+
+    io.on("connection", (socket) => {
+      socket.on("readCard", async () => {
+        try {
+          if (!nfcReader) {
+            throw new Error("No NFC reader detected.");
+          }
+
+          console.log("📡 Waiting for NFC card...");
+
+          // Attach event listener for card detection
+          nfcReader.once("card", async (card) => {
+            console.log(`✅ Card detected: UID ${card.uid}`);
+
+            const block = 4; // Data storage block
+            const keyType = 0x60; // Key A authentication
+            const customKey = Buffer.from([0xa0, 0xb1, 0xc2, 0xd3, 0xe4, 0xf5]); // Custom key
+
+            try {
+              // ✅ Authenticate with the custom key
+              await nfcReader.authenticate(block, keyType, customKey);
+              console.log("🔑 Successfully authenticated using Custom Key!");
+
+              // ✅ Read the 16-byte block
+              const data = await nfcReader.read(block, 16);
+              const formattedData = data.toString("utf8").trim(); // Convert buffer to string
+              console.log(`📖 Read data: "${formattedData}"`);
+
+              // ✅ Emit the UID and stored data to the client
+              socket.emit("cardRead", { uid: card.uid, data: formattedData });
+            } catch (err) {
+              console.error("❌ Error reading NFC card:", err.message);
+              socket.emit("readFailed", { message: err.message });
+            }
+          });
+        } catch (err) {
+          console.error("❌ Error during NFC read process:", err.message);
+          socket.emit("readFailed", { message: err.message });
+        }
+      });
+    });
   });
 }
 
