@@ -89,7 +89,7 @@ function saveDevice() {
             fetchDevices(1);
             closeModal();
         },
-        onError: (errors) => {
+        onError: () => {
             successMessage.value = deviceForm.id
                 ? "Error updating device. Try again!"
                 : "Error saving device. Try again!";

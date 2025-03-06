@@ -53,12 +53,10 @@ const props = defineProps({
 
 const { props: page } = usePage();
 
-console.log(page.search);
-
 // State variables
 const searchQuery = ref(page.search || "");
 const loading = ref(false);
-const selectedDepartment = ref("");
+const selectedDepartment = ref(page.departments || "");
 const successMessage = ref("");
 
 const announcementForm = useForm({
@@ -85,8 +83,8 @@ const uploadImage = ref("Upload Image");
 const hasImage = ref(false);
 const showConfirm = ref(false);
 const announcementToDelete = ref(null);
-const startDate = ref("");
-const endDate = ref("");
+const startDate = ref(page.start_date || "");
+const endDate = ref(page.end_date || "");
 
 // Reference for the modal component
 const modalRef = ref(null);

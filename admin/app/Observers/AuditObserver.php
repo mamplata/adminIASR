@@ -34,11 +34,18 @@ class AuditObserver
 
     private function logAudit(string $action, Model $model, $details)
     {
+        $adminId = Auth::id(); // Get the authenticated admin ID
+
+        if (!$adminId) {
+            // If no authenticated user, handle it gracefully
+            return;
+        }
+
         AuditLog::create([
-            'admin_id' => Auth::id(),
+            'admin_id' => $adminId, // Authenticated admin performing the delete action
             'action'   => $action,
             'model'    => class_basename($model), // Get only the model name
-            'model_id' => $model->id,
+            'model_id' => $model->id, // Ensure we store ID before deletion
             'details'  => json_encode($details),
         ]);
     }

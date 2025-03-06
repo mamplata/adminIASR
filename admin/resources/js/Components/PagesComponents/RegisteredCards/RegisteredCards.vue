@@ -30,7 +30,7 @@
         <!-- DaisyModal Component Usage -->
         <DaisyModal title="Enter Student ID" ref="modalRef">
             <EnterStudentForm v-model="studentID" :isLoading="isLoading" @cancel-registration="cancelRegistration"
-                @register-student="registerStudent" />
+                :nfcStatus="nfcStatus" @register-student="registerStudent" />
         </DaisyModal>
 
         <DaisyModal title="Student Information" ref="modalRef1">
@@ -48,7 +48,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import { io } from "socket.io-client";
 import axios from "axios";
 import SearchBar from './SearchBar.vue';
@@ -68,8 +68,10 @@ const props = defineProps({
     }
 });
 
+const { props: page } = usePage();
+
 // Local state
-const searchQuery = ref(props.search);
+const searchQuery = ref(page.search || "");
 const loading = ref(false);
 const successMessage = ref("");
 
@@ -85,7 +87,6 @@ function fetchRegisteredCards(page) {
             }
         }
     );
-    console.log(searchQuery.value);
 }
 
 function resetSearch() {
@@ -238,9 +239,10 @@ const registerStudent = async () => {
         cardExists.value = checkCardResponse.data.exists;
         modalRef.value.closeModal();
         modalRef1.value.showModal();
+        nfcStatus.value = "";
+        nfcError.value = "";
     } catch (error) {
-        console.error("Error verifying student info:", error);
-        nfcStatus.value = "❌ Error verifying student info!";
+        nfcStatus.value = "❌ " + error.response.data.error;
     }
 };
 
@@ -248,6 +250,8 @@ const registerStudent = async () => {
 const confirmRegistration = () => {
     modalRef1.value.closeModal();
     modalRef2.value.showModal();
+    nfcStatus.value = "";
+    nfcError.value = "";
     socket.emit("registerStudent", studentID.value);
     nfcStatus.value = "⏳ Waiting for NFC tap...";
 };

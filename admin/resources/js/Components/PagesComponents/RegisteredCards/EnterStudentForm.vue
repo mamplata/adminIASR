@@ -1,8 +1,11 @@
 <template>
     <div>
         <div class="py-2">
-            <input type="text" class="input input-bordered dark:text-black w-full mb-2" v-model="studentID"
+            <input type="text" class="input input-bordered dark:text-white w-full mb-2" v-model="studentID"
                 placeholder="Student ID" />
+            <div v-if="nfcStatus" class="mt-2">
+                <span>{{ nfcStatus }}</span>
+            </div>
         </div>
         <div class="modal-action">
             <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
@@ -25,6 +28,10 @@ const props = defineProps({
     isLoading: {
         type: Boolean,
         default: false
+    },
+    nfcStatus: {
+        type: String,
+        default: ''
     }
 })
 

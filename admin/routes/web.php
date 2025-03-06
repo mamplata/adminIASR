@@ -67,24 +67,55 @@ Route::middleware(['auth'])->group(
         Route::get('student-infos/check', [StudentInfoController::class, 'check'])->name('student-infos.check');
     }
 );
-
 Route::get('students/{studentId}', function ($studentId) {
-    $faker = Faker::create();
-    $dummyData = [
-        'studentId'        => $studentId,
-        'lName'            => 'John',
-        'fName'            => 'Doe',
-        'program'          => $faker->randomElement(['bsit', 'bscs']),
-        'department'       => 'ccs',
-        'yearLevel'        => $faker->randomElement(['1', '2', '3', '4']),
-        'image' => 'https://placehold.co/400',
-        'semester'         => '2nd',
-        'year' => '2024-2025'
+    // Define the three students
+    $students = [
+        '1901234' => [
+            'studentId'  => '1901234',
+            'lName'      => 'Smith',
+            'fName'      => 'John',
+            'program'    => 'BSIT',
+            'department' => 'CCS',
+            'yearLevel'  => '1',
+            'image'      => 'https://placehold.co/400',
+            'semester'   => '2nd',
+            'year'       => '2024-2025',
+        ],
+        '1904568' => [
+            'studentId'  => '1904568',
+            'lName'      => 'Brown',
+            'fName'      => 'Emily',
+            'program'    => 'BSCS',
+            'department' => 'CCS',
+            'yearLevel'  => '3',
+            'image'      => 'https://placehold.co/400',
+            'semester'   => '2nd',
+            'year'       => '2024-2025',
+        ],
+        '1901111' => [
+            'studentId'  => '1901111',
+            'lName'      => 'Taylor',
+            'fName'      => 'Michael',
+            'program'    => 'BSIT',
+            'department' => 'CCS',
+            'yearLevel'  => '2',
+            'image'      => 'https://placehold.co/400',
+            'semester'   => '2nd',
+            'year'       => '2024-2025',
+        ],
     ];
 
+    // Check if the requested studentId exists
+    if (array_key_exists($studentId, $students)) {
+        return response()->json([
+            'student' => $students[$studentId]
+        ]);
+    }
+
+    // If studentId is not found, return an error response
     return response()->json([
-        'student' => $dummyData
-    ]);
+        'error' => 'Student not found'
+    ], 404);
 })->name('students.fetch');
 
 
