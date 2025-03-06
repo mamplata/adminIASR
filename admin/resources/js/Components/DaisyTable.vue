@@ -19,7 +19,9 @@
                 <tr v-for="(row, index) in data" :key="index"
                     class="border-b dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-150">
                     <td v-for="column in columns" :key="column" class="px-4 py-2 whitespace-normal break-words">
-                        {{ row[column] }}
+                        <slot :name="`cell-${column}`" :value="row[column]" :row="row">
+                            {{ row[column] }}
+                        </slot>
                     </td>
                     <td v-if="actionsSlot" class="px-4 py-2">
                         <slot name="actions" :row="row"></slot>

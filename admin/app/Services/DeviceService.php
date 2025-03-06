@@ -29,8 +29,8 @@ class DeviceService
                 'id'                => $device->id,
                 'name'              => $device->name,
                 'short_code'        => $device->short_code,
-                'status'            => $device->status,
                 'deviceFingerprint' => $device->deviceFingerprint,
+                'status'            => $device->status,
             ]);
     }
 
