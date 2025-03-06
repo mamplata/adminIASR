@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Users\CreateUserRequest;
 use App\Services\UserService;
 use App\Http\Requests\Users\SearchUsersRequest;
-use App\Models\User;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -21,12 +20,6 @@ class UserController extends Controller
             'users' => $users,
             'search' => $search,
         ]);
-    }
-
-    public function indexApi()
-    {
-        $users = User::all();
-        return response()->json($users);
     }
 
     public function store(CreateUserRequest $request, UserService $userService)

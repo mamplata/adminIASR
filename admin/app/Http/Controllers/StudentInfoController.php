@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StudentInfos\StoreStudentInfoRequest;
+use App\Models\StudentInfo;
 use App\Services\StudentInfoService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -31,5 +32,11 @@ class StudentInfoController extends Controller
 
         return redirect()->route('registered-cards.index')
             ->with('success', 'Student Info created!');
+    }
+
+    public function indexApi()
+    {
+        $users = StudentInfo::all();
+        return response()->json($users);
     }
 }

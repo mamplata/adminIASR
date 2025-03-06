@@ -15,14 +15,14 @@
 
         <div v-else>
             <h2>Device Registered!</h2>
-            <button @click="fetchUsers">Fetch Users</button>
+            <button @click="fetchStudents">Fetch Students</button>
 
-            <ul v-if="users.length">
-                <li v-for="user in users" :key="user.id">
-                    {{ user.name }} - {{ user.email }}
+            <ul v-if="students.length">
+                <li v-for="student in students" :key="student.studentId">
+                    {{ student.fName }} {{ student.lName }} - {{ student.program }} ({{ student.yearLevel }} Yr)
                 </li>
             </ul>
-            <div v-else>No users fetched yet.</div>
+            <div v-else>No students fetched yet.</div>
         </div>
     </div>
 </template>
@@ -34,17 +34,16 @@ import HTTP from './http';
 const shortCode = ref('');
 const isRegistered = ref(false);
 const errorMessage = ref('');
-const users = ref([]);
+const students = ref([]);  // ✅ Changed 'users' to 'students'
 const checkingRegistration = ref(true);
 
-// 1. On component mount, try hitting a protected route
 onMounted(() => {
     checkRegistration();
 });
 
+// ✅ Check if device is registered
 async function checkRegistration() {
     try {
-        // Call the new route dedicated to device status checking
         await HTTP.get('/api/device/status', { withCredentials: true });
         isRegistered.value = true;
     } catch (error) {
@@ -54,7 +53,7 @@ async function checkRegistration() {
     }
 }
 
-// 2. Register the device
+// ✅ Register device
 async function registerDevice() {
     errorMessage.value = '';
 
@@ -65,28 +64,21 @@ async function registerDevice() {
             { withCredentials: true }
         );
 
-        // If success = true, set isRegistered
         if (response.data && response.data.success) {
             isRegistered.value = true;
         }
     } catch (error) {
-        // If there's an error response from the server
-        // we'll assume it has a 'message' field for us
-        if (error.response && error.response.data.message) {
-            errorMessage.value = error.response.data.message;
-        } else {
-            errorMessage.value = 'An unexpected error occurred.';
-        }
+        errorMessage.value = error.response?.data?.message || 'An unexpected error occurred.';
     }
 }
 
-// 3. Fetch users
-async function fetchUsers() {
+// ✅ Fetch students instead of users
+async function fetchStudents() {
     try {
-        const response = await HTTP.get('/api/users', { withCredentials: true });
-        users.value = response.data;
+        const response = await HTTP.get('/api/students', { withCredentials: true });
+        students.value = response.data;
     } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching students:', error);
     }
 }
 </script>
