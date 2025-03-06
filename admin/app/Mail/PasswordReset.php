@@ -21,7 +21,7 @@ class PasswordReset extends Mailable
     {
         $this->user = $user;
         // Generate the password reset token
-        $this->resetUrl = url('reset-password/' . Password::createToken($user) . '?email=' . $user->email);
+        $this->resetUrl = \url('reset-password/' . Password::createToken($user) . '?email=' . $user->email);
     }
 
     /**

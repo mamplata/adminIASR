@@ -162,9 +162,6 @@
                 <table width="570" border="0" cellpadding="0" cellspacing="0">
                     <tr>
                         <td class="footer" align="center">
-                            <p>
-                                © {{ date('Y') }} Pamantasan ng Cabuyao. All rights reserved.
-                            </p>
                             <div class="address">
                                 <strong>Pamantasan ng Cabuyao</strong><br>
                                 Katapatan Mutual Homes, Brgy. Banay-banay<br>
