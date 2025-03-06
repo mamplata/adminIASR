@@ -14,6 +14,9 @@ class PasswordReset extends Mailable
     public $user;
     public $resetUrl;
 
+    /**
+     * Create a new message instance.
+     */
     public function __construct($user)
     {
         $this->user = $user;
@@ -21,14 +24,17 @@ class PasswordReset extends Mailable
         $this->resetUrl = url('reset-password/' . Password::createToken($user) . '?email=' . $user->email);
     }
 
-
+    /**
+     * Build the message.
+     */
     public function build()
     {
-        return $this->subject('Reset Your Password')
-            ->html(
-                "<p>Hello {$this->user->name},</p>
-                         <p>Your account has been created. Please click the link below to set a new password:</p>
-                         <a href='{$this->resetUrl}'>Reset Password</a>"
-            );
+        return $this
+            ->subject('Reset Your Password')
+            ->view('emails.password-reset') // <-- reference the Blade view
+            ->with([
+                'user' => $this->user,
+                'resetUrl' => $this->resetUrl,
+            ]);
     }
 }
