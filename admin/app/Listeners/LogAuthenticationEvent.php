@@ -5,7 +5,7 @@ namespace App\Listeners;
 use App\Models\AuditLog;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class LogAuthenticationEvent
 {
@@ -26,7 +26,9 @@ class LogAuthenticationEvent
             'action' => $action,
             'model' => 'User',
             'model_id' => $user->id,
-            'details' => null  // Login/Logout actions usually don't require extra details
+            'details' => json_encode([
+                'time' => Carbon::now()->toDateTimeString()
+            ])
         ]);
     }
 }

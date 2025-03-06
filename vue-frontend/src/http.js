@@ -1,13 +1,12 @@
-// src/http.js
+// src/http.ts
 import axios from "axios";
 
-const apiUrl = import.meta.env.VITE_API_URL;
-
-const http = axios.create({
-  baseURL: apiUrl, // Use the environment variable
+const HTTP = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Necessary for Sanctum cookie auth
 });
 
-export default http;
+export default HTTP;
