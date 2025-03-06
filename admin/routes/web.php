@@ -79,7 +79,8 @@ Route::get('students/{studentId}', function ($studentId) {
             'yearLevel'  => '1',
             'image'      => 'https://placehold.co/400',
             'semester'   => '2nd',
-            'year'       => '2024-2025',
+            'year'       => '2024',
+            'enrolled'       => true,
         ],
         '1904568' => [
             'studentId'  => '1904568',
@@ -90,7 +91,8 @@ Route::get('students/{studentId}', function ($studentId) {
             'yearLevel'  => '3',
             'image'      => 'https://placehold.co/400',
             'semester'   => '2nd',
-            'year'       => '2024-2025',
+            'year'       => '2024',
+            'enrolled'       => false,
         ],
         '1901111' => [
             'studentId'  => '1901111',
@@ -101,7 +103,8 @@ Route::get('students/{studentId}', function ($studentId) {
             'yearLevel'  => '2',
             'image'      => 'https://placehold.co/400',
             'semester'   => '2nd',
-            'year'       => '2024-2025',
+            'year'       => '2024',
+            'enrolled'       => true,
         ],
     ];
 

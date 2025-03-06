@@ -43,13 +43,13 @@
                 <strong>Year: </strong>
                 <span>{{ modalStudentInfo.year }}</span>
             </div>
-            <div v-if="nfcStatus" class="mt-2">
-                <span>{{ nfcStatus }}</span>
-            </div>
             <div>
                 <strong>Status: </strong>
                 <span v-if="cardExists" class="text-warning">Card already exists.</span>
                 <span v-else class="text-success">New registration.</span>
+            </div>
+            <div v-if="nfcStatus" class="mt-2">
+                <span>{{ nfcStatus }}</span>
             </div>
         </section>
 

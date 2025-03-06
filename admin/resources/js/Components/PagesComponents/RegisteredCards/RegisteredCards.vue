@@ -96,6 +96,7 @@ function resetSearch() {
 
 // Reactive variables
 const studentID = ref("");
+const semester = ref("");
 const nfcStatus = ref("");
 const nfcError = ref("");
 const isLoading = ref(false);
@@ -187,6 +188,7 @@ onMounted(() => {
 const openModal = () => {
     modalStudentInfo.value = null;
     studentID.value = "";
+    semester.value = "";
     nfcStatus.value = "";
     nfcError.value = "";
     modalRef.value.showModal();
@@ -206,11 +208,16 @@ const registerStudent = async () => {
 
         if (checkStudentResponse.data.error) {
             console.log("Student not found locally. Fetching from external API...");
-            const fetchResponse = await axios.get(
-                route("students.fetch", { studentId: studentID.value })
-            );
+            const fetchResponse = await axios.get(route("students.fetch", { studentId: studentID.value }));
             const studentData = fetchResponse.data.student;
+
+            if (!studentData.enrolled) {
+                nfcStatus.value = "❌ This student is not enrolled and cannot be registered.";
+                return; // Stop the process if not enrolled
+            }
+
             modalStudentInfo.value = studentData;
+            semester.value = studentData.semester + studentData.year;
 
             await router.post(route("student-infos.store"), {
                 studentId: studentData.studentId,
@@ -221,30 +228,37 @@ const registerStudent = async () => {
                 yearLevel: studentData.yearLevel,
                 semester: studentData.semester,
                 year: studentData.year,
-                image: studentData.image
+                image: studentData.image,
+                enrolled: studentData.enrolled
             });
 
             console.log("Student info stored successfully.");
         } else {
             console.log("Student info found locally.");
             modalStudentInfo.value = checkStudentResponse.data.student;
+            semester.value = modalStudentInfo.value.semester + modalStudentInfo.value.year;
         }
 
-        const checkCardResponse = await axios.get(
-            route("registered-cards.checkStudentID"),
-            {
-                params: { studentId: studentID.value },
-            }
-        );
+        const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
+            params: { studentId: studentID.value },
+        });
+
         cardExists.value = checkCardResponse.data.exists;
         modalRef.value.closeModal();
         modalRef1.value.showModal();
         nfcStatus.value = "";
         nfcError.value = "";
     } catch (error) {
-        nfcStatus.value = "❌ " + error.response.data.error;
+        console.log(error.response);
+
+        if (error.response && error.response.status === 422) {
+            alert("❌ " + error.response.data.error);
+        } else {
+            nfcStatus.value = "❌ " + (error.response?.data?.error || "An error occurred.");
+        }
     }
 };
+
 
 // Called when the user confirms registration after reviewing student info.
 const confirmRegistration = () => {
@@ -252,7 +266,8 @@ const confirmRegistration = () => {
     modalRef2.value.showModal();
     nfcStatus.value = "";
     nfcError.value = "";
-    socket.emit("registerStudent", studentID.value);
+    let studentInfo = { studentID: studentID.value, semester: semester.value };
+    socket.emit("registerStudent", studentInfo);
     nfcStatus.value = "⏳ Waiting for NFC tap...";
 };
 
