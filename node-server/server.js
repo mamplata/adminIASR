@@ -3,7 +3,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 
-const { initializeNFC, pendingStudent } = require("./utils/nfcHandler");
+const { initializeNFC } = require("./utils/nfcHandler");
 
 const app = express();
 const server = http.createServer(app);
@@ -25,22 +25,6 @@ const io = new Server(server, {
     console.error("❌ Initialization error:", err);
   }
 })();
-
-// Set up Socket.io connections and events
-io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
-  // NFC related event: student registration
-  socket.on("registerStudent", (studentID) => {
-    console.log(`Student ID received: ${studentID}`);
-    pendingStudent.id = studentID;
-    socket.emit("nfcStatus", "Tap your NFC card now!");
-  });
-
-  socket.on("disconnect", () => {
-    console.log(`User disconnected: ${socket.id}`);
-  });
-});
 
 // Start the server
 const PORT = 3000;

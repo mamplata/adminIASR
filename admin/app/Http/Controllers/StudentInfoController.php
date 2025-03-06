@@ -35,12 +35,10 @@ class StudentInfoController extends Controller
             ], 422);
         }
 
-        // Proceed with storing student info if enrolled
         $this->studentInfoService->storeStudentInfo($request->validated());
 
-        return response()->json([
-            'success' => 'Student Info created successfully!'
-        ], 201);
+        return redirect()->route('registered-cards.index')
+            ->with('success', 'Student Info created!');
     }
 
     public function indexApi()

@@ -217,6 +217,7 @@ const registerStudent = async () => {
             }
 
             modalStudentInfo.value = studentData;
+            semester.value = studentData.semester + studentData.year;
 
             await router.post(route("student-infos.store"), {
                 studentId: studentData.studentId,
@@ -235,6 +236,7 @@ const registerStudent = async () => {
         } else {
             console.log("Student info found locally.");
             modalStudentInfo.value = checkStudentResponse.data.student;
+            semester.value = modalStudentInfo.value.semester + modalStudentInfo.value.year;
         }
 
         const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
@@ -264,7 +266,8 @@ const confirmRegistration = () => {
     modalRef2.value.showModal();
     nfcStatus.value = "";
     nfcError.value = "";
-    socket.emit("registerStudent", studentID.value);
+    let studentInfo = { studentID: studentID.value, semester: semester.value };
+    socket.emit("registerStudent", studentInfo);
     nfcStatus.value = "⏳ Waiting for NFC tap...";
 };
 
