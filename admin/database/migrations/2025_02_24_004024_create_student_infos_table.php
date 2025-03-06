@@ -19,6 +19,7 @@ class CreateStudentInfosTable extends Migration
             $table->string('semester');
             $table->string('year');
             $table->longText('image');
+            $table->boolean('enrolled');
             $table->timestamps();
         });
     }

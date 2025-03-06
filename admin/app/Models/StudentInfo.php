@@ -17,7 +17,8 @@ class StudentInfo extends Model
         'yearLevel',
         'semester',
         'year',
-        'image'
+        'image',
+        'enrolled'
     ];
 
     // One student can have many registered cards

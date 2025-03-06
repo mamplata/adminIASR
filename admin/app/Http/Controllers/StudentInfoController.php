@@ -28,10 +28,19 @@ class StudentInfoController extends Controller
 
     public function store(StoreStudentInfoRequest $request)
     {
+        // Check if the student is enrolled
+        if (!$request->enrolled) {
+            return response()->json([
+                'error' => 'Student is not enrolled and cannot be registered.'
+            ], 422);
+        }
+
+        // Proceed with storing student info if enrolled
         $this->studentInfoService->storeStudentInfo($request->validated());
 
-        return redirect()->route('registered-cards.index')
-            ->with('success', 'Student Info created!');
+        return response()->json([
+            'success' => 'Student Info created successfully!'
+        ], 201);
     }
 
     public function indexApi()
