@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
         User::withoutEvents(function () {
             User::create([
                 'name'     => 'Admin1',
-                'email'    => 'admin@example.com',
+                'email'    => 'admin@gmail.com',
                 'password' => Hash::make('password'),
                 'role'     => 'admin',
             ]);

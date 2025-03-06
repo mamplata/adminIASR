@@ -31,14 +31,26 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'name'     => 'required|string|max:255',
+            'email'    => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                // Enforce Gmail addresses only using regex
+                'regex:/^[A-Za-z0-9._%+\-]+@gmail\.com$/i',
+                'unique:'.User::class,
+            ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            // Custom error message for the regex rule
+            'email.regex' => 'The email must be a valid Gmail address (must end with @gmail.com).',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
