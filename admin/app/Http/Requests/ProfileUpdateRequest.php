@@ -23,8 +23,22 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
+                // Use regex to ensure it ends with @gmail.com
+                'regex:/^[A-Za-z0-9._%+\-]+@gmail\.com$/i',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+        ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.regex' => 'The email must be a valid Gmail address (must end with @gmail.com).',
         ];
     }
 }

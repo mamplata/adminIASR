@@ -27,8 +27,20 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email'    => ['required', 'string', 'email', 'regex:/^[A-Za-z0-9._%+\-]+@gmail\.com$/i'],
             'password' => ['required', 'string'],
+        ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.regex' => 'The email must be a valid Gmail address (must end with @gmail.com).',
         ];
     }
 
