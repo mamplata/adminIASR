@@ -41,6 +41,19 @@ class AnnouncementController extends Controller
             });
         }
 
+        // 🔹 Handle Programs Search
+        if ($request->filled('programs')) {
+            $searchProgram = trim($request->programs);
+
+            $query->where(function ($q) use ($searchProgram) {
+                // Replace both colon and semicolon with commas, then remove spaces so that
+                // the string becomes a comma-separated list of tokens.
+                $q->whereRaw("FIND_IN_SET(?, REPLACE(REPLACE(departments, ':', ','), ' ', ''))", [$searchProgram])
+                    // Alternatively, add a LIKE clause for partial matches if needed.
+                    ->orWhere('departments', 'LIKE', "%: %{$searchProgram}%");
+            });
+        }
+
         // 🔹 Get Unique Departments for Filtering
         $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
         $searchDepartments = collect($rawDepartments)
@@ -142,6 +155,7 @@ class AnnouncementController extends Controller
             'departmentPrograms'    => $departmentPrograms,
             'search' =>  $request->input('search'),
             'filterDepartments' =>  $request->input('departments'),
+            'filterPrograms' =>  $request->input('programs'),
             'start_date' =>  $request->input('start_date'),
             'end_date' =>  $request->input('end_date')
         ]);

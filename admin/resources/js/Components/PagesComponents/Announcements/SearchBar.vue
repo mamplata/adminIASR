@@ -81,8 +81,6 @@ const props = defineProps({
     loading: { type: Boolean, default: false },
 });
 
-console.log(props.searchPrograms);
-
 // Define emits for updating parent values and handling button clicks.
 const emit = defineEmits([
     'update:searchQuery',
