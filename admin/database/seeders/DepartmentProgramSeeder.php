@@ -24,11 +24,13 @@ class DepartmentProgramSeeder extends Seeder
         // Loop through each department, create the department record,
         // then create each related program record.
         foreach ($departments as $deptCode) {
-            $department = Department::create(['code' => $deptCode]);
+            // Check if the department already exists
+            $department = Department::firstOrCreate(['code' => $deptCode]);
 
             if (isset($departmentPrograms[$deptCode])) {
                 foreach ($departmentPrograms[$deptCode] as $programCode) {
-                    Program::create([
+                    // Create program if not exists
+                    Program::firstOrCreate([
                         'department_id' => $department->id,
                         'code' => $programCode,
                     ]);
