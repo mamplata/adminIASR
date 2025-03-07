@@ -7,6 +7,7 @@ use App\Models\Device;
 use App\Services\DeviceService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class DeviceController extends Controller
 {
@@ -76,11 +77,14 @@ class DeviceController extends Controller
         $device->status = 'active';
         $device->save();
 
+        // Generate a random cookie name
+        $cookieName = Str::random(10);
+
         // Return a successful response with a set-cookie header
         return response()
             ->json(['success' => true])
             ->cookie(
-                'deviceFingerprint',
+                $cookieName,
                 $device->deviceFingerprint,
                 525600 // 1 year in minutes
             );

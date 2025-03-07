@@ -2,7 +2,7 @@
     <DaisyTable :data="announcements.data" :excludedColumns="['id', 'content']"
         :currentPage="announcements.current_page" :lastPage="announcements.last_page" @change-page="onChangePage">
         <template #actions="{ row }">
-            <div class="flex gap-2">
+            <div class="flex gap-2 justify-center items-center">
                 <button @click="view(row)" class="btn text-white btn-info shadow-lg hover:bg-blue-700 mb-2">
                     View
                 </button>

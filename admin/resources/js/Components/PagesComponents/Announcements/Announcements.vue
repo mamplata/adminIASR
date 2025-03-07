@@ -1,9 +1,9 @@
 <template>
     <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
         <SearchBar v-model:searchQuery="searchQuery" v-model:selectedDepartment="selectedDepartment"
-            :searchDepartments="searchDepartments" v-model:startDate="startDate" v-model:endDate="endDate"
-            :maxStartDate="maxStartDate" :maxEndDate="maxEndDate" :loading="loading" @search="fetchAnnouncements(1)"
-            @reset="resetSearch" @add="openModal('Add')" />
+            :searchDepartments="searchDepartments" :searchPrograms="searchPrograms" v-model:startDate="startDate"
+            v-model:endDate="endDate" :maxStartDate="maxStartDate" :maxEndDate="maxEndDate" :loading="loading"
+            @search="fetchAnnouncements(1)" @reset="resetSearch" @add="openModal('Add')" />
 
         <!-- Success Notification -->
         <transition name="fade">
@@ -26,10 +26,10 @@
         <DaisyModal ref="modalRef" :title="currentAction">
             <template #default>
                 <AnnouncementModal :currentAction="currentAction" :announcementForm="announcementForm"
-                    :extraContent="extraContent" :departments="departments" :minPublicationDate="minPublicationDate"
-                    :uploadImage="uploadImage" :fileName="fileName" :isFileRequired="isFileRequired"
-                    @cancel="closeModal" @save="isEditing ? updateAnnouncement() : saveAnnouncement()"
-                    @image-upload="handleImageUpload" />
+                    :extraContent="extraContent" :departments="departments" :departmentPrograms="departmentPrograms"
+                    :minPublicationDate="minPublicationDate" :uploadImage="uploadImage" :fileName="fileName"
+                    :isFileRequired="isFileRequired" @cancel="closeModal"
+                    @save="isEditing ? updateAnnouncement() : saveAnnouncement()" @image-upload="handleImageUpload" />
             </template>
         </DaisyModal>
     </div>
@@ -49,6 +49,9 @@ import AnnouncementModal from './AnnouncementModal.vue';
 const props = defineProps({
     announcements: Object,
     searchDepartments: Array,
+    searchPrograms: Object,
+    departments: Array,
+    departmentPrograms: Object
 });
 
 const { props: page } = usePage();
@@ -56,7 +59,8 @@ const { props: page } = usePage();
 // State variables
 const searchQuery = ref(page.search || "");
 const loading = ref(false);
-const selectedDepartment = ref(page.departments || "");
+const selectedDepartment = ref(page.filterDepartments || "");
+const selectedProgram = ref(page.filterPrograms || "");
 const successMessage = ref("");
 
 const announcementForm = useForm({
@@ -74,7 +78,7 @@ const extraContent = reactive({
     body: "",
 });
 
-const departments = ['CCS', 'CAS', 'CHAS', 'COE', 'CBAA', 'COED'];
+
 const selectedAnnouncement = ref(null);
 const currentAction = ref("Add");
 const currentRow = ref(null);
