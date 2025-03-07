@@ -27,8 +27,8 @@ class LogAuthenticationEvent
             'model' => 'User',
             'model_id' => $user->id,
             'details' => json_encode([
-                'time' => Carbon::now()->toDateTimeString()
+                'time' => $action . ' at ' . Carbon::now()->format('F j, Y, g:i a')
             ])
         ]);
-    }
+    }    
 }
