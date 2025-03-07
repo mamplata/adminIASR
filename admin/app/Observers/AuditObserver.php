@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\AuditLog;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 
@@ -54,7 +55,7 @@ class AuditObserver
 
     private function logAudit(string $action, Model $model, $details)
     {
-        $adminId = Auth::id(); // Get the authenticated admin ID
+        $adminId = Auth::id();
 
         if (!$adminId) {
             // If no authenticated user, handle it gracefully
