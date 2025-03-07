@@ -25,13 +25,20 @@ class AuditObserver
         $humanReadableTimestamp = $model->updated_at->format('F j, Y, g:i a');
 
         foreach ($model->getChanges() as $attribute => $newValue) {
-            // Skip updated_at entirely
             if ($attribute === 'updated_at') {
                 continue;
             }
 
             $oldValue = $model->getOriginal($attribute);
-            // Log old → new plus the time of change
+
+            // Convert array values to strings if necessary
+            if (is_array($oldValue)) {
+                $oldValue = json_encode($oldValue);
+            }
+            if (is_array($newValue)) {
+                $newValue = json_encode($newValue);
+            }
+
             $changes[$attribute] = $oldValue . ' → ' . $newValue . ' at ' . $humanReadableTimestamp;
         }
 

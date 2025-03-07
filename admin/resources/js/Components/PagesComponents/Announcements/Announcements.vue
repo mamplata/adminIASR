@@ -1,9 +1,10 @@
 <template>
     <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
         <SearchBar v-model:searchQuery="searchQuery" v-model:selectedDepartment="selectedDepartment"
-            :searchDepartments="searchDepartments" :searchPrograms="searchPrograms" v-model:startDate="startDate"
-            v-model:endDate="endDate" :maxStartDate="maxStartDate" :maxEndDate="maxEndDate" :loading="loading"
-            @search="fetchAnnouncements(1)" @reset="resetSearch" @add="openModal('Add')" />
+            v-model:selectedProgram="selectedProgram" :searchDepartments="searchDepartments"
+            :searchPrograms="searchPrograms" v-model:startDate="startDate" v-model:endDate="endDate"
+            :maxStartDate="maxStartDate" :maxEndDate="maxEndDate" :loading="loading" @search="fetchAnnouncements(1)"
+            @reset="resetSearch" @add="openModal('Add')" />
 
         <!-- Success Notification -->
         <transition name="fade">
@@ -138,7 +139,6 @@ const isFileRequired = computed(() => {
 
 // Methods
 function openModal(action, row = null) {
-    console.log(announcementForm.departments);
     resetForm();
     if (action === 'Edit' && row) {
         isEditing.value = true;
@@ -171,6 +171,7 @@ function openModal(action, row = null) {
     // Set mode if needed on modalRef
     if (modalRef.value) {
         modalRef.value.mode = action;
+        console.log(announcementForm);
         modalRef.value.showModal();
     }
 }
@@ -296,6 +297,7 @@ function fetchAnnouncements(page) {
             page,
             search: searchQuery.value,
             departments: selectedDepartment.value,
+            programs: selectedProgram.value,
             start_date: startDate.value || null,
             end_date: endDate.value || null,
         },
@@ -311,6 +313,7 @@ function fetchAnnouncements(page) {
 function resetSearch() {
     searchQuery.value = "";
     selectedDepartment.value = "";
+    selectedProgram.value = "";
     startDate.value = "";
     endDate.value = "";
     fetchAnnouncements(1);

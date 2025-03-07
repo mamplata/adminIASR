@@ -42,7 +42,7 @@
             <label class="label text-gray-900 dark:text-white">{{ dept }} Programs</label>
             <multiselect v-model="selectedDepartmentPrograms[dept]" :options="getProgramOptions(dept)" :multiple="true"
                 group-values="libs" group-label="language" :group-select="true" placeholder="Select programs"
-                track-by="name" label="name">
+                track-by="name" label="name" required>
             </multiselect>
         </div>
 
@@ -216,6 +216,7 @@ function onSubmit() {
             return `${key}: ${departments.join(", ")}`;
         })
         .join("; ");
+    console.log(departmentString);
     props.announcementForm.departments = departmentString;
     selectedDepartments.value = []
     emit('save')
@@ -225,4 +226,47 @@ function onSubmit() {
 function onImageUpload(event) {
     emit('image-upload', event)
 }
+// Function to parse the department string and update selectedDepartments and selectedDepartmentPrograms
+function parseDepartmentString(deptString) {
+    // Clear previous selections
+    selectedDepartments.value = []
+    selectedDepartmentPrograms.value = {}
+
+    // Split by semicolon in case there are multiple entries.
+    const entries = deptString
+        .split(';')
+        .map(e => e.trim())
+        .filter(e => e.length)
+    entries.forEach(entry => {
+        // Handle the case where it's just "GENERAL"
+        if (entry === "GENERAL") {
+            if (!selectedDepartments.value.includes("GENERAL")) {
+                selectedDepartments.value.push("GENERAL")
+            }
+        } else {
+            // Assume the format is "Department: Program1, Program2"
+            const parts = entry.split(':').map(part => part.trim())
+            if (parts.length === 2) {
+                const dept = parts[0]
+                const programs = parts[1]
+                    .split(',')
+                    .map(p => p.trim())
+                    .filter(p => p.length)
+                if (dept && programs.length) {
+                    if (!selectedDepartments.value.includes(dept)) {
+                        selectedDepartments.value.push(dept)
+                    }
+                    selectedDepartmentPrograms.value[dept] = programs.map(name => ({ name }))
+                }
+            }
+        }
+    })
+}
+
+// Watch the announcementForm.departments property to trigger parsing whenever its value changes.
+watch(() => props.announcementForm.departments, (newVal) => {
+    if (newVal) {
+        parseDepartmentString(newVal)
+    }
+})
 </script>
