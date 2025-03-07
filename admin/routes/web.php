@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
     Route::post('/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
 });
 
 // REGISTERED CARDS

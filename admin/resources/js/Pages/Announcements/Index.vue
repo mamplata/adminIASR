@@ -15,13 +15,14 @@ import Announcements from '@/Components/PagesComponents/Announcements/Announceme
             </template>
 
 
-            <Announcements :announcements="announcements" :searchDepartments="searchDepartments" />
+            <Announcements :announcements="announcements" :searchDepartments="searchDepartments"
+                :searchPrograms="searchPrograms" :departments="departments" :departmentPrograms="departmentPrograms" />
         </AuthenticatedLayout>
     </div>
 </template>
 
 <script>
 export default {
-    props: { announcements: Object, searchDepartments: Array },
+    props: { announcements: Object, searchDepartments: Array, searchPrograms: Object, departments: Array, departmentPrograms: Object },
 };
 </script>

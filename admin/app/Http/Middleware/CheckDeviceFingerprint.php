@@ -4,20 +4,25 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Models\Device;
-use Illuminate\Support\Facades\Log;
 
 class CheckDeviceFingerprint
 {
     public function handle($request, Closure $next)
     {
-        // Retrieve from the cookie instead of the header
-        $fingerprint = $request->cookie('deviceFingerprint');
+        $authorized = false;
 
-        $deviceIsValid = Device::where('deviceFingerprint', $fingerprint)
-            ->where('status', 'active')
-            ->exists();
+        // Loop through each cookie in the request
+        foreach ($request->cookies as $cookieValue) {
+            if (Device::where('deviceFingerprint', $cookieValue)
+                ->where('status', 'active')
+                ->exists()
+            ) {
+                $authorized = true;
+                break;
+            }
+        }
 
-        if (!$fingerprint || !$deviceIsValid) {
+        if (!$authorized) {
             return response()->json(['error' => 'Unauthorized device'], 401);
         }
 
