@@ -1,39 +1,45 @@
 <script setup>
-import { nextTick, ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import Label from '@/Components/Label.vue'
-import Input from '@/Components/Input.vue'
-import InputError from '@/Components/InputError.vue'
-import Modal from '@/Components/Modal.vue'
-import Button from '@/Components/Button.vue'
+import { ref, computed, nextTick } from 'vue';
+import { usePage, useForm } from '@inertiajs/vue3';
+import Label from '@/Components/Label.vue';
+import Input from '@/Components/Input.vue';
+import InputError from '@/Components/InputError.vue';
+import Modal from '@/Components/Modal.vue';
+import Button from '@/Components/Button.vue';
 
-const confirmingUserDeletion = ref(false)
-const passwordInput = ref(null)
+const page = usePage();
+const confirmingUserDeletion = ref(false);
+const passwordInput = ref(null);
 
 const form = useForm({
     password: '',
-})
+});
+
+// Reactive error handling
+const deleteError = ref(null);
 
 const confirmUserDeletion = () => {
-    confirmingUserDeletion.value = true
-
-    nextTick(() => passwordInput.value.focus())
-}
+    confirmingUserDeletion.value = true;
+    setTimeout(() => passwordInput.value?.focus(), 50);
+};
 
 const deleteUser = () => {
     form.delete(route('profile.destroy'), {
         preserveScroll: true,
-        onSuccess: () => closeModal(),
-        onError: () => passwordInput.value.focus(),
+        onSuccess: () => {
+            closeModal();
+        },
+        onError: () => {
+            deleteError.value = page.props.errors.error;
+        },
         onFinish: () => form.reset(),
-    })
-}
+    });
+};
 
 const closeModal = () => {
-    confirmingUserDeletion.value = false
-
-    form.reset()
-}
+    confirmingUserDeletion.value = false;
+    form.reset();
+};
 </script>
 
 <template>
@@ -56,9 +62,7 @@ const closeModal = () => {
 
         <Modal :show="confirmingUserDeletion" @close="closeModal">
             <div class="p-6">
-                <h2
-                    class="text-lg font-medium text-gray-900 dark:text-gray-100"
-                >
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                     Are you sure you want to delete your account?
                 </h2>
 
@@ -71,17 +75,14 @@ const closeModal = () => {
                 <div class="mt-6">
                     <Label for="password" value="Password" class="sr-only" />
 
-                    <Input
-                        id="password"
-                        ref="passwordInput"
-                        v-model="form.password"
-                        type="password"
-                        class="mt-1 block w-3/4"
-                        placeholder="Password"
-                        @keyup.enter="deleteUser"
-                    />
+                    <Input id="password" ref="passwordInput" v-model="form.password" type="password"
+                        class="mt-1 block w-3/4" placeholder="Password" @keyup.enter="deleteUser" />
 
                     <InputError :message="form.errors.password" class="mt-2" />
+                    <!-- Display the error message if it exists -->
+                    <div v-if="deleteError" class="mt-4 text-red-600 dark:text-white">
+                        {{ deleteError }}
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end">
@@ -89,13 +90,8 @@ const closeModal = () => {
                         Cancel
                     </Button>
 
-                    <Button
-                        variant="danger"
-                        class="ml-3"
-                        :class="{ 'opacity-25': form.processing }"
-                        :disabled="form.processing"
-                        @click="deleteUser"
-                    >
+                    <Button variant="danger" class="ml-3" :class="{ 'opacity-25': form.processing }"
+                        :disabled="form.processing" @click="deleteUser">
                         Delete Account
                     </Button>
                 </div>

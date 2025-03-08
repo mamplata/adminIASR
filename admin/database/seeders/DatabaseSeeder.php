@@ -17,6 +17,6 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
         ]);
 
-        $this->call(DepartmentProgramSeeder::class);
+        // $this->call(DepartmentProgramSeeder::class);
     }
 }

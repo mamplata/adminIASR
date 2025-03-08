@@ -3,9 +3,9 @@
 namespace App\Observers;
 
 use App\Models\AuditLog;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class AuditObserver
 {
@@ -46,16 +46,23 @@ class AuditObserver
         $this->logAudit('update', $model, $changes);
     }
 
-    public function deleted(Model $model)
+    public function deleting(Model $model)
     {
-        $this->logAudit('delete', $model, [
-            'id' => $model->id
-        ]);
+        $action = 'delete';
+
+        // Capture the admin's ID before the model is deleted
+        $adminId = Auth::id();
+
+        // Log the deletion before the model is actually deleted
+        $this->logAudit($action, $model, [
+            'time' => $action . ' at ' . Carbon::now()->format('F j, Y, g:i a')
+        ], $adminId);
     }
 
-    private function logAudit(string $action, Model $model, $details)
+    private function logAudit(string $action, Model $model, $details, $adminId = null)
     {
-        $adminId = Auth::id();
+        // Use the provided admin ID or fallback to Auth::id() (for non-user deletions)
+        $adminId = $adminId ?? Auth::id();
 
         if (!$adminId) {
             // If no authenticated user, handle it gracefully
@@ -63,10 +70,10 @@ class AuditObserver
         }
 
         AuditLog::create([
-            'admin_id' => $adminId,          // Authenticated admin performing the action
+            'admin_id' => $adminId ?? null,               // Authenticated admin performing the action
             'action'   => $action,
             'model'    => class_basename($model), // Log only the model name
-            'model_id' => $model->id,        // Store the model ID
+            'model_id' => $model->id,             // Store the model ID
             'details'  => json_encode($details),
         ]);
     }

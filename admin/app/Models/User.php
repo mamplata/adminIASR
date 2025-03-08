@@ -51,4 +51,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class, 'admin_id');
     }
+
+    /**
+     * Override the delete method to prevent deleting the last user.
+     *
+     * @return bool|null
+     *
+     * @throws \Exception
+     */
+    // public function delete()
+    // {
+    //     if (self::count() === 1) {
+    //         throw new \Exception('You cannot delete the last remaining user.');
+    //     }
+
+    //     return parent::delete();
+    // }
 }
