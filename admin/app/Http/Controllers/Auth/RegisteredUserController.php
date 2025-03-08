@@ -9,7 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -40,9 +40,15 @@ class RegisteredUserController extends Controller
                 'max:255',
                 // Enforce Gmail addresses only using regex
                 'regex:/^[A-Za-z0-9._%+\-]+@gmail\.com$/i',
-                'unique:'.User::class,
+                'unique:' . User::class,
             ],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => [
+                'required', 'confirmed',
+                'required', 'confirmed',  Password::min(8)
+                    ->letters()
+                    ->numbers(),
+
+            ],
         ], [
             // Custom error message for the regex rule
             'email.regex' => 'The email must be a valid Gmail address (must end with @gmail.com).',

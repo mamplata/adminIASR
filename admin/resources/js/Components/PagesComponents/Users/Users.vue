@@ -65,7 +65,7 @@ function saveUser() {
     userForm.post('/users', {
         onSuccess: () => {
             closeModal();
-            successMessage.value = "User added successfully!";
+            successMessage.value = "User added successfully! They must check Gmail to set their password.";
             setTimeout(() => (successMessage.value = ""), 4000);
             userForm.reset();
         },
