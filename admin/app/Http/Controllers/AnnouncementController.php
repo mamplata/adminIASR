@@ -21,144 +21,23 @@ class AnnouncementController extends Controller
 
     public function index(Request $request)
     {
-        $query = Announcement::orderBy('created_at', 'desc');
+        // Fetch announcements
+        $announcements = $this->announcementService->getAnnouncements($request);
 
-        // 🔹 Search by Publisher (if applicable)
-        if ($request->has('search') && !empty($request->input('search'))) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('publisher', 'LIKE', "%{$search}%");
-            });
-        }
+        // Fetch searchable department and program filters
+        $searchData = $this->announcementService->getSearchableData();
 
-        // 🔹 Handle Departments Search
-        if ($request->filled('departments')) {
-            $searchDepartment = trim($request->departments);
+        // Fetch departments and programs for dropdowns
+        $departmentData = $this->announcementService->getDepartmentsWithPrograms();
 
-            $query->where(function ($q) use ($searchDepartment) {
-                $q->whereRaw("FIND_IN_SET(?, REPLACE(departments, ' ', ''))", [$searchDepartment])
-                    ->orWhere('departments', 'LIKE', "%$searchDepartment%");
-            });
-        }
-
-        // 🔹 Handle Programs Search
-        if ($request->filled('programs')) {
-            $searchProgram = trim($request->programs);
-
-            $query->where(function ($q) use ($searchProgram) {
-                // Replace both colon and semicolon with commas, then remove spaces so that
-                // the string becomes a comma-separated list of tokens.
-                $q->whereRaw("FIND_IN_SET(?, REPLACE(REPLACE(departments, ':', ','), ' ', ''))", [$searchProgram])
-                    // Alternatively, add a LIKE clause for partial matches if needed.
-                    ->orWhere('departments', 'LIKE', "%: %{$searchProgram}%");
-            });
-        }
-
-        // 🔹 Get Unique Departments for Filtering
-        $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
-        $searchDepartments = collect($rawDepartments)
-            ->flatMap(function ($deptString) {
-                // Split each string by semicolon
-                return explode(';', $deptString);
-            })
-            ->map(function ($dept) {
-                $dept = trim($dept);
-                // If a colon exists, take only the text before it; otherwise, return the trimmed string
-                return strpos($dept, ':') !== false ? trim(explode(':', $dept)[0]) : $dept;
-            })
-            ->unique()
-            ->values()
-            ->toArray();
-
-        // Create searchPrograms grouped by department
-        $searchPrograms = collect($rawDepartments)
-            ->flatMap(function ($deptString) {
-                // Split each announcement by semicolon to separate department:program pairs
-                return explode(';', $deptString);
-            })
-            ->flatMap(function ($entry) {
-                // Split by colon to separate department and program(s)
-                $parts = explode(':', $entry);
-                if (count($parts) < 2) {
-                    return []; // Skip if there's no program part
-                }
-                $department = trim($parts[0]);
-                $programString = trim($parts[1]);
-
-                // Check if the program part contains commas
-                if (strpos($programString, ',') !== false) {
-                    // Split by comma and return a collection of department-program pairs
-                    return collect(explode(',', $programString))
-                        ->map(function ($program) use ($department) {
-                            return [
-                                'department' => $department,
-                                'program'    => trim($program),
-                            ];
-                        });
-                }
-
-                // Otherwise return a single department-program pair
-                return [
-                    [
-                        'department' => $department,
-                        'program'    => $programString,
-                    ]
-                ];
-            })
-            ->groupBy('department')
-            ->map(function ($group) {
-                // Pluck unique programs for each department
-                return $group->pluck('program')->unique()->values();
-            })
-            ->toArray();
-
-        // 🔹 Date Range Filtering
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('publication_date', [
-                $request->start_date . ' 00:00:00',
-                $request->end_date . ' 23:59:59'
-            ]);
-        } elseif ($request->filled('start_date')) {
-            $query->where('publication_date', '>=', $request->start_date . ' 00:00:00');
-        } elseif ($request->filled('end_date')) {
-            $query->where('publication_date', '<=', $request->end_date . ' 23:59:59');
-        }
-
-        // 🔹 Paginate Results
-        $announcements = $query->latest()
-            ->paginate(5)
-            ->appends(['search' => $request->input('search')])
-            ->through(fn($announcement) => [
-                'id'                => $announcement->id,
-                'departments'       => $announcement->departments,
-                'publisher'         => $announcement->publisher,
-                'type'              => $announcement->type,
-                'content'           => $announcement->content,
-                'publication_date'  => $announcement->publication_date->format('l, F j, Y'),
-            ]);
-
-        // Get an array of department codes
-        $departments = Department::pluck('code')->toArray();
-
-        // Get an associative array where each department code maps to an array of program codes
-        $departmentPrograms = Department::with('programs')->get()->mapWithKeys(function ($department) {
-            return [
-                $department->code => $department->programs->pluck('code')->toArray()
-            ];
-        })->toArray();
-
-        return inertia('Announcements/Index', [
+        return inertia('Announcements/Index', array_merge([
             'announcements'     => $announcements,
-            'searchDepartments' => $searchDepartments,
-            'searchPrograms' => $searchPrograms,
-            'departments' => $departments,
-            'departmentPrograms'    => $departmentPrograms,
-            'search' =>  $request->input('search'),
-            'filterDepartments' =>  $request->input('departments'),
-            'filterPrograms' =>  $request->input('programs'),
-            'start_date' =>  $request->input('start_date'),
-            'end_date' =>  $request->input('end_date')
-        ]);
+            'search'            => $request->input('search'),
+            'filterDepartments' => $request->input('departments'),
+            'filterPrograms'    => $request->input('programs'),
+            'start_date'        => $request->input('start_date'),
+            'end_date'          => $request->input('end_date')
+        ], $searchData, $departmentData));
     }
 
     public function store(AnnouncementStoreRequest $request)
