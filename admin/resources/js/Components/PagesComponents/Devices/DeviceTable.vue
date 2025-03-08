@@ -42,10 +42,10 @@ function changePage(page) {
 
 <style scoped>
 .badge-success {
-    @apply bg-green-100 text-green-700 px-3 py-1 rounded-full;
+    @apply inline-flex items-center justify-center bg-green-100 text-green-700 px-4 py-2 rounded-full min-w-[100px] sm:min-w-[120px] md:min-w-[140px] text-sm sm:text-base whitespace-nowrap;
 }
 
 .badge-error {
-    @apply bg-red-100 text-red-700;
+    @apply inline-flex items-center justify-center bg-red-100 text-red-700 px-4 py-2 rounded-full min-w-[100px] sm:min-w-[120px] md:min-w-[140px] text-sm sm:text-base whitespace-nowrap;
 }
 </style>
