@@ -47,8 +47,8 @@
 </template>
 
 <script>
-import pncBg from '../../assets/img/pnc-bg.jpg';
-import pncLogo from '../../assets/img/pnc-logo.png';
+import pncBg from '../../../assets/img/pnc-bg.jpg';
+import pncLogo from '../../../assets/img/pnc-logo.png';
 
 export default {
     data() {

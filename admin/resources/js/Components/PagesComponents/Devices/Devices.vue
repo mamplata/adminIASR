@@ -32,10 +32,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
-import DaisyConfirm from '@/Components/DaisyConfirm.vue';
+import DaisyConfirm from '@/Components/Daisy/DaisyConfirm.vue';
 import DeviceSearchBar from './DeviceSearchBar.vue';
 import DeviceTable from './DeviceTable.vue';
-import DaisyModal from '@/Components/DaisyModal.vue';
+import DaisyModal from '@/Components/Daisy/DaisyModal.vue';
 import DeviceModal from './DeviceModal.vue';
 
 

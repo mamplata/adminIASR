@@ -24,7 +24,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
-import DaisyTable from '@/Components/DaisyTable.vue';
+import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
 
 const props = defineProps({
     devices: {

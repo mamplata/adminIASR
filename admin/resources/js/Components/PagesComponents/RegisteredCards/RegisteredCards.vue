@@ -54,12 +54,12 @@ import axios from "axios";
 import { useToast } from 'vue-toastification';
 
 import SearchBar from './SearchBar.vue';
-import DaisyTable from '@/Components/DaisyTable.vue';
-import DaisyModal from '@/Components/DaisyModal.vue';
+import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
+import DaisyModal from '@/Components/Daisy/DaisyModal.vue';
 import EnterStudentForm from "./EnterStudentForm.vue";
 import ConfirmStudentInfo from "./ConfirmStudentInfo.vue";
 import NfcScanningState from "./NfcScanningState.vue";
-import DaisyConfirm from "@/Components/DaisyConfirm.vue";
+import DaisyConfirm from "@/Components/Daisy/DaisyConfirm.vue";
 
 // Define props passed from the server
 const props = defineProps({

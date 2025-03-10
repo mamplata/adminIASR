@@ -22,8 +22,8 @@ import { ref } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import SearchBar from './SearchBar.vue';
 import AddUserForm from './AddUserForm.vue';
-import DaisyTable from '@/Components/DaisyTable.vue';
-import DaisyModal from '@/Components/DaisyModal.vue';
+import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
+import DaisyModal from '@/Components/Daisy/DaisyModal.vue';
 import { useToast } from 'vue-toastification';
 
 const toast = useToast() // Initialize toast
