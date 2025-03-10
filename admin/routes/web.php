@@ -79,7 +79,7 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '1',
             'image'      => 'https://placehold.co/400',
-            'enrolled'       => true,
+            'enrolled'       => 1,
         ],
         '1904568' => [
             'studentId'  => '1904568',
@@ -89,7 +89,7 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '3',
             'image'      => 'https://placehold.co/400',
-            'enrolled'       => false,
+            'enrolled'       => 1,
         ],
         '1901111' => [
             'studentId'  => '1901111',
@@ -99,7 +99,7 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '2',
             'image'      => 'https://placehold.co/400',
-            'enrolled'       => true,
+            'enrolled'       => 1,
         ],
     ];
 

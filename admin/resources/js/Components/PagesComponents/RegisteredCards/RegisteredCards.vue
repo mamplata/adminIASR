@@ -113,6 +113,7 @@ const form = useForm({
 });
 
 const registrationSuccess = ref(false);
+const isModal2Open = ref(false);
 
 onMounted(() => {
     socket = io(import.meta.env.VITE_SOCKET_URL);
@@ -123,6 +124,17 @@ onMounted(() => {
 
     socket.on("nfcStatus", (message) => {
         nfcStatus.value = message;
+    });
+
+    socket.on("registrationFailed", async (data) => {
+        if (isModal2Open.value) {
+            nfcStatus.value = "❌ " + data.message;
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            modalRef2.value.closeModal();
+            modalRef1.value.showModal();
+            isModal2Open.value = false;
+            registrationSuccess.value = false;
+        }
     });
 
     socket.on("cardScanned", (data) => {
@@ -143,18 +155,19 @@ onMounted(() => {
                 registrationSuccess.value = false;
                 nfcStatus.value =
                     "❌ Registration Failed: " + Object.values(errors).join(", ");
-                socket.emit("registrationFailed", { error: errors });
             },
             onFinish: async () => {
                 // Asynchronous delay of 1 second before finalizing
                 await new Promise((resolve) => setTimeout(resolve, 2000));
                 isLoading.value = false;
+                isModal2Open.value = false;
                 if (registrationSuccess.value) {
                     modalRef2.value.closeModal();
                     // Reset state if needed
                     modalStudentInfo.value = null;
                     studentID.value = "";
                     registrationSuccess.value = false;
+                    isModal2Open.value = true;
                 } else {
                     // Registration failed; go back to the confirm student info modal
                     modalRef2.value.closeModal();
@@ -261,6 +274,7 @@ const registerStudent = async () => {
 const confirmRegistration = () => {
     modalRef1.value.closeModal();
     modalRef2.value.showModal();
+    isModal2Open.value = true;
     nfcStatus.value = "";
     nfcError.value = "";
     let studentInfo = { studentID: studentID.value, semester: semester.value };
