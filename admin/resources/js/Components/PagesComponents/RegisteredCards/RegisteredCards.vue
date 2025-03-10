@@ -120,7 +120,7 @@ const form = useForm({
 const registrationSuccess = ref(false);
 
 onMounted(() => {
-    socket = io("localhost:3000");
+    socket = io(import.meta.env.VITE_SOCKET_URL);
 
     socket.on("connect", () => {
         console.log("Connected to Socket.io server");
