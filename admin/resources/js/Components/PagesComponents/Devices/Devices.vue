@@ -4,13 +4,6 @@
         <DeviceSearchBar v-model="searchQuery" v-model:status="status" :loading="loading" @search="fetchDevices(1)"
             @reset="resetSearch" @add-device="openModal" />
 
-        <!-- Success Notification -->
-        <transition name="fade">
-            <div v-if="successMessage" class="alert alert-success shadow-lg mb-4">
-                <span>{{ successMessage }}</span>
-            </div>
-        </transition>
-
         <!-- Device Table -->
         <DeviceTable :devices="devices" @change-page="fetchDevices" @delete-device="openDeleteConfirm"
             @edit-device="openEditModal" />
@@ -37,7 +30,9 @@ import DeviceSearchBar from './DeviceSearchBar.vue';
 import DeviceTable from './DeviceTable.vue';
 import DaisyModal from '@/Components/Daisy/DaisyModal.vue';
 import DeviceModal from './DeviceModal.vue';
+import { useToast } from 'vue-toastification';
 
+const toast = useToast();
 
 const props = defineProps({
     devices: Object,
@@ -50,7 +45,6 @@ const searchQuery = ref(page.search || "");
 const status = ref(page.status || "");
 const currentPage = ref(1);
 const loading = ref(false);
-const successMessage = ref("");
 
 // Update deviceForm to include only id, name, and status.
 const deviceForm = useForm({
@@ -81,19 +75,17 @@ function closeModal() {
 function saveDevice() {
     deviceForm.post('/devices', {
         onSuccess: () => {
-            successMessage.value = deviceForm.id
+            toast.success(deviceForm.id
                 ? "Device updated successfully!"
-                : "Device saved successfully!";
-            setTimeout(() => (successMessage.value = ""), 4000);
+                : "Device saved successfully!");
             deviceForm.reset();
             fetchDevices(1);
             closeModal();
         },
         onError: () => {
-            successMessage.value = deviceForm.id
+            toast.error(deviceForm.id
                 ? "Error updating device. Try again!"
-                : "Error saving device. Try again!";
-            setTimeout(() => (successMessage.value = ""), 4000);
+                : "Error saving device. Try again!");
         }
     });
 }
@@ -131,12 +123,11 @@ function openDeleteConfirm(id) {
 function handleDeleteConfirm() {
     router.delete(`/devices/${deleteId.value}`, {
         onSuccess: () => {
-            successMessage.value = "Device deleted successfully!";
+            toast.success("Device deleted successfully!");
             fetchDevices(currentPage.value);
-            setTimeout(() => (successMessage.value = ""), 4000);
         },
         onError: () => {
-            successMessage.value = "Error deleting device. Try again!";
+            toast.error("Error deleting device. Try again!");
         }
     });
     confirmVisible.value = false;

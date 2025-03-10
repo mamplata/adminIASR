@@ -48,7 +48,7 @@
                 <span v-if="cardExists" class="text-warning">Card already exists.</span>
                 <span v-else class="text-success">New registration.</span>
             </div>
-            <div v-if="nfcStatus" class="mt-2">
+            <div v-if="nfcStatus" class="mt-2 normal-case">
                 <span>{{ nfcStatus }}</span>
             </div>
         </section>

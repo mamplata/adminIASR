@@ -6,13 +6,6 @@
             :maxStartDate="maxStartDate" :maxEndDate="maxEndDate" :loading="loading" @search="fetchAnnouncements(1)"
             @reset="resetSearch" @add="openModal('Add')" />
 
-        <!-- Success Notification -->
-        <transition name="fade">
-            <div v-if="successMessage" class="alert alert-success shadow-lg mb-4">
-                <span>{{ successMessage }}</span>
-            </div>
-        </transition>
-
         <AnnouncementTable :announcements="announcements" @change-page="fetchAnnouncements" @view="viewAnnouncement"
             @edit="openModal('Edit', $event)" @delete="confirmDeleteAnnouncement" />
 
@@ -45,6 +38,9 @@ import DaisyConfirm from '@/Components/Daisy/DaisyConfirm.vue';
 import SearchBar from './SearchBar.vue';
 import AnnouncementTable from './AnnouncementTable.vue';
 import AnnouncementModal from './AnnouncementModal.vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 // Define props
 const props = defineProps({
@@ -62,7 +58,6 @@ const searchQuery = ref(page.search || "");
 const loading = ref(false);
 const selectedDepartment = ref(page.filterDepartments || "");
 const selectedProgram = ref(page.filterPrograms || "");
-const successMessage = ref("");
 
 const announcementForm = useForm({
     publisher: "",
@@ -213,8 +208,7 @@ function saveAnnouncement() {
         forceFormData: true,
         onSuccess: () => {
             closeModal();
-            successMessage.value = "Announcement added successfully!";
-            setTimeout(() => (successMessage.value = ""), 4000);
+            toast.success("Announcement added successfully!");
             announcementForm.reset();
             extraContent.title = "";
             extraContent.body = "";
@@ -223,8 +217,7 @@ function saveAnnouncement() {
         onError: (errors) => {
             // Only show a generic error if there are no field-specific validation errors.
             if (Object.keys(errors).length === 0) {
-                successMessage.value = "Error adding announcement. Try again!";
-                setTimeout(() => (successMessage.value = ""), 4000);
+                toast.error("Error adding announcement. Try again!");
             }
         },
     });
@@ -246,8 +239,7 @@ function updateAnnouncement() {
         forceFormData: true,
         onSuccess: () => {
             closeModal();
-            successMessage.value = "Announcement updated successfully!";
-            setTimeout(() => (successMessage.value = ""), 4000);
+            toast.success("Announcement updated successfully!");
             announcementForm.reset();
             extraContent.title = "";
             extraContent.body = "";
@@ -256,8 +248,7 @@ function updateAnnouncement() {
         onError: (errors) => {
             // Only show a generic error if there are no field-specific validation errors.
             if (Object.keys(errors).length === 0) {
-                successMessage.value = "Error updating announcement. Try again!";
-                setTimeout(() => (successMessage.value = ""), 4000);
+                toast.error("Error adding announcement. Try again!");
             }
         },
     });
@@ -271,12 +262,10 @@ function confirmDeleteAnnouncement(announcementId) {
 function handleConfirmDelete() {
     announcementForm.delete(`/announcements/${announcementToDelete.value}`, {
         onSuccess: () => {
-            successMessage.value = "Announcement deleted successfully!";
-            setTimeout(() => { successMessage.value = ""; }, 4000);
+            toast.success("Announcement deleted successfully!");
         },
         onError: () => {
-            successMessage.value = "Error deleting announcement. Please try again!";
-            setTimeout(() => { successMessage.value = ""; }, 4000);
+            toast.error("Error deleting announcement. Please try again!");
         },
     });
     announcementToDelete.value = null;

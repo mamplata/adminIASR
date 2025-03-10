@@ -4,13 +4,6 @@
         <SearchBar v-model="searchQuery" :loading="loading" @search="fetchRegisteredCards(1)" @reset="resetSearch()"
             @add-card="openModal" />
 
-        <!-- Success Notification -->
-        <transition name="fade">
-            <div v-if="successMessage" class="alert alert-success shadow-lg mb-4">
-                <span>{{ successMessage }}</span>
-            </div>
-        </transition>
-
         <!-- Device Table -->
         <DaisyTable :data="registeredCards.data" :currentPage="registeredCards.current_page"
             :lastPage="registeredCards.last_page" @change-page="fetchRegisteredCards">
@@ -76,7 +69,6 @@ const toast = useToast();
 // Local state
 const searchQuery = ref(page.search || "");
 const loading = ref(false);
-const successMessage = ref("");
 
 function fetchRegisteredCards(page) {
     loading.value = true;
@@ -145,7 +137,7 @@ onMounted(() => {
                 registrationSuccess.value = true;
                 // No errors, proceed with NFC writing.
                 socket.emit("dbStored", data);
-                toast.success("✅ Card registered successfully!");
+                toast.success("Card registered successfully!");
             },
             onError: (errors) => {
                 registrationSuccess.value = false;
@@ -174,7 +166,7 @@ onMounted(() => {
 
 
     socket.on("studentRegistered", (student) => {
-        nfcStatus.value = `✅ Student Registered Successfully and Card Written! Student ID: ${student.studentId} UID: ${student.uid}`;
+        nfcStatus.value = `Student Registered Successfully and Card Written! Student ID: ${student.studentId} UID: ${student.uid}`;
     });
 
     socket.on("nfcError", (error) => {
@@ -299,12 +291,10 @@ function confirmDelete(cardId) {
 function handleConfirmDelete() {
     router.delete(`/registered-cards/${cardToDelete.value}`, {
         onSuccess: () => {
-            successMessage.value = "Card deleted successfully!";
-            setTimeout(() => { successMessage.value = ""; }, 4000);
+            toast.success("Card deleted successfully!");
         },
         onError: () => {
-            successMessage.value = "Error deleting card. Please try again!";
-            setTimeout(() => { successMessage.value = ""; }, 4000);
+            toast.error("Error deleting card. Please try again!");
         },
     });
     cardToDelete.value = null;
