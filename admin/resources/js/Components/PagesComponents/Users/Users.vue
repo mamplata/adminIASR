@@ -4,13 +4,6 @@
         <SearchBar v-model="searchQuery" :loading="loading" @search="fetchUsers(1)" @reset="resetSearch()"
             @add-user="openModal" />
 
-        <!-- Success Notification -->
-        <transition name="fade">
-            <div v-if="successMessage" class="alert alert-success shadow-lg mb-4">
-                <span>{{ successMessage }}</span>
-            </div>
-        </transition>
-
         <!-- User Table -->
         <DaisyTable :data="users.data" :currentPage="users.current_page" :lastPage="users.last_page"
             @change-page="fetchUsers" />
@@ -31,6 +24,9 @@ import SearchBar from './SearchBar.vue';
 import AddUserForm from './AddUserForm.vue';
 import DaisyTable from '@/Components/DaisyTable.vue';
 import DaisyModal from '@/Components/DaisyModal.vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast() // Initialize toast
 
 // Define props passed from the server
 const props = defineProps({
@@ -46,7 +42,6 @@ const { props: page } = usePage();
 // Local state
 const searchQuery = ref(page.search || "");
 const loading = ref(false);
-const successMessage = ref("");
 const userForm = useForm({ id: null, name: "", email: "", password: "", confirmPassword: "" });
 
 // Reference to the modal component
@@ -65,15 +60,13 @@ function saveUser() {
     userForm.post('/users', {
         onSuccess: () => {
             closeModal();
-            successMessage.value = "User added successfully! They must check Gmail to set their password.";
-            setTimeout(() => (successMessage.value = ""), 4000);
+            toast.success('User added successfully!') // Show success toast
             userForm.reset();
         },
         onError: (errors) => {
             // Only show a generic error if there are no field-specific validation errors.
             if (Object.keys(errors).length === 0) {
-                successMessage.value = "Error adding user. Try again!";
-                setTimeout(() => (successMessage.value = ""), 4000);
+                toast.error('Error adding user. Try again!') // Show error toast
             }
         }
     });

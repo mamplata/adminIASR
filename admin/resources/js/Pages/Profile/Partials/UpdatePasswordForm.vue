@@ -5,6 +5,7 @@ import Label from '@/Components/Label.vue'
 import Input from '@/Components/Input.vue'
 import InputError from '@/Components/InputError.vue'
 import Button from '@/Components/Button.vue'
+import { useToast } from 'vue-toastification'
 
 const passwordInput = ref(null)
 const currentPasswordInput = ref(null)
@@ -15,10 +16,15 @@ const form = useForm({
     password_confirmation: '',
 })
 
+const toast = useToast() // Initialize toast
+
 const updatePassword = () => {
     form.put(route('password.update'), {
         preserveScroll: true,
-        onSuccess: () => form.reset(),
+        onSuccess: () => {
+            form.reset()
+            toast.success('Password updated successfully!') // Show success toast
+        },
         onError: () => {
             if (form.errors.password) {
                 form.reset('password', 'password_confirmation')
@@ -76,12 +82,6 @@ const updatePassword = () => {
 
             <div class="flex items-center gap-4">
                 <Button :disabled="form.processing">Save</Button>
-
-                <Transition enter-from-class="opacity-0" leave-to-class="opacity-0" class="transition ease-in-out">
-                    <p v-if="form.recentlySuccessful" class="text-sm text-gray-600 dark:text-gray-400">
-                        Saved.
-                    </p>
-                </Transition>
             </div>
         </form>
     </section>
