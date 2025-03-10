@@ -51,6 +51,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import { io } from "socket.io-client";
 import axios from "axios";
+import { useToast } from 'vue-toastification';
+
 import SearchBar from './SearchBar.vue';
 import DaisyTable from '@/Components/DaisyTable.vue';
 import DaisyModal from '@/Components/DaisyModal.vue';
@@ -69,6 +71,7 @@ const props = defineProps({
 });
 
 const { props: page } = usePage();
+const toast = useToast();
 
 // Local state
 const searchQuery = ref(page.search || "");
@@ -142,7 +145,7 @@ onMounted(() => {
                 registrationSuccess.value = true;
                 // No errors, proceed with NFC writing.
                 socket.emit("dbStored", data);
-                nfcStatus.value = "✅ Database stored successfully!";
+                toast.success("✅ Card registered successfully!");
             },
             onError: (errors) => {
                 registrationSuccess.value = false;
