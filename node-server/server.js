@@ -4,17 +4,16 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const { initializeNFC } = require("./utils/nfcHandler");
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
+// Split the ALLOWED_ORIGINS string into an array.
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:8000",
-      "http://127.0.0.1:8000",
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-    ],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true,

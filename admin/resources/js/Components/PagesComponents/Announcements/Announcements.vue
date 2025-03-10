@@ -39,9 +39,9 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
-import DaisyModal from '@/Components/DaisyModal.vue';
-import DaisyCardAnnouncement from '@/Components/DaisyCardAnnouncement.vue';
-import DaisyConfirm from '@/Components/DaisyConfirm.vue';
+import DaisyModal from '@/Components/Daisy/DaisyModal.vue';
+import DaisyCardAnnouncement from '@/Components/Daisy/DaisyCardAnnouncement.vue';
+import DaisyConfirm from '@/Components/Daisy/DaisyConfirm.vue';
 import SearchBar from './SearchBar.vue';
 import AnnouncementTable from './AnnouncementTable.vue';
 import AnnouncementModal from './AnnouncementModal.vue';
@@ -171,7 +171,6 @@ function openModal(action, row = null) {
     // Set mode if needed on modalRef
     if (modalRef.value) {
         modalRef.value.mode = action;
-        console.log(announcementForm);
         modalRef.value.showModal();
     }
 }

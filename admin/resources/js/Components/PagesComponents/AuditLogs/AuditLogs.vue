@@ -33,8 +33,8 @@
 import { ref, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import AuditLogFilterPanel from './AuditLogFilterPanel.vue';
-import DaisyTable from '@/Components/DaisyTable.vue';
-import DaisyCard from '@/Components/DaisyCard.vue';
+import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
+import DaisyCard from '@/Components/Daisy/DaisyCard.vue';
 
 const { props: page } = usePage();
 
