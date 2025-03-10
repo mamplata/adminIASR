@@ -20,8 +20,6 @@ class StoreStudentInfoRequest extends FormRequest
             'program'    => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'yearLevel'  => 'required|string|max:50',
-            'semester'   => 'required|string|max:50',
-            'year'       => 'required|string|max:50',
             'image'      => 'required|string',
             'enrolled'   => 'required|in:1', // Ensures enrolled must be 1 (true)
         ];
@@ -38,8 +36,6 @@ class StoreStudentInfoRequest extends FormRequest
             'program.required'    => 'Program is required.',
             'department.required' => 'Department is required.',
             'yearLevel.required'  => 'Year level is required.',
-            'semester.required'   => 'Semester is required.',
-            'year.required'       => 'Year is required.',
             'image.required'      => 'Student image is required.',
             'enrolled.required'   => 'Enrollment status is required.',
             'enrolled.in'         => 'The student must be enrolled',

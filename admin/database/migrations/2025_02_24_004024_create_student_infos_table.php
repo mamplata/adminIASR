@@ -16,8 +16,6 @@ class CreateStudentInfosTable extends Migration
             $table->string('program');
             $table->string('department');
             $table->string('yearLevel');
-            $table->string('semester');
-            $table->string('year');
             $table->longText('image');
             $table->boolean('enrolled');
             $table->timestamps();

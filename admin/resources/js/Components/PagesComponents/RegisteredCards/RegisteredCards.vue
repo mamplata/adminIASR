@@ -212,7 +212,12 @@ const registerStudent = async () => {
             }
 
             modalStudentInfo.value = studentData;
-            semester.value = studentData.semester + studentData.year;
+
+            // Fetch semester and year separately
+            const semesterResponse = await axios.get(route("students.semester"));
+            const semesterData = semesterResponse.data.semester;
+
+            semester.value = semesterData.semester + " " + semesterData.year; // Updated to use the separate API
 
             await router.post(route("student-infos.store"), {
                 studentId: studentData.studentId,
@@ -221,8 +226,6 @@ const registerStudent = async () => {
                 program: studentData.program,
                 department: studentData.department,
                 yearLevel: studentData.yearLevel,
-                semester: studentData.semester,
-                year: studentData.year,
                 image: studentData.image,
                 enrolled: studentData.enrolled
             });
@@ -231,7 +234,12 @@ const registerStudent = async () => {
         } else {
             console.log("Student info found locally.");
             modalStudentInfo.value = checkStudentResponse.data.student;
-            semester.value = modalStudentInfo.value.semester + modalStudentInfo.value.year;
+
+            // Fetch semester and year separately
+            const semesterResponse = await axios.get(route("students.semester"));
+            const semesterData = semesterResponse.data.semester;
+
+            semester.value = semesterData.semester + " " + semesterData.year; // Updated to use the separate API
         }
 
         const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
@@ -244,13 +252,7 @@ const registerStudent = async () => {
         nfcStatus.value = "";
         nfcError.value = "";
     } catch (error) {
-        console.log(error.response);
-
-        if (error.response && error.response.status === 422) {
-            alert("❌ " + error.response.data.error);
-        } else {
-            nfcStatus.value = "❌ " + (error.response?.data?.error || "An error occurred.");
-        }
+        nfcStatus.value = "❌ " + (error.response?.data?.error || "An error occurred.");
     }
 };
 

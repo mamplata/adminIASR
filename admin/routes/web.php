@@ -79,8 +79,6 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '1',
             'image'      => 'https://placehold.co/400',
-            'semester'   => '2nd',
-            'year'       => '2024',
             'enrolled'       => true,
         ],
         '1904568' => [
@@ -91,8 +89,6 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '3',
             'image'      => 'https://placehold.co/400',
-            'semester'   => '2nd',
-            'year'       => '2024',
             'enrolled'       => false,
         ],
         '1901111' => [
@@ -103,8 +99,6 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '2',
             'image'      => 'https://placehold.co/400',
-            'semester'   => '2nd',
-            'year'       => '2024',
             'enrolled'       => true,
         ],
     ];
@@ -122,5 +116,14 @@ Route::get('students/{studentId}', function ($studentId) {
     ], 404);
 })->name('students.fetch');
 
+
+Route::get('semester', function () {
+    return response()->json([
+        'semester' => [
+            'semester' => '2nd',
+            'year'     => '2024',
+        ]
+    ]);
+})->name('students.semester');
 
 require __DIR__ . '/auth.php';

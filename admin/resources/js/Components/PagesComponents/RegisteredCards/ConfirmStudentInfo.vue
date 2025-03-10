@@ -35,14 +35,6 @@
                 <strong>Year Level: </strong>
                 <span>{{ modalStudentInfo.yearLevel }}</span>
             </div>
-            <div v-if="modalStudentInfo">
-                <strong>Semester: </strong>
-                <span>{{ modalStudentInfo.semester }}</span>
-            </div>
-            <div v-if="modalStudentInfo">
-                <strong>Year: </strong>
-                <span>{{ modalStudentInfo.year }}</span>
-            </div>
             <div>
                 <strong>Status: </strong>
                 <span v-if="cardExists" class="text-warning">Card already exists.</span>
