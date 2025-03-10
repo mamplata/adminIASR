@@ -80,7 +80,7 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '1',
             'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2024-2025", // last enrolled at:  2nd 2024-2025 - 224
+            'last_enrolled_at' => "1st 2024",
         ],
         '1904568' => [
             'studentId'  => '1904568',
@@ -90,7 +90,7 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '3',
             'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2024-2025",
+            'last_enrolled_at' => "2nd 2025",
         ],
         '1901111' => [
             'studentId'  => '1901111',
@@ -100,7 +100,7 @@ Route::get('students/{studentId}', function ($studentId) {
             'department' => 'CCS',
             'yearLevel'  => '2',
             'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2024-2025",
+            'last_enrolled_at' => "2nd 2025",
         ],
     ];
 

@@ -202,7 +202,6 @@ const openModal = () => {
     modalRef.value.showModal();
 };
 
-// Called when the user enters a Student ID and clicks "Tap Your Card Now".
 const registerStudent = async () => {
     if (!studentID.value) {
         alert("Please enter a Student ID first.");
@@ -262,7 +261,20 @@ const registerStudent = async () => {
         nfcStatus.value = "";
         nfcError.value = "";
     } catch (error) {
-        nfcStatus.value = "❌ " + (error.response?.data?.error || "An error occurred.");
+        // If the error is from Inertia and has errors
+        if (error.response && error.response.status === 422) {
+            // Inertia handles validation errors in the 'errors' object, not in the response.data.error
+            const errors = error.response.data.errors;
+            if (errors) {
+                // Check if there's an error for a specific field, or show a general error message
+                nfcStatus.value = "❌ " + Object.values(errors).flat().join(" ");
+            } else {
+                nfcStatus.value = "❌ " + (error.response.data.error || "An error occurred.");
+            }
+        } else {
+            // Fallback for general error handling
+            nfcStatus.value = "❌ " + (error.response?.data?.error || "An unexpected error occurred.");
+        }
     }
 };
 

@@ -10,7 +10,7 @@
         <div class="modal-action">
             <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
             <button class="btn btn-primary dark:text-white" @click="handleRegister" :disabled="isLoading">
-                Tap Your Card Now
+                Register
             </button>
         </div>
     </div>

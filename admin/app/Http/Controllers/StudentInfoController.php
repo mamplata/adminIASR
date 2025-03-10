@@ -29,22 +29,20 @@ class StudentInfoController extends Controller
 
     public function store(StoreStudentInfoRequest $request)
     {
-        // Extract the last_enrolled_at value (e.g., "2nd 2024-2025")
+        // Extract the last_enrolled_at value (e.g., "2nd 2025")
         $lastEnrolledAt = $request->last_enrolled_at;
 
-        // Extract semester (e.g., "2nd") and year (e.g., "2024")
-        preg_match('/(\d+)(?:st|nd|rd|th)\s(\d{4})/', $lastEnrolledAt, $matches);
+        // Update the regular expression to match "2nd 2025" format
+        preg_match('/(1st|2nd)\s(\d{4})/', $lastEnrolledAt, $matches);
 
         if (!$matches) {
-            return response()->json([
-                'error' => 'Invalid last_enrolled_at format.'
-            ], 422);
+            return back()
+                ->withErrors(['last_enrolled_at' => 'Invalid last_enrolled_at format.'])
+                ->withInput(); // Keep the input data
         }
 
-
-
-        $enrolledSemester = $matches[1] . 'nd'; // Extract semester (ensure format like '2nd')
-        $enrolledYear = $matches[2]; // Extract year
+        $enrolledSemester = $matches[1]; // Extract semester (e.g., "2nd")
+        $enrolledYear = $matches[2]; // Extract year (e.g., "2025")
 
         // Check if the student is enrolled in the current semester
         $currentSemester = DB::table('semesters')
@@ -54,13 +52,15 @@ class StudentInfoController extends Controller
 
 
         if (!$currentSemester) {
-            return response()->json([
-                'error' => 'Student is not currently enrolled and cannot be registered.'
-            ], 422);
+            return [
+                'message' => 'Student is not currently enrolled and cannot be registered.',
+            ];
         }
 
+        // Store the student info using the validated data
         $this->studentInfoService->storeStudentInfo($request->validated());
 
+        // Inertia response for success
         return redirect()->route('registered-cards.index')
             ->with('success', 'Student Info created!');
     }
