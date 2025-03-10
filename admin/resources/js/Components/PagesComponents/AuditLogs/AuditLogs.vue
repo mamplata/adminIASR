@@ -48,7 +48,7 @@ const props = defineProps({
 // Filter states
 const selectedAction = ref(page.action || '');
 const selectedModel = ref(page.model || '');
-const selectedAdmin = ref(page.admin_id || '');
+const selectedAdmin = ref(page.admin_name || '');
 const startDate = ref(page.start_date || '');
 const endDate = ref(page.end_date || '');
 const loading = ref(false);
@@ -103,7 +103,7 @@ function fetchLogs(page) {
     const filters = {
         action: selectedAction.value,
         model: selectedModel.value,
-        admin_id: selectedAdmin.value,
+        admin_name: selectedAdmin.value,
         start_date: startDate.value || null,
         end_date: endDate.value || null,
         page: page,

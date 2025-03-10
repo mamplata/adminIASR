@@ -16,7 +16,10 @@ class LogAuthenticationEvent
 
     public function handleLogout(Logout $event)
     {
-        $this->logAudit('logout', $event->user);
+        $user = $event->user;
+        if ($user && $user->exists) {
+            $this->logAudit('logout', $user);
+        }
     }
 
     private function logAudit($action, $user)
@@ -27,8 +30,8 @@ class LogAuthenticationEvent
             'model' => 'User',
             'model_id' => $user->id,
             'details' => json_encode([
-                'time' => $action . ' at ' . Carbon::now()->format('F j, Y, g:i a')
+                'time' => $action . ' at ' . now()->format('F j, Y, g:i a')
             ])
         ]);
-    }    
+    }
 }

@@ -20,8 +20,13 @@ class AuditLogService
             $query->where('model', $request->model);
         }
 
-        if ($request->filled('admin_id')) {
-            $query->where('admin_id', $request->admin_id);
+        // Filter by admin_name instead of admin_id
+        if ($request->filled('admin_name')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('admin', function ($subQuery) use ($request) {
+                    $subQuery->where('name', $request->admin_name);
+                })->orWhere('admin_name', $request->admin_name);
+            });
         }
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -37,7 +42,12 @@ class AuditLogService
 
         $actions = AuditLog::distinct()->pluck('action')->toArray();
         $models = AuditLog::distinct()->pluck('model')->toArray();
-        $admins = User::select('id', 'name')->get();
+        // Get unique list of admin names (from audit_logs & users)
+        $auditAdminNames = AuditLog::whereNotNull('admin_name')->distinct()->pluck('admin_name')->toArray();
+        $activeAdminNames = User::whereIn('id', AuditLog::whereNotNull('admin_id')->pluck('admin_id'))
+            ->pluck('name')
+            ->toArray();
+        $admins = array_unique(array_merge($auditAdminNames, $activeAdminNames)); // Merge deleted & active admin names
 
         $auditLogs = $query->paginate(5)->through(function ($log) {
             $details = $log->details;
@@ -65,7 +75,7 @@ class AuditLogService
                 'model'    => $log->model,
                 'model_id' => $log->model_id,
                 'details'  => $details,
-                'admin'    => $log->admin?->name,
+                'admin'    => $log->admin ? $log->admin->name : $log->admin_name,
                 'created'  => $log->created_at->format('l, F j, Y')
             ];
         });

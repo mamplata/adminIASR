@@ -48,33 +48,50 @@ class AuditObserver
 
     public function deleting(Model $model)
     {
-        $action = 'delete';
+        $admin = Auth::user();
+        $adminId = $admin ? $admin->id : null;
+        $adminName = $admin ? $admin->name : 'Deleted Admin'; // Fallback if missing
 
-        // Capture the admin's ID before the model is deleted
-        $adminId = Auth::id();
+        if ($adminId) {
+            // Update all previous logs so they don't lose reference to admin_name
+            AuditLog::where('admin_id', $adminId)
+                ->update(['admin_name' => $adminName]);
+        }
 
-        // Log the deletion before the model is actually deleted
-        $this->logAudit($action, $model, [
-            'time' => $action . ' at ' . Carbon::now()->format('F j, Y, g:i a')
-        ], $adminId);
+        // Log the deletion action
+        $this->logAudit('delete', $model, [
+            'time' => 'Deleted at ' . Carbon::now()->format('F j, Y, g:i a')
+        ], $adminName);
     }
 
-    private function logAudit(string $action, Model $model, $details, $adminId = null)
-    {
-        // Use the provided admin ID or fallback to Auth::id() (for non-user deletions)
-        $adminId = $adminId ?? Auth::id();
 
-        if (!$adminId) {
-            // If no authenticated user, handle it gracefully
+    /**
+     * Log the audit details including admin ID and name.
+     */
+    private function logAudit(string $action, Model $model, $details, $adminName = null)
+    {
+        $adminId = Auth::id();
+
+        if (!$adminId && $adminName) {
+            // If no admin ID (because user was deleted), fallback to name only
+            AuditLog::create([
+                'admin_id'   => null, // The user is deleted, so we can't store an ID
+                'admin_name' => $adminName, // Store the last known admin name
+                'action'     => $action,
+                'model'      => class_basename($model),
+                'model_id'   => $model->id,
+                'details'    => json_encode($details),
+            ]);
             return;
         }
 
         AuditLog::create([
-            'admin_id' => $adminId ?? null,               // Authenticated admin performing the action
-            'action'   => $action,
-            'model'    => class_basename($model), // Log only the model name
-            'model_id' => $model->id,             // Store the model ID
-            'details'  => json_encode($details),
+            'admin_id'   => $adminId,
+            'admin_name' => $adminName,
+            'action'     => $action,
+            'model'      => class_basename($model),
+            'model_id'   => $model->id,
+            'details'    => json_encode($details),
         ]);
     }
 }
