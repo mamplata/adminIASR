@@ -21,7 +21,7 @@ class StoreStudentInfoRequest extends FormRequest
             'department' => 'required|string|max:255',
             'yearLevel'  => 'required|string|max:50',
             'image'      => 'required|string',
-            'enrolled'   => 'required|in:1', // Ensures enrolled must be 1 (true)
+            'last_enrolled_at' => 'required|string|max:50',
         ];
     }
 
@@ -37,8 +37,7 @@ class StoreStudentInfoRequest extends FormRequest
             'department.required' => 'Department is required.',
             'yearLevel.required'  => 'Year level is required.',
             'image.required'      => 'Student image is required.',
-            'enrolled.required'   => 'Enrollment status is required.',
-            'enrolled.in'         => 'The student must be enrolled',
+            'last_enrolled_at.required' => 'Enrollment status is required.',
         ];
     }
 }

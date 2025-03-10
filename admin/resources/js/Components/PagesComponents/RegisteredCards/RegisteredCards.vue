@@ -219,18 +219,14 @@ const registerStudent = async () => {
             const fetchResponse = await axios.get(route("students.fetch", { studentId: studentID.value }));
             const studentData = fetchResponse.data.student;
 
-            if (!studentData.enrolled) {
-                nfcStatus.value = "❌ This student is not enrolled and cannot be registered.";
-                return; // Stop the process if not enrolled
-            }
-
             modalStudentInfo.value = studentData;
 
-            // Fetch semester and year separately
-            const semesterResponse = await axios.get(route("students.semester"));
-            const semesterData = semesterResponse.data.semester;
-
-            semester.value = semesterData.semester + " " + semesterData.year; // Updated to use the separate API
+            // Extract the first digit (2 from "2nd")
+            const semesterNumber = studentData.last_enrolled_at.match(/\d+/)[0];
+            // Extract the last two digits of the year (24 from "2024-2025")
+            const year = studentData.last_enrolled_at.match(/\d{4}/)[0].slice(2);
+            semester.value = semesterNumber + year;
+            // Updated to use the separate API
 
             await router.post(route("student-infos.store"), {
                 studentId: studentData.studentId,
@@ -240,7 +236,7 @@ const registerStudent = async () => {
                 department: studentData.department,
                 yearLevel: studentData.yearLevel,
                 image: studentData.image,
-                enrolled: studentData.enrolled
+                last_enrolled_at: studentData.last_enrolled_at
             });
 
             console.log("Student info stored successfully.");
@@ -248,11 +244,12 @@ const registerStudent = async () => {
             console.log("Student info found locally.");
             modalStudentInfo.value = checkStudentResponse.data.student;
 
-            // Fetch semester and year separately
-            const semesterResponse = await axios.get(route("students.semester"));
-            const semesterData = semesterResponse.data.semester;
-
-            semester.value = semesterData.semester + " " + semesterData.year; // Updated to use the separate API
+            // Extract the first digit (2 from "2nd")
+            const semesterNumber = modalStudentInfo.value.last_enrolled_at.match(/\d+/)[0];
+            // Extract the last two digits of the year (24 from "2024-2025")
+            const year = modalStudentInfo.value.last_enrolled_at.match(/\d{4}/)[0].slice(2);
+            semester.value = semesterNumber + year;
+            // Updated to use the separate API
         }
 
         const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {

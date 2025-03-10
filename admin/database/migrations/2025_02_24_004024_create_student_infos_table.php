@@ -17,7 +17,7 @@ class CreateStudentInfosTable extends Migration
             $table->string('department');
             $table->string('yearLevel');
             $table->longText('image');
-            $table->boolean('enrolled');
+            $table->string('last_enrolled_at');
             $table->timestamps();
         });
     }
