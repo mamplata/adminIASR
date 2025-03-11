@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col lg:flex-row h-screen w-full">
-    <div class="w-full lg:w-2/5 flex flex-col items-center justify-center bg-white p-8">
+    <div class="w-full lg:w-2/5 flex flex-col items-center justify-center p-8">
       <div>
         <img :src="iASRPNC" alt="iASR Logo" class="w-48">
       </div>
