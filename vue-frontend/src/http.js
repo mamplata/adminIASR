@@ -6,7 +6,7 @@ const HTTP = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Necessary for Sanctum cookie auth
+  withCredentials: true,
 });
 
 export default HTTP;
