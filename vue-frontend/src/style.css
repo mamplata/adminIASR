@@ -1,6 +1,5 @@
-@import "tailwindcss";
-@plugin "daisyui";
+/* src/style.css */
 
-* {
-    font-family: "Nunito Sans", sans-serif;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
