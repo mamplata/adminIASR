@@ -41,7 +41,7 @@
                 <span v-else class="text-success">New registration.</span>
             </div>
             <div v-if="nfcStatus" class="mt-2 normal-case">
-                <span>{{ nfcStatus }}</span>
+                <span v-if="nfcStatus != '⏳ Waiting for NFC tap...'">{{ nfcStatus }}</span>
             </div>
         </section>
 

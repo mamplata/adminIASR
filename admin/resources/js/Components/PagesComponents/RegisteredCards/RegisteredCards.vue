@@ -202,6 +202,33 @@ const openModal = () => {
     modalRef.value.showModal();
 };
 
+const processStudentData = async (studentData) => {
+    // Extract the first digit (2 from "2nd")
+    const semesterNumber = studentData.last_enrolled_at.match(/\d+/)[0];
+    // Extract the last two digits of the year (24 from "2024")
+    const year = studentData.last_enrolled_at.match(/\d{4}/)[0].slice(2);
+    semester.value = semesterNumber + year;
+
+    console.log(semester.value);
+
+    // Proceed to check if the card exists **after** the student form is successfully stored
+    try {
+        const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
+            params: { studentId: studentID.value },
+        });
+        cardExists.value = checkCardResponse.data.exists;
+    } catch (cardError) {
+        console.error("Error checking card existence:", cardError);
+    }
+
+    // Proceed with closing and opening modals
+    modalRef.value.closeModal();
+    modalRef1.value.showModal();
+    nfcStatus.value = "";
+    nfcError.value = "";
+};
+
+
 const registerStudent = async () => {
     if (!studentID.value) {
         alert("Please enter a Student ID first.");
@@ -209,25 +236,21 @@ const registerStudent = async () => {
     }
 
     try {
+        // Check if the student exists locally
         const checkStudentResponse = await axios.get(route("student-infos.check"), {
             params: { studentId: studentID.value },
         });
 
+        // If student not found locally, fetch from external API
         if (checkStudentResponse.data.error) {
-            console.log("Student not found locally. Fetching from external API...");
+
             const fetchResponse = await axios.get(route("students.fetch", { studentId: studentID.value }));
             const studentData = fetchResponse.data.student;
 
             modalStudentInfo.value = studentData;
 
-            // Extract the first digit (2 from "2nd")
-            const semesterNumber = studentData.last_enrolled_at.match(/\d+/)[0];
-            // Extract the last two digits of the year (24 from "2024-2025")
-            const year = studentData.last_enrolled_at.match(/\d{4}/)[0].slice(2);
-            semester.value = semesterNumber + year;
-            // Updated to use the separate API
-
-            await router.post(route("student-infos.store"), {
+            // Prepare the form data
+            const studentForm = useForm({
                 studentId: studentData.studentId,
                 fName: studentData.fName,
                 lName: studentData.lName,
@@ -238,43 +261,29 @@ const registerStudent = async () => {
                 last_enrolled_at: studentData.last_enrolled_at
             });
 
-            console.log("Student info stored successfully.");
+            // Submit the form to store student info
+            await studentForm.post(route("student-infos.store"), {
+                onSuccess: async () => {
+                    // Call the new function to handle processing
+                    await processStudentData(studentData);
+                },
+                onError: (errors) => {
+                    nfcStatus.value = "❌ " + (errors.error || "An error occurred while saving student data.");
+                }
+            });
+
         } else {
-            console.log("Student info found locally.");
             modalStudentInfo.value = checkStudentResponse.data.student;
 
-            // Extract the first digit (2 from "2nd")
-            const semesterNumber = modalStudentInfo.value.last_enrolled_at.match(/\d+/)[0];
-            // Extract the last two digits of the year (24 from "2024-2025")
-            const year = modalStudentInfo.value.last_enrolled_at.match(/\d{4}/)[0].slice(2);
-            semester.value = semesterNumber + year;
-            // Updated to use the separate API
+            // Call the new function to handle processing for locally found student
+            await processStudentData(modalStudentInfo.value);
+
         }
 
-        const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
-            params: { studentId: studentID.value },
-        });
-
-        cardExists.value = checkCardResponse.data.exists;
-        modalRef.value.closeModal();
-        modalRef1.value.showModal();
-        nfcStatus.value = "";
-        nfcError.value = "";
     } catch (error) {
-        // If the error is from Inertia and has errors
-        if (error.response && error.response.status === 422) {
-            // Inertia handles validation errors in the 'errors' object, not in the response.data.error
-            const errors = error.response.data.errors;
-            if (errors) {
-                // Check if there's an error for a specific field, or show a general error message
-                nfcStatus.value = "❌ " + Object.values(errors).flat().join(" ");
-            } else {
-                nfcStatus.value = "❌ " + (error.response.data.error || "An error occurred.");
-            }
-        } else {
-            // Fallback for general error handling
-            nfcStatus.value = "❌ " + (error.response?.data?.error || "An unexpected error occurred.");
-        }
+        // General error handling
+        console.error("An unexpected error occurred:", error);
+        nfcStatus.value = "❌ " + (error.response?.data?.error || "An unexpected error occurred.");
     }
 };
 
@@ -296,7 +305,6 @@ const cancelRegistration = () => {
     modalRef.value.closeModal();
     modalRef1.value.closeModal();
     modalRef2.value.closeModal();
-    nfcStatus.value = "Registration cancelled.";
 };
 
 onUnmounted(() => {

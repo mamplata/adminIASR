@@ -37,8 +37,7 @@ class StudentInfoController extends Controller
 
         if (!$matches) {
             return back()
-                ->withErrors(['last_enrolled_at' => 'Invalid last_enrolled_at format.'])
-                ->withInput(); // Keep the input data
+                ->withErrors(['error' => 'Invalid last_enrolled_at format.']);
         }
 
         $enrolledSemester = $matches[1]; // Extract semester (e.g., "2nd")
@@ -50,17 +49,15 @@ class StudentInfoController extends Controller
             ->where('semester', $enrolledSemester)
             ->first();
 
-
         if (!$currentSemester) {
-            return [
-                'message' => 'Student is not currently enrolled and cannot be registered.',
-            ];
+            return back()
+                ->withErrors(['error' => 'Student is not currently enrolled.']);
         }
 
         // Store the student info using the validated data
         $this->studentInfoService->storeStudentInfo($request->validated());
 
-        // Inertia response for success
+        // Return success response using Inertia
         return redirect()->route('registered-cards.index')
             ->with('success', 'Student Info created!');
     }
