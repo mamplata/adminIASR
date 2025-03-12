@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\EntryLogController;
 use App\Http\Controllers\RegisteredCardController;
 use App\Http\Controllers\StudentInfoController;
 use Illuminate\Http\Request;
@@ -17,6 +18,9 @@ Route::middleware('device.check')->group(function () {
 
     // NFC Card Scanning route
     Route::post('/card/scan', [RegisteredCardController::class, 'scanCard']);
+
+    // ENTRY LOGS
+    Route::post('/entry-logs', [EntryLogController::class, 'store']);
 });
 
 

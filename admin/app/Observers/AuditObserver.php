@@ -6,23 +6,22 @@ use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AuditObserver
 {
     public function created(Model $model)
     {
-        $this->logAudit('create', $model, $model->toArray()); // Log full details
+        $this->logAudit('create', $model, $model->toArray());
     }
 
     public function updated(Model $model)
     {
-        // Skip logging if 'password' or 'remember_token' is being updated
         if ($model->isDirty(['password', 'remember_token'])) {
             return;
         }
 
         $changes = [];
-        // You can still use a human-readable timestamp for reference if desired
         $humanReadableTimestamp = $model->updated_at->format('F j, Y, g:i a');
 
         foreach ($model->getChanges() as $attribute => $newValue) {
@@ -31,8 +30,6 @@ class AuditObserver
             }
 
             $oldValue = $model->getOriginal($attribute);
-
-            // Convert array values to strings if necessary
             if (is_array($oldValue)) {
                 $oldValue = json_encode($oldValue);
             }
@@ -50,48 +47,44 @@ class AuditObserver
     {
         $admin = Auth::user();
         $adminId = $admin ? $admin->id : null;
-        $adminName = $admin ? $admin->name : 'Deleted Admin'; // Fallback if missing
+        $adminName = $admin ? $admin->name : 'Deleted Admin';
 
         if ($adminId) {
-            // Update all previous logs so they don't lose reference to admin_name
             AuditLog::where('admin_id', $adminId)
                 ->update(['admin_name' => $adminName]);
         }
 
-        // Log the deletion action
         $this->logAudit('delete', $model, [
             'time' => 'Deleted at ' . Carbon::now()->format('F j, Y, g:i a')
         ], $adminName);
     }
 
-
-    /**
-     * Log the audit details including admin ID and name.
-     */
     private function logAudit(string $action, Model $model, $details, $adminName = null)
     {
-        $adminId = Auth::id();
+        $admin = Auth::user();
+        $adminId = $admin ? $admin->id : null;
+        $adminName = $adminName ?? ($admin ? $admin->name : 'System'); // Default to 'System' if no admin is logged in
 
-        if (!$adminId && $adminName) {
-            // If no admin ID (because user was deleted), fallback to name only
-            AuditLog::create([
-                'admin_id'   => null, // The user is deleted, so we can't store an ID
-                'admin_name' => $adminName, // Store the last known admin name
-                'action'     => $action,
-                'model'      => class_basename($model),
-                'model_id'   => $model->id,
-                'details'    => json_encode($details),
-            ]);
-            return;
-        }
-
-        AuditLog::create([
+        $logData = [
             'admin_id'   => $adminId,
             'admin_name' => $adminName,
             'action'     => $action,
             'model'      => class_basename($model),
             'model_id'   => $model->id,
-            'details'    => json_encode($details),
+            'details'    => $details,
+        ];
+
+        // Log to database
+        AuditLog::create([
+            'admin_id'   => $logData['admin_id'],
+            'admin_name' => $logData['admin_name'],
+            'action'     => $logData['action'],
+            'model'      => $logData['model'],
+            'model_id'   => $logData['model_id'],
+            'details'    => json_encode($logData['details']),
         ]);
+
+        // Log to storage/logs/laravel.log
+        Log::info('Audit Log:', $logData);
     }
 }
