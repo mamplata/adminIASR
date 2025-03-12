@@ -9,47 +9,48 @@
             <form @submit.prevent="registerDevice" class="space-y-4">
                 <input v-model="shortCode" class="input input-bordered w-full" placeholder="Enter short code"
                     required />
-                <button type="submit" class="btn btn-primary w-full">Register</button>
+                <button type="submit" class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">
+                    Register
+                </button>
             </form>
             <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
         </div>
 
         <div v-else class="w-full max-w-lg bg-base-200 p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold text-success mb-4">Device Registered!</h2>
-            <div class="flex gap-4">
-                <button @click="fetchStudents" class="btn btn-secondary">Fetch Students</button>
-                <!-- 🔹 Read Card Button (Disabled when reading) -->
-                <button @click="readNfcCard" :disabled="isReadingNfc" class="btn btn-accent"
-                    :class="{ 'btn-disabled': isReadingNfc }">
-                    {{ isReadingNfc ? "Reading..." : "Read Card" }}
-                </button>
+            <h2 class="text-2xl font-semibold text-success mb-4">
+                Device Registered!
+            </h2>
+            <!-- Display the device name -->
+            <p v-if="deviceName" class="text-lg text-gray-700 mb-4">
+                Registered Device: <strong>{{ deviceName }}</strong>
+            </p>
+
+            <!-- Live scanning animation -->
+            <div class="flex flex-col items-center my-4">
+                <div v-if="isReadingNfc" class="flex items-center space-x-2">
+                    <svg class="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>Scanning for NFC card...</span>
+                </div>
+                <div v-else>
+                    <span class="text-lg text-gray-600">Waiting for card scan...</span>
+                </div>
             </div>
 
-            <!-- List fetched students -->
-            <div class="mt-4">
-                <h3 class="text-lg font-semibold">Student List</h3>
-                <ul v-if="students.length" class="list-disc pl-5 mt-2">
-                    <li v-for="student in students" :key="student.studentId" class="text-sm">
-                        <span class="font-bold">{{ student.fName }} {{ student.lName }}</span> -
-                        {{ student.program }} ({{ student.yearLevel }} Yr)
-                    </li>
-                </ul>
-                <div v-else class="text-gray-500">No students fetched yet.</div>
-            </div>
-
-            <!-- 🔹 Display NFC read raw data -->
-            <div v-if="nfcData" class="mt-4 bg-neutral p-4 rounded-lg shadow">
-                <h3 class="text-lg font-semibold text-white">Card Data</h3>
-                <p class="text-white"><strong>UID:</strong> {{ nfcData.uid }}</p>
-                <p class="text-white"><strong>Stored Data:</strong> {{ nfcData.data }}</p>
-            </div>
-
-            <!-- 🔹 Display scanned student information -->
+            <!-- Display scanned student information -->
             <div v-if="scannedStudent" class="mt-4 bg-base-300 p-4 rounded-lg shadow">
                 <h3 class="text-xl font-semibold">Scanned Student Information</h3>
+                <div v-if="scannedStudent.image" class="mt-2">
+                    <img :src="scannedStudent.image" alt="Student Image" class="w-32 h-32 object-cover rounded-full">
+                </div>
                 <p><strong>Name:</strong> {{ scannedStudent.fName }} {{ scannedStudent.lName }}</p>
                 <p><strong>Program:</strong> {{ scannedStudent.program }}</p>
+                <p><strong>Department:</strong> {{ scannedStudent.department }}</p>
                 <p><strong>Year Level:</strong> {{ scannedStudent.yearLevel }}</p>
+                <p><strong>Last Enrolled At:</strong> {{ scannedStudent.last_enrolled_at }}</p>
             </div>
 
             <p v-if="nfcError" class="text-red-500 mt-2">{{ nfcError }}</p>
@@ -64,37 +65,53 @@ import HTTP from './http';
 
 const shortCode = ref('');
 const isRegistered = ref(false);
+const deviceName = ref('');
 const errorMessage = ref('');
-const students = ref([]);
 const checkingRegistration = ref(true);
-const socket = io('http://localhost:3000');
 
-// NFC read state
+// We'll create the socket connection after we obtain the device fingerprint.
+let socket = null;
+
+// NFC read state and scanned data.
 const nfcData = ref(null);
 const nfcError = ref('');
 const isReadingNfc = ref(false);
-
-// New variable to store scanned student info from scanCard API
 const scannedStudent = ref(null);
 
 onMounted(() => {
     checkRegistration();
-    setupSocketListeners();
 });
 
-// Check device registration status
+// Check device registration status and establish socket connection with fingerprint.
 async function checkRegistration() {
     try {
-        await HTTP.get('/api/device/status', { withCredentials: true });
-        isRegistered.value = true;
+        const response = await HTTP.get('/api/device/status', { withCredentials: true });
+        if (response.data) {
+            if (response.data.device_name) {
+                deviceName.value = response.data.device_name;
+            }
+            // Ensure the API returns the device fingerprint (set in your Laravel middleware).
+            if (response.data.device_fingerprint) {
+                socket = io('http://localhost:4000', {
+                    query: { deviceFingerprint: response.data.device_fingerprint },
+                });
+                setupSocketListeners();
+            }
+
+            console.log(response.data.device_fingerprint);
+            isRegistered.value = true;
+        }
     } catch (error) {
         isRegistered.value = false;
     } finally {
         checkingRegistration.value = false;
+        if (isRegistered.value) {
+            readNfcCard();
+        }
     }
 }
 
-// Register device with a short code
+// Register device with a short code and initialize socket with fingerprint.
 async function registerDevice() {
     errorMessage.value = '';
     try {
@@ -104,69 +121,81 @@ async function registerDevice() {
             { withCredentials: true }
         );
         if (response.data && response.data.success) {
+            if (response.data.device_name) {
+                deviceName.value = response.data.device_name;
+            }
+            if (response.data.device_fingerprint) {
+                socket = io('http://localhost:4000', {
+                    query: { deviceFingerprint: response.data.device_fingerprint },
+                });
+                setupSocketListeners();
+            }
             isRegistered.value = true;
+            readNfcCard();
         }
     } catch (error) {
         errorMessage.value = error.response?.data?.message || 'An unexpected error occurred.';
     }
 }
 
-// Fetch list of students from API
-async function fetchStudents() {
-    try {
-        const response = await HTTP.get('/api/students', { withCredentials: true });
-        students.value = response.data;
-    } catch (error) {
-        console.error('Error fetching students:', error);
-    }
-}
-
-// Initiate NFC card reading (prevents multiple clicks)
+// Initiate NFC card reading. Prevent multiple concurrent scans.
 function readNfcCard() {
     if (isReadingNfc.value) return;
     isReadingNfc.value = true;
     nfcData.value = null;
     nfcError.value = '';
     console.log("📡 Requesting to read NFC card...");
-    socket.emit('readCard');
+    if (socket) {
+        socket.emit('readCard');
+    } else {
+        console.error('Socket connection not established');
+    }
 }
 
-// After a card is read, process it through the scanCard API endpoint
+// Process the scanned card via the scanCard API endpoint.
 async function processScannedCard(card) {
     try {
         const response = await HTTP.post(
             '/api/card/scan',
-            {
-                uid: card.uid,
-                data: card.data
-            },
+            { uid: card.uid, data: card.data },
             { withCredentials: true }
         );
-        // On success, store the returned student info.
         scannedStudent.value = response.data.student;
-        console.log("✅ Card scan processed:", response.data);
     } catch (err) {
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
+        scannedStudent.value = null;
     } finally {
         isReadingNfc.value = false;
+        // Automatically restart scanning after a 2-second delay.
+        if (isRegistered.value) {
+            setTimeout(() => {
+                readNfcCard();
+            }, 2000);
+        }
     }
 }
 
-// Setup socket listeners for NFC events
+// Setup socket listeners for NFC events.
 function setupSocketListeners() {
-    // On successful card read from the NFC reader.
+    if (!socket) return;
+    socket.on('connect', () => {
+        console.log("Socket connected");
+    });
     socket.on('cardRead', (data) => {
-        console.log("✅ NFC Card Read Successfully:", data);
         nfcData.value = data;
-        // Use the card data to process the scan.
         processScannedCard(data);
     });
-
-    // On NFC read failure.
-    socket.on('readFailed', (error) => {
-        console.error("❌ NFC Read Failed:", error);
-        nfcError.value = error.message;
+    socket.on('readFailed', (data) => {
+        console.error("❌ NFC Read Failed:", data);
+        nfcError.value = "Unauthorized access.";
         isReadingNfc.value = false;
+        scannedStudent.value = null;
+        // Restart scanning after an error.
+        if (isRegistered.value) {
+            setTimeout(() => {
+                readNfcCard();
+            }, 2000);
+        }
     });
 }
 </script>

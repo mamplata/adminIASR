@@ -2,13 +2,12 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-
 const { initializeNFC } = require("./utils/nfcHandler");
+
 require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
-// Split the ALLOWED_ORIGINS string into an array.
 const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
 const io = new Server(server, {
@@ -20,18 +19,16 @@ const io = new Server(server, {
   },
 });
 
-// Always initialize NFC scanning, no device checking required.
 (async () => {
   try {
-    console.log("✅ NFC scanning enabled...");
+    console.log("✅ NFC Registration Server initialized...");
     initializeNFC(io);
   } catch (err) {
-    console.error("❌ Initialization error:", err);
+    console.error("❌ NFC Registration Server error:", err);
   }
 })();
 
-// Start the server
 const PORT = 3000;
 server.listen(PORT, () => {
-  console.log(`Socket.io server running on port ${PORT}`);
+  console.log(`NFC Registration Server running on port ${PORT}`);
 });

@@ -59,50 +59,49 @@ class RegisteredCardController extends Controller
         $uid = $request->input('uid');
         $data = $request->input('data');
 
-        // Check if the card contains any data.
-        if (empty($data)) {
-            return response()->json(['error' => 'No data found on the card (unauthorized or empty).'], 400);
-        }
-
-        // Expecting card data in the format "2251901234"
-        if (strlen($data) < 10) {
-            return response()->json(['error' => 'Invalid card data format.'], 400);
+        // Error 1: Unauthorized access.
+        if (empty($data) || strlen($data) < 10) {
+            return response()->json(['error' => 'Unauthorized access.'], 400);
         }
 
         // Split the data:
-        // - First 3 digits for enrollment/semester check
+        // - First 3 digits for enrollment: first digit for semester, next 2 digits for year
         // - Remaining digits for student ID
-        $semesterCode = substr($data, 0, 3);  // e.g. "225"
-        $studentId   = substr($data, 3);       // e.g. "1901234"
+        $enrollmentCode = substr($data, 0, 3);  // e.g. "225"
+        $studentId      = substr($data, 3);      // e.g. "1901234"
 
-        // Further split the semester code into its parts.
-        if (strlen($semesterCode) !== 3) {
-            return response()->json(['error' => 'Invalid semester code format.'], 400);
-        }
-        $yearDigit      = substr($semesterCode, 0, 1); // e.g. "2"
-        $semesterNumber = substr($semesterCode, 1);    // e.g. "25"
-        $yearOrdinal    = $this->convertToOrdinal($yearDigit); // converts 2 -> "2nd"
-
-        // Check semester enrollment.
-        // You could call an external API or use the Semester model directly.
-        // Here, we use the Semester model to verify the semester code.
-        $semesterRecord = Semester::where('semester', $semesterNumber)->first();
-        if (!$semesterRecord) {
-            return response()->json(['error' => 'Enrollment check failed: invalid semester code.'], 400);
+        if (strlen($enrollmentCode) !== 3) {
+            return response()->json(['error' => 'Unauthorized access.'], 400);
         }
 
-        // Check if the card is registered for the student.
+        // Extract semester and year parts. 
+        $semesterDigit = substr($enrollmentCode, 0, 1); // e.g. "2"
+        $yearSuffix    = substr($enrollmentCode, 1);    // e.g. "25"
+
+        // Convert the semester digit to its ordinal form (e.g. 2 -> "2nd")
+        $semesterOrdinal = $this->convertToOrdinal($semesterDigit);
+
+        // Fetch the semester record using the semester ordinal.
+        $semesterRecord = Semester::where('semester', $semesterOrdinal)->first();
+
+        // Convert the full year from the database (e.g., "2025") into its two-digit suffix.
+        $dbYearSuffix = $semesterRecord ? substr($semesterRecord->year, -2) : null;
+
+        // Check if the card is activated for the current semester and if it is registered.
         $registeredCard = RegisteredCard::where('uid', $uid)
             ->where('studentId', $studentId)
             ->first();
-        if (!$registeredCard) {
-            return response()->json(['error' => 'Card not registered for any student.'], 404);
+
+        if (!$semesterRecord || $dbYearSuffix !== $yearSuffix || !$registeredCard) {
+            return response()->json(['error' => 'Card is not activated. Please activate it first by contacting the MSID team.'], 400);
         }
 
         // Fetch the student information.
         $student = StudentInfo::where('studentId', $studentId)->first();
+
+        // Error: Missing student information.
         if (!$student) {
-            return response()->json(['error' => 'Student not found or not currently enrolled.'], 404);
+            return response()->json(['error' => 'No student information found, please inform admin.'], 404);
         }
 
         // Everything checks out. Return the student info along with enrollment details.
@@ -110,14 +109,15 @@ class RegisteredCardController extends Controller
             'message'    => 'Card scanned and verified successfully.',
             'student'    => $student,
             'enrollment' => [
-                'year'     => $yearOrdinal,
-                'semester' => $semesterNumber
+                'semester' => $semesterOrdinal,
+                'year'     => $semesterRecord->year
             ]
         ], 200);
     }
 
+
     /**
-     * Helper function to convert a digit into an ordinal string.
+     * Helper function to convert a single digit into its ordinal string.
      */
     private function convertToOrdinal($number)
     {
