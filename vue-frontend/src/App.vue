@@ -1,12 +1,11 @@
 <template>
-    <div>
-        <RFIDScanner />
+    <div class="min-h-screen bg-base-200 flex items-center justify-center">
+        <div class="w-full">
+            <RFIDScanner />
+        </div>
     </div>
 </template>
 
-
 <script setup>
-import RFIDScanner from './components/RFIDScanner.vue';
-
+import RFIDScanner from "./components/RFIDScanner.vue";
 </script>
-<style></style>
