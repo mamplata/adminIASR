@@ -1,57 +1,93 @@
 <template>
   <div class="flex flex-col lg:flex-row h-screen w-full">
-    <div class="w-full lg:w-2/5 flex flex-col items-center justify-center p-8">
-      <div>
-        <img :src="iASRPNC" alt="iASR Logo" class="w-48">
+    <!-- Left Section -->
+    <div class="w-full lg:w-2/5 flex flex-col items-center justify-center">
+      <img :src="iASRPNC" alt="iASR Logo" class="w-48">
+      <div v-if="!cardTapped" class="text-center mt-12">
+        <img :src="logoRFID" alt="RFID Icon" class="w-32 mx-auto animate-zoom-in-out">
+        <h1 class="text-4xl font-bold text-green-900 mt-4">Tap your card</h1>
       </div>
-      <div class="text-center mt-12">
-        <img :src="logoRFID" alt="RFID Icon" class="w-32 mx-auto animate-bounce">
-        <h1 class="text-4xl font-bold text-green-600 mt-4">Tap your card</h1>
+
+      <div v-else class="text-center mt-12">
+        <!-- Card ID -->
+        <div class="border border-black rounded-lg p-4 text-center text-lg font-semibold w-64 mb-20">
+          Card ID
+        </div>
+
+        <!-- Schedule -->
+        <div class="border border-black rounded-lg p-4 text-center text-lg font-semibold w-64">
+          Schedule
+        </div>
       </div>
+
+      <button @click="tapCard" class="mt-4 px-4 py-2 bg-green-600 text-white rounded">
+        Simulate Card Tap
+      </button>
     </div>
 
-    <div class="w-full lg:w-3/5 relative">
-      <carousel :items-to-show="1" :wrap-around="true" :autoplay="3000" class="w-full h-full">
-        <slide v-for="(announcement, index) in announcements" :key="index" class="w-full h-full">
-          <div class="w-full h-full flex justify-center items-center">
+    <!-- Right Section (Custom Carousel) -->
+    <div class="w-full lg:w-3/5 relative overflow-hidden flex justify-center items-center"
+      :style="{ backgroundImage: `url(${bgAnnounce})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
+      <div class="w-full h-[400px] lg:h-[500px] overflow-hidden relative">
+        <!-- Carousel Container -->
+        <div class="flex w-full h-full" :style="containerStyle">
+          <!-- Slides -->
+          <div v-for="(announcement, index) in slides" :key="index" class="flex-none w-full h-full">
             <img :src="announcement.img" alt="Announcement" class="w-full h-full object-cover">
           </div>
-        </slide>
-      </carousel>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import iASRPNC from "@/assets/img/iASRPNC.png";
 import logoRFID from "@/assets/img/logoRFID.png";
+import bgAnnounce from "@/assets/img/bgAnnounce.png";
 import announce1 from "@/assets/img/announce1.jpg";
 import announce2 from "@/assets/img/announce2.jpg";
-import { Carousel, Slide } from "vue3-carousel";
-import "vue3-carousel/dist/carousel.css";
 
-export default {
-  components: {
-    Carousel,
-    Slide,
-  },
-  data() {
-    return {
-      iASRPNC,
-      logoRFID,
-      announcements: [
-        { img: announce1 },
-        { img: announce2 }
-      ]
-    };
-  }
+const cardTapped = ref(false);
+
+// Announcements array
+const images = [{ img: announce1 }, { img: announce2 }];
+
+// Duplicate the first slide to create an infinite loop effect
+const slides = [...images, images[0]];
+
+const currentIndex = ref(0);
+const disableTransition = ref(false);
+let timer = null;
+
+// Simulate card tap event
+const tapCard = () => {
+  cardTapped.value = !cardTapped.value;
 };
-</script>
 
-<style scoped>
-/* Ensure full-bleed effect */
-.carousel {
-  width: 100%;
-  height: 100%;
-}
-</style>
+// Compute transform styles for sliding effect
+const containerStyle = computed(() => ({
+  transform: `translateX(-${currentIndex.value * 100}%)`,
+  transition: disableTransition.value ? "none" : "transform 0.5s ease-in-out",
+}));
+
+// Auto-slide every 3 seconds
+onMounted(() => {
+  timer = setInterval(() => {
+    currentIndex.value++;
+
+    // If reaching the last duplicate slide, reset the position instantly
+    if (currentIndex.value === images.length) {
+      setTimeout(() => {
+        disableTransition.value = true;
+        currentIndex.value = 0;
+        setTimeout(() => (disableTransition.value = false), 50);
+      }, 500);
+    }
+  }, 3000);
+});
+
+// Clear interval when component is unmounted
+onUnmounted(() => clearInterval(timer));
+</script>
