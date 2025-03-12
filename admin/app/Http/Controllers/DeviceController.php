@@ -82,7 +82,11 @@ class DeviceController extends Controller
 
         // Return a successful response with a set-cookie header
         return response()
-            ->json(['success' => true])
+            ->json([
+                'success' => true,
+                'device_name' => $device->name,
+                'device_fingerprint' => $device->deviceFingerprint,
+            ])
             ->cookie(
                 $cookieName,
                 $device->deviceFingerprint,

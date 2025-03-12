@@ -115,26 +115,29 @@ async function checkRegistration() {
 async function registerDevice() {
     errorMessage.value = '';
     try {
-        const response = await HTTP.post(
+        const { data } = await HTTP.post(
             '/api/device/register',
             { short_code: shortCode.value },
             { withCredentials: true }
         );
-        if (response.data && response.data.success) {
-            if (response.data.device_name) {
-                deviceName.value = response.data.device_name;
-            }
-            if (response.data.device_fingerprint) {
+        if (data && data.success) {
+            // Set device name if available.
+            deviceName.value = data.device_name || '';
+
+            // Initialize the socket connection with the device fingerprint.
+            if (data.device_fingerprint) {
                 socket = io('http://localhost:4000', {
-                    query: { deviceFingerprint: response.data.device_fingerprint },
+                    query: { deviceFingerprint: data.device_fingerprint },
                 });
                 setupSocketListeners();
             }
+
             isRegistered.value = true;
             readNfcCard();
         }
     } catch (error) {
-        errorMessage.value = error.response?.data?.message || 'An unexpected error occurred.';
+        errorMessage.value =
+            error.response?.data?.message || 'An unexpected error occurred.';
     }
 }
 
