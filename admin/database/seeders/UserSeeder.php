@@ -22,20 +22,5 @@ class UserSeeder extends Seeder
                 'role'     => 'admin',
             ]);
         });
-
-        // $names = ['John', 'Jane', 'May'];
-
-        // User::withoutEvents(function () use ($names) {
-        //     for ($i = 1; $i <= 20; $i++) {
-        //         // Cycle through the names array
-        //         $name = $names[($i - 1) % count($names)];
-        //         User::create([
-        //             'name'     => $name . ' ' . $i, // e.g., "John 1", "Jane 2", "May 3", etc.
-        //             'email'    => strtolower($name) . $i . '@gmail.com', // e.g., "john1@example.com"
-        //             'password' => Hash::make('password'),
-        //             'role'     => 'admin',
-        //         ]);
-        //     }
-        // });
     }
 }
