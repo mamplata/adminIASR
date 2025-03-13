@@ -110,6 +110,16 @@ Route::get('students/{studentId}', function ($studentId) {
             'image'      => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
+        '1901112' => [
+            'studentId'  => '1901112',
+            'lName'      => 'Taylor',
+            'fName'      => 'Michael',
+            'program'    => 'BSIT',
+            'department' => 'CCS',
+            'yearLevel'  => '2',
+            'image'      => 'https://placehold.co/400',
+            'last_enrolled_at' => "2nd 2025",
+        ],
     ];
 
     // Check if the requested studentId exists

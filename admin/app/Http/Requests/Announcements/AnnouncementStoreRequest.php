@@ -18,6 +18,7 @@ class AnnouncementStoreRequest extends FormRequest
             'publisher'         => 'required|string',
             'type'              => 'required|in:text,image',
             'publication_date'  => 'required|date',
+            'end_date'          => 'required|date|after_or_equal:publication_date',
             'content'           => 'required', // For text, JSON is expected; for image, a file is expected.
         ];
     }

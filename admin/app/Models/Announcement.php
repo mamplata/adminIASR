@@ -15,6 +15,7 @@ class Announcement extends Model
         'type',
         'content',
         'publication_date',
+        'end_date',
     ];
 
     protected $casts = [
