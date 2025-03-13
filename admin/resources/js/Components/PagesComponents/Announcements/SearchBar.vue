@@ -122,7 +122,12 @@ const computedStartDate = computed({
 
 const computedEndDate = computed({
     get: () => props.endDate,
-    set: (value) => emit('update:endDate', value),
+    set: (value) => {
+        emit('update:endDate', value);
+        if (props.startDate && value < props.startDate) {
+            emit('update:startDate', value);
+        }
+    },
 });
 
 // Computed list of programs based on the currently selected department.
