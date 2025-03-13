@@ -42,12 +42,17 @@ class AuditLogService
 
         $actions = AuditLog::distinct()->pluck('action')->toArray();
         $models = AuditLog::distinct()->pluck('model')->toArray();
+
         // Get unique list of admin names (from audit_logs & users)
         $auditAdminNames = AuditLog::whereNotNull('admin_name')->distinct()->pluck('admin_name')->toArray();
         $activeAdminNames = User::whereIn('id', AuditLog::whereNotNull('admin_id')->pluck('admin_id'))
             ->pluck('name')
             ->toArray();
         $admins = array_unique(array_merge($auditAdminNames, $activeAdminNames)); // Merge deleted & active admin names
+
+        // Get min and max dates from audit logs
+        $min_date = AuditLog::min('created_at');
+        $max_date = AuditLog::max('created_at');
 
         $auditLogs = $query->paginate(5)->through(function ($log) {
             $details = $log->details;
@@ -80,6 +85,6 @@ class AuditLogService
             ];
         });
 
-        return compact('actions', 'models', 'admins', 'auditLogs');
+        return compact('actions', 'models', 'admins', 'auditLogs', 'min_date', 'max_date');
     }
 }

@@ -4,7 +4,8 @@
 
         <AuditLogFilterPanel v-model:selectedAction="selectedAction" v-model:selectedModel="selectedModel"
             v-model:selectedAdmin="selectedAdmin" v-model:startDate="startDate" v-model:endDate="endDate"
-            :actions="actions" :models="models" :admins="admins" @search="fetchLogs(1)" @reset="resetSearch" />
+            :actions="actions" :models="models" :admins="admins" :minDate="minDate" :maxDate="maxDate"
+            @search="fetchLogs(1)" @reset="resetSearch" />
 
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
             @change-page="fetchLogs" :excludedColumns="['details']">
@@ -43,6 +44,8 @@ const props = defineProps({
     admins: Array,
     actions: Array,
     models: Array,
+    minDate: String,
+    maxDate: String
 });
 
 // Filter states

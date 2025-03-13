@@ -24,6 +24,8 @@ class AuditLogController extends Controller
             'actions' => array_values($data['actions']),
             'admins' => $data['admins'],
             'auditLogs' => $data['auditLogs'],
+            'minDate' => $data['min_date'],
+            'maxDate' => $data['max_date'],
             'action' =>  $request->input('action'),
             'model' =>  $request->input('model'),
             'admin_id' =>  $request->input('admin_id'),

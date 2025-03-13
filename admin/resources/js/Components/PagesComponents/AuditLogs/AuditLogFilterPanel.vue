@@ -9,7 +9,8 @@
 
         <!-- Second Row: Date Range and Buttons -->
         <div class="flex flex-col md:flex-row items-center gap-2 mt-4">
-            <DateRangePicker class="w-full" v-model:startDate="localStartDate" v-model:endDate="localEndDate" />
+            <DateRangePicker class="w-full" v-model:startDate="localStartDate" v-model:endDate="localEndDate"
+                :minDate="minDate" :maxDate="maxDate" />
             <button @click="$emit('search')" class="btn btn-success text-white hover:bg-[#20714c] w-full md:w-auto">
                 Search
             </button>
@@ -33,7 +34,9 @@ const props = defineProps({
     endDate: String,
     actions: Array,
     models: Array,
-    admins: Array
+    admins: Array,
+    minDate: String,
+    maxDate: String
 });
 const emits = defineEmits([
     "update:selectedAction",
