@@ -63,6 +63,7 @@ const announcementForm = useForm({
     publisher: "",
     departments: "",
     publication_date: "",
+    end_date: "",
     type: "",
     content: "",
     file: null,
@@ -132,6 +133,14 @@ const isFileRequired = computed(() => {
     return announcementForm.type === 'image' && (!isEditing.value || !hasImage.value);
 });
 
+function formatDate(dateString) {
+    const dateObj = new Date(dateString);
+    const year = dateObj.getFullYear();
+    const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
+    const day = ("0" + dateObj.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
+}
+
 // Methods
 function openModal(action, row = null) {
     resetForm();
@@ -144,7 +153,8 @@ function openModal(action, row = null) {
         const year = dateObj.getFullYear();
         const month = ("0" + (dateObj.getMonth() + 1)).slice(-2);
         const day = ("0" + dateObj.getDate()).slice(-2);
-        announcementForm.publication_date = `${year}-${month}-${day}`;
+        announcementForm.publication_date = formatDate(row.publication_date);
+        announcementForm.end_date = formatDate(row.end_date);
         announcementForm.type = row.type;
         if (row.type === 'text') {
             try {

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('type'); // 'text' or 'image'
             $table->json('content'); // JSON field for text or image metadata
             $table->date('publication_date');
+            $table->date('end_date');
             $table->timestamps();
         });
     }

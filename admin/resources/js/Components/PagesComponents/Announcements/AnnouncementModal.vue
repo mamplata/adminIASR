@@ -55,6 +55,15 @@
             {{ announcementForm.errors.publication_date }}
         </div>
 
+        <!-- End Date of Announcement -->
+        <label class="label text-gray-900 dark:text-white">End Date</label>
+        <input v-model="announcementForm.end_date" type="date" :min="announcementForm.publication_date"
+            class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
+            required />
+        <div v-if="announcementForm.errors.end_date" class="text-sm mb-2 text-red-500 dark:text-white">
+            {{ announcementForm.errors.end_date }}
+        </div>
+
         <!-- Type Dropdown -->
         <label class="label text-gray-900 dark:text-white">Type</label>
         <select v-model="announcementForm.type"
