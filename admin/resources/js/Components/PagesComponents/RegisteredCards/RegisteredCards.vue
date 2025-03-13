@@ -37,7 +37,7 @@
         <DaisyModal title="Student Information" ref="modalRef2">
             <ConfirmStudentInfo :studentID="studentID" :modalStudentInfo="modalStudentInfo" :cardExists="cardExists"
                 :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration"
-                @confirm-registration="confirmRegistration" />
+                @confirm-registration="confirmRegistration" :isEnrolled="isEnrolled" />
         </DaisyModal>
     </div>
 </template>
@@ -106,6 +106,7 @@ const scannedCardUID = ref("");
 // Modal-related reactive variables
 const modalStudentInfo = ref(null); // Holds student info when loaded
 const cardExists = ref(false); // Tracks if a card already exists
+const isEnrolled = ref(true); // Tracks enrollment status
 
 // References to DaisyModal component instances
 const modalRef = ref(null); // NFC scanning modal
@@ -150,26 +151,41 @@ onMounted(() => {
         modalRef.value.closeModal();
 
         try {
+            // Step 1: Check if the card is already registered
             const checkResponse = await axios.get(route("registered-cards.checkCard"), {
                 params: { uid: scannedCardUID.value },
             });
+
             if (checkResponse.data.exists) {
                 studentID.value = checkResponse.data.studentId;
                 modalStudentInfo.value = checkResponse.data.studentInfo;
+
+                // Step 2: Extract semester and year
                 const semesterNumber = modalStudentInfo.value.last_enrolled_at.match(/\d+/)[0];
                 const year = modalStudentInfo.value.last_enrolled_at.match(/\d{4}/)[0].slice(2);
                 semester.value = semesterNumber + year;
                 cardExists.value = true;
+
+                // Step 3: Check enrollment status
+                const enrollmentResponse = await axios.get(route("check-enrollment-status", { studentId: studentID.value }));
+
+                if (!enrollmentResponse.data.isEnrolled) {
+                    isEnrolled.value = false;
+                    nfcStatus.value = "❌ Student is not currently enrolled.";
+                }
+
+                // If enrolled, show the confirmation modal
                 modalRef2.value.showModal();
             } else {
                 cardExists.value = false;
                 modalRef1.value.showModal();
             }
         } catch (error) {
-            console.error("Error checking card existence:", error);
+            console.error("Error checking card existence or enrollment status:", error);
             modalRef1.value.showModal();
         }
     });
+
 
     socket.on("studentRegistered", (student) => {
         nfcStatus.value = `Student Registered Successfully and Card Written! Student ID: ${student.studentId} UID: ${student.uid}`;
@@ -309,6 +325,7 @@ const cancelRegistration = () => {
     modalRef.value.closeModal();
     modalRef1.value.closeModal();
     modalRef2.value.closeModal();
+    isEnrolled.value = true;
 };
 
 onUnmounted(() => {

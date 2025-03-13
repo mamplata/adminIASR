@@ -61,4 +61,34 @@ class StudentInfoController extends Controller
         return redirect()->route('registered-cards.index')
             ->with('success', 'Student Info created!');
     }
+
+    public function checkEnrollmentStatus(Request $request)
+    {
+        $studentId = $request->studentId;
+
+        // Get the last enrolled semester from StudentInfo
+        $studentInfo = StudentInfo::where('studentId', $studentId)->first();
+
+        if (!$studentInfo || !$studentInfo->last_enrolled_at) {
+            return response()->json(['isEnrolled' => false, 'message' => 'Student record not found.']);
+        }
+
+        // Extract last_enrolled_at (format: "2nd 2025")
+        preg_match('/(1st|2nd)\s(\d{4})/', $studentInfo->last_enrolled_at, $matches);
+
+        if (!$matches) {
+            return response()->json(['isEnrolled' => false, 'message' => 'Invalid last_enrolled_at format.']);
+        }
+
+        $enrolledSemester = $matches[1]; // e.g., "2nd"
+        $enrolledYear = $matches[2]; // e.g., "2025"
+
+        // Check if the semester exists in the database
+        $currentSemester = DB::table('semesters')
+            ->where('year', $enrolledYear)
+            ->where('semester', $enrolledSemester)
+            ->exists();
+
+        return response()->json(['isEnrolled' => $currentSemester]);
+    }
 }

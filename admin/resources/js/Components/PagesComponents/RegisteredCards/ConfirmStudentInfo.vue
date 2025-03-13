@@ -52,7 +52,7 @@
         <!-- Action Buttons -->
         <footer class="mt-6 flex justify-end space-x-2">
             <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
-            <button class="btn btn-primary" @click="handleConfirm">Validate</button>
+            <button v-if="isEnrolled" class="btn btn-primary" @click="handleConfirm">Validate</button>
         </footer>
     </div>
 
@@ -78,6 +78,10 @@ const props = defineProps({
     nfcStatus: {
         type: String,
         default: ''
+    },
+    isEnrolled: {
+        type: Boolean,
+        default: true
     }
 })
 

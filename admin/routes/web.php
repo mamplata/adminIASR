@@ -75,6 +75,7 @@ Route::middleware(['auth'])->group(
     function () {
         Route::post('/student-infos', [StudentInfoController::class, 'store'])->name('student-infos.store');
         Route::get('student-infos/check', [StudentInfoController::class, 'check'])->name('student-infos.check');
+        Route::get('/check-enrollment-status', [StudentInfoController::class, 'checkEnrollmentStatus'])->name('check-enrollment-status');
     }
 );
 
