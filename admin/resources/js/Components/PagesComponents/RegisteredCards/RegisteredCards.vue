@@ -171,7 +171,6 @@ onMounted(() => {
 
                 if (!enrollmentResponse.data.isEnrolled) {
                     isEnrolled.value = false;
-                    nfcStatus.value = "❌ Student is not currently enrolled.";
                 }
 
                 // If enrolled, show the confirmation modal

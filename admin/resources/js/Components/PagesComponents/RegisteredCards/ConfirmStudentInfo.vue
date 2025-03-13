@@ -41,7 +41,8 @@
             </div>
             <div>
                 <strong>Status: </strong>
-                <span v-if="cardExists" class="text-warning">Card already exists.</span>
+                <span v-if="!isEnrolled" class="text-danger">Not yet enrolled.</span>
+                <span v-else-if="cardExists" class="text-warning">Card already exists.</span>
                 <span v-else class="text-success">New registration.</span>
             </div>
             <div v-if="nfcStatus" class="mt-2 normal-case">
