@@ -31,8 +31,12 @@ const internalEndDate = computed({
     },
     set(val) {
         emits("update:endDate", val);
+        if (props.startDate && val < props.startDate) {
+            emits("update:startDate", val);
+        }
     }
 });
+
 
 // Compute maxStartDate based on internalEndDate or today's date
 const maxStartDate = computed(() => {
