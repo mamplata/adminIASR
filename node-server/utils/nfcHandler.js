@@ -2,7 +2,6 @@
 const { NFC } = require("nfc-pcsc");
 
 let nfcReader = null;
-let pendingStudent = { id: null, semester: null };
 let nfcListening = false;
 
 function formatSemesterData(semester, studentId) {
@@ -35,41 +34,45 @@ function initializeNFC(io) {
     nfcReader = reader;
 
     reader.on("card", async (card) => {
+      // Only process card events if scanning is enabled.
       if (!nfcListening) {
         console.log("⚠️ NFC scanning disabled.");
         return;
       }
-
-      console.log(`✅ Card detected for Student ID ${pendingStudent.id}, Semester ${pendingStudent.semester}: ${card.uid}`);
-      const record = { studentId: pendingStudent.id, uid: card.uid };
-      io.emit("cardScanned", record);
+      console.log(`✅ Card detected with UID: ${card.uid}`);
+      // Emit the UID; the client will later include it with student data.
+      io.emit("cardScanned", { uid: card.uid });
       nfcListening = false;
     });
   });
 
   io.on("connection", (socket) => {
-    socket.on("registerStudent", ({ studentID, semester }) => {
-      pendingStudent.id = studentID;
-      pendingStudent.semester = semester;
+    // Start scanning when the client is ready.
+    socket.on("startScan", () => {
       nfcListening = true;
       socket.emit("nfcStatus", "Tap your NFC card now!");
     });
 
-    socket.on("dbStored", async (data) => {
+    // Handle registration confirmation, including the scanned UID.
+    // Expected data: { studentID, semester, uid }
+    socket.on("confirmRegistration", async (data) => {
       try {
+        const { studentID, semester, uid } = data;
         const block = 4;
         const sectorTrailerBlock = 7;
         const keyType = 0x60;
         const defaultKey = Buffer.from([0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
         const customKey = Buffer.from([0xa0, 0xb1, 0xc2, 0xd3, 0xe4, 0xf5]);
 
-        const semesterData = formatSemesterData(pendingStudent.semester, pendingStudent.id);
+        const semesterData = formatSemesterData(semester, studentID);
         console.log(`📌 Formatted semester data: ${semesterData}`);
 
+        // Attempt authentication and write to the card.
         const authKey = await authenticateCard(nfcReader, block, defaultKey, customKey);
         await nfcReader.write(block, semesterData, 16);
         console.log(`✅ Successfully wrote semester data to Block ${block}`);
 
+        // If the card was authenticated using the default key, update the sector trailer.
         if (authKey === "default") {
           await nfcReader.authenticate(sectorTrailerBlock, keyType, defaultKey);
           const accessBits = Buffer.from([0xff, 0x07, 0x80, 0x69]);
@@ -78,12 +81,10 @@ function initializeNFC(io) {
           console.log("🔒 Block 4 is now locked with a custom key!");
         }
 
-        io.emit("studentRegistered", data);
-        pendingStudent.id = null;
-        pendingStudent.semester = null;
+        socket.emit("studentRegistered", data);
       } catch (err) {
         console.error("❌ Error writing to NFC:", err.message);
-        io.emit("registrationFailed", { message: `NFC Write Error: ${err.message}` });
+        socket.emit("registrationFailed", { message: `NFC Write Error: ${err.message}` });
       }
     });
   });

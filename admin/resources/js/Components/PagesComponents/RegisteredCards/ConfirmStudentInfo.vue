@@ -35,6 +35,10 @@
                 <strong>Year Level: </strong>
                 <span>{{ modalStudentInfo.yearLevel }}</span>
             </div>
+            <div v-if="modalStudentInfo">
+                <strong>Last Enrolled At: </strong>
+                <span>{{ modalStudentInfo.last_enrolled_at }}</span>
+            </div>
             <div>
                 <strong>Status: </strong>
                 <span v-if="cardExists" class="text-warning">Card already exists.</span>
@@ -48,7 +52,7 @@
         <!-- Action Buttons -->
         <footer class="mt-6 flex justify-end space-x-2">
             <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
-            <button class="btn btn-primary" @click="handleConfirm">Continue</button>
+            <button class="btn btn-primary" @click="handleConfirm">Validate</button>
         </footer>
     </div>
 

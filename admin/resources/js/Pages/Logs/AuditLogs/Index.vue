@@ -16,8 +16,7 @@ import { useForm, router } from '@inertiajs/vue3';
             </template>
 
             <!-- Passing the users prop to the UserManagement component -->
-            <AuditLogs :auditLogs="auditLogs" :filters="filters" :admins="admins" :actions="actions" :types="types"
-                :minDate="minDate" :maxDate="maxDate" />
+            <AuditLogs :auditLogs="auditLogs" :filters="filters" :admins="admins" :actions="actions" :types="types" />
         </AuthenticatedLayout>
     </div>
 </template>
@@ -30,8 +29,6 @@ export default {
         admins: Array,
         actions: Array,
         types: Array,
-        minDate: String,
-        maxDate: String
     }
 };
 </script>

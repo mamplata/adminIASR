@@ -38,6 +38,29 @@ class RegisteredCardController extends Controller
         return response()->json($this->registeredCardService->checkStudentID($request->studentId));
     }
 
+    public function checkCard(Request $request): array
+    {
+        // Retrieve the 'uid' parameter from the request
+        $uid = $request->input('uid');
+
+        // Check if a registered card exists with the provided UID
+        $registeredCard = RegisteredCard::where('uid', $uid)->first();
+        $exists = $registeredCard !== null;
+
+        // If the card exists, retrieve the associated student information
+        $studentInfo = $exists ? StudentInfo::where('studentId', $registeredCard->studentId)->first() : null;
+
+        // Return the response as an array
+        return [
+            'exists'      => $exists,
+            'studentId'   => $exists ? (string) $registeredCard->studentId : null,
+            'studentInfo' => $studentInfo,
+            'message'     => $exists
+                ? 'Card already registered with Student ID: ' . $registeredCard->studentId
+                : 'Card is not registered.',
+        ];
+    }
+
     public function store(StoreRegisteredCardRequest $request)
     {
         $this->registeredCardService->storeOrUpdate($request->validated());

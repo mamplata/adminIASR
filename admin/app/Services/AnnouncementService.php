@@ -46,7 +46,7 @@ class AnnouncementService
 
         return $query->paginate(5)
             ->appends($request->only(['search', 'departments', 'programs', 'start_date', 'end_date']))
-            ->through(fn ($announcement) => [
+            ->through(fn($announcement) => [
                 'id'                => $announcement->id,
                 'departments'       => $announcement->departments,
                 'publisher'         => $announcement->publisher,
@@ -65,15 +65,15 @@ class AnnouncementService
         // Get unique departments
         $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
         $searchDepartments = collect($rawDepartments)
-            ->flatMap(fn ($deptString) => explode(';', $deptString))
-            ->map(fn ($dept) => strpos(trim($dept), ':') !== false ? trim(explode(':', $dept)[0]) : trim($dept))
+            ->flatMap(fn($deptString) => explode(';', $deptString))
+            ->map(fn($dept) => strpos(trim($dept), ':') !== false ? trim(explode(':', $dept)[0]) : trim($dept))
             ->unique()
             ->values()
             ->toArray();
 
         // Get programs grouped by department
         $searchPrograms = collect($rawDepartments)
-            ->flatMap(fn ($deptString) => explode(';', $deptString))
+            ->flatMap(fn($deptString) => explode(';', $deptString))
             ->flatMap(function ($entry) {
                 $parts = explode(':', $entry);
                 if (count($parts) < 2) return [];
@@ -81,10 +81,10 @@ class AnnouncementService
                 $programString = trim($parts[1]);
 
                 return collect(explode(',', $programString))
-                    ->map(fn ($program) => ['department' => $department, 'program' => trim($program)]);
+                    ->map(fn($program) => ['department' => $department, 'program' => trim($program)]);
             })
             ->groupBy('department')
-            ->map(fn ($group) => $group->pluck('program')->unique()->values())
+            ->map(fn($group) => $group->pluck('program')->unique()->values())
             ->toArray();
 
         return compact('searchDepartments', 'searchPrograms');
@@ -97,7 +97,7 @@ class AnnouncementService
     {
         $departments = Department::pluck('code')->toArray();
 
-        $departmentPrograms = Department::with('programs')->get()->mapWithKeys(fn ($department) => [
+        $departmentPrograms = Department::with('programs')->get()->mapWithKeys(fn($department) => [
             $department->code => $department->programs->pluck('code')->toArray()
         ])->toArray();
 
@@ -108,50 +108,10 @@ class AnnouncementService
      * Create a new announcement with an end date.
      */
     public function create(array $data)
-{
-    $request = request();
+    {
+        $request = request();
 
-    if ($data['type'] === 'image' && $request->hasFile('content')) {
-        $file = $request->file('content');
-        $filePath = $file->store('announcements', 'public');
-        $data['content'] = [
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => Storage::url($filePath),
-            'mime_type' => $file->getClientMimeType(),
-            'size'      => $file->getSize(),
-        ];
-    } else {
-        $content = json_decode($data['content'], true);
-        if (!$content || !isset($content['title']) || !isset($content['body'])) {
-            throw new \Exception('Invalid content format.');
-        }
-        $data['content'] = [
-            'title' => $content['title'],
-            'body'  => $content['body'],
-        ];
-    }
-
-    // ✅ Ensure `end_date` is required and not null
-    if (!isset($data['end_date']) || empty($data['end_date'])) {
-        throw new \Exception('End date is required.');
-    }
-
-    Announcement::create($data);
-}
-
-public function update(Announcement $announcement, array $data)
-{
-    $request = request();
-
-    if ($data['type'] === 'image') {
-        if ($request->hasFile('content')) {
-            $currentContent = $announcement->content;
-            if (is_array($currentContent) && isset($currentContent['file_path'])) {
-                $relativePath = str_replace('/storage/', '', $currentContent['file_path']);
-                if (Storage::disk('public')->exists($relativePath)) {
-                    Storage::disk('public')->delete($relativePath);
-                }
-            }
+        if ($data['type'] === 'image' && $request->hasFile('content')) {
             $file = $request->file('content');
             $filePath = $file->store('announcements', 'public');
             $data['content'] = [
@@ -161,26 +121,66 @@ public function update(Announcement $announcement, array $data)
                 'size'      => $file->getSize(),
             ];
         } else {
-            unset($data['content']);
+            $content = json_decode($data['content'], true);
+            if (!$content || !isset($content['title']) || !isset($content['body'])) {
+                throw new \Exception('Invalid content format.');
+            }
+            $data['content'] = [
+                'title' => $content['title'],
+                'body'  => $content['body'],
+            ];
         }
-    } else {
-        $content = json_decode($data['content'], true);
-        if (!$content || !isset($content['title']) || !isset($content['body'])) {
-            throw new \Exception('Invalid content format.');
+
+        // ✅ Ensure `end_date` is required and not null
+        if (!isset($data['end_date']) || empty($data['end_date'])) {
+            throw new \Exception('End date is required.');
         }
-        $data['content'] = [
-            'title' => $content['title'],
-            'body'  => $content['body'],
-        ];
+
+        Announcement::create($data);
     }
 
-    // ✅ Ensure `end_date` is required for updates as well
-    if (!isset($data['end_date']) || empty($data['end_date'])) {
-        throw new \Exception('End date is required.');
-    }
+    public function update(Announcement $announcement, array $data)
+    {
+        $request = request();
 
-    $announcement->update($data);
-}
+        if ($data['type'] === 'image') {
+            if ($request->hasFile('content')) {
+                $currentContent = $announcement->content;
+                if (is_array($currentContent) && isset($currentContent['file_path'])) {
+                    $relativePath = str_replace('/storage/', '', $currentContent['file_path']);
+                    if (Storage::disk('public')->exists($relativePath)) {
+                        Storage::disk('public')->delete($relativePath);
+                    }
+                }
+                $file = $request->file('content');
+                $filePath = $file->store('announcements', 'public');
+                $data['content'] = [
+                    'file_name' => $file->getClientOriginalName(),
+                    'file_path' => Storage::url($filePath),
+                    'mime_type' => $file->getClientMimeType(),
+                    'size'      => $file->getSize(),
+                ];
+            } else {
+                unset($data['content']);
+            }
+        } else {
+            $content = json_decode($data['content'], true);
+            if (!$content || !isset($content['title']) || !isset($content['body'])) {
+                throw new \Exception('Invalid content format.');
+            }
+            $data['content'] = [
+                'title' => $content['title'],
+                'body'  => $content['body'],
+            ];
+        }
+
+        // ✅ Ensure `end_date` is required for updates as well
+        if (!isset($data['end_date']) || empty($data['end_date'])) {
+            throw new \Exception('End date is required.');
+        }
+
+        $announcement->update($data);
+    }
 
     /**
      * Delete an announcement and remove associated files if necessary.

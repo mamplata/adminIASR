@@ -23,6 +23,9 @@ class StudentInfoService
 
     public function storeStudentInfo(array $validatedData): void
     {
-        StudentInfo::create($validatedData);
+        StudentInfo::updateOrCreate(
+            ['studentId' => $validatedData['studentId']],
+            $validatedData
+        );
     }
 }

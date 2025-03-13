@@ -50,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/registered-cards', [RegisteredCardController::class, 'index'])->name('registered-cards.index');
     Route::post('/registered-cards', [RegisteredCardController::class, 'store'])->name('registered-cards.store');
     Route::get('/register-cards/checkStudentID', [RegisteredCardController::class, 'checkStudentID'])->name('registered-cards.checkStudentID');
+    Route::get('/registered-cards/check-card', [RegisteredCardController::class, 'checkCard'])->name('registered-cards.checkCard');
     Route::delete('/registered-cards/{id}', [RegisteredCardController::class, 'destroy'])
         ->name('registered-cards.destroy');
 });

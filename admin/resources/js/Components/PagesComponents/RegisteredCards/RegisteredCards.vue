@@ -21,34 +21,37 @@
             @confirm="handleConfirmDelete" @cancel="handleCancelDelete" />
 
         <!-- DaisyModal Component Usage -->
-        <DaisyModal title="Enter Student ID" ref="modalRef">
+
+        <!-- 1. NFC Scanning Modal (shown first) -->
+        <DaisyModal title="Waiting for NFC Tap" ref="modalRef">
+            <NfcScanningState :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration" />
+        </DaisyModal>
+
+        <!-- 2. Student ID Input Modal -->
+        <DaisyModal title="Enter Student ID" ref="modalRef1">
             <EnterStudentForm v-model="studentID" :isLoading="isLoading" @cancel-registration="cancelRegistration"
                 :nfcStatus="nfcStatus" @register-student="registerStudent" />
         </DaisyModal>
 
-        <DaisyModal title="Student Information" ref="modalRef1">
+        <!-- 3. Confirmation Modal -->
+        <DaisyModal title="Student Information" ref="modalRef2">
             <ConfirmStudentInfo :studentID="studentID" :modalStudentInfo="modalStudentInfo" :cardExists="cardExists"
                 :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration"
                 @confirm-registration="confirmRegistration" />
-        </DaisyModal>
-
-
-        <DaisyModal title="Waiting for NFC Tap" ref="modalRef2">
-            <NfcScanningState :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration" />
         </DaisyModal>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useForm, router, usePage } from '@inertiajs/vue3';
+import { useForm, router, usePage } from "@inertiajs/vue3";
 import { io } from "socket.io-client";
 import axios from "axios";
-import { useToast } from 'vue-toastification';
+import { useToast } from "vue-toastification";
 
-import SearchBar from './SearchBar.vue';
-import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
-import DaisyModal from '@/Components/Daisy/DaisyModal.vue';
+import SearchBar from "./SearchBar.vue";
+import DaisyTable from "@/Components/Daisy/DaisyTable.vue";
+import DaisyModal from "@/Components/Daisy/DaisyModal.vue";
 import EnterStudentForm from "./EnterStudentForm.vue";
 import ConfirmStudentInfo from "./ConfirmStudentInfo.vue";
 import NfcScanningState from "./NfcScanningState.vue";
@@ -59,8 +62,8 @@ const props = defineProps({
     registeredCards: Object,
     search: {
         type: String,
-        default: ""
-    }
+        default: "",
+    },
 });
 
 const { props: page } = usePage();
@@ -79,7 +82,7 @@ function fetchRegisteredCards(page) {
             preserveState: true,
             onFinish: () => {
                 loading.value = false;
-            }
+            },
         }
     );
 }
@@ -97,16 +100,19 @@ const nfcError = ref("");
 const isLoading = ref(false);
 let socket = null;
 
+// New reactive variable to hold the scanned card UID
+const scannedCardUID = ref("");
+
 // Modal-related reactive variables
 const modalStudentInfo = ref(null); // Holds student info when loaded
-const cardExists = ref(false);        // Tracks if a card already exists
+const cardExists = ref(false); // Tracks if a card already exists
 
-// Reference to the DaisyModal component instance
-const modalRef = ref(null);
-const modalRef1 = ref(null);
-const modalRef2 = ref(null);
+// References to DaisyModal component instances
+const modalRef = ref(null); // NFC scanning modal
+const modalRef1 = ref(null); // Student ID modal
+const modalRef2 = ref(null); // Confirmation modal
 
-// Form for NFC registration
+// useForm for saving card registration
 const form = useForm({
     studentId: "",
     uid: "",
@@ -137,46 +143,33 @@ onMounted(() => {
         }
     });
 
-    socket.on("cardScanned", (data) => {
-        isLoading.value = true;
-        form.studentId = data.studentId;
-        form.uid = data.uid;
+    // When a card is scanned, store its UID, then check if it already exists.
+    socket.on("cardScanned", async (data) => {
+        scannedCardUID.value = data.uid;
+        nfcStatus.value = null;
+        modalRef.value.closeModal();
 
-        form.post(route("registered-cards.store"), {
-            preserveState: true,
-            preserveScroll: true,
-            onSuccess: () => {
-                registrationSuccess.value = true;
-                // No errors, proceed with NFC writing.
-                socket.emit("dbStored", data);
-                toast.success("Card registered successfully!");
-            },
-            onError: (errors) => {
-                registrationSuccess.value = false;
-                nfcStatus.value =
-                    "❌ Registration Failed: " + Object.values(errors).join(", ");
-            },
-            onFinish: async () => {
-                // Asynchronous delay of 1 second before finalizing
-                await new Promise((resolve) => setTimeout(resolve, 2000));
-                isLoading.value = false;
-                isModal2Open.value = false;
-                if (registrationSuccess.value) {
-                    modalRef2.value.closeModal();
-                    // Reset state if needed
-                    modalStudentInfo.value = null;
-                    studentID.value = "";
-                    registrationSuccess.value = false;
-                    isModal2Open.value = true;
-                } else {
-                    // Registration failed; go back to the confirm student info modal
-                    modalRef2.value.closeModal();
-                    modalRef1.value.showModal();
-                }
-            },
-        });
+        try {
+            const checkResponse = await axios.get(route("registered-cards.checkCard"), {
+                params: { uid: scannedCardUID.value },
+            });
+            if (checkResponse.data.exists) {
+                studentID.value = checkResponse.data.studentId;
+                modalStudentInfo.value = checkResponse.data.studentInfo;
+                const semesterNumber = modalStudentInfo.value.last_enrolled_at.match(/\d+/)[0];
+                const year = modalStudentInfo.value.last_enrolled_at.match(/\d{4}/)[0].slice(2);
+                semester.value = semesterNumber + year;
+                cardExists.value = true;
+                modalRef2.value.showModal();
+            } else {
+                cardExists.value = false;
+                modalRef1.value.showModal();
+            }
+        } catch (error) {
+            console.error("Error checking card existence:", error);
+            modalRef1.value.showModal();
+        }
     });
-
 
     socket.on("studentRegistered", (student) => {
         nfcStatus.value = `Student Registered Successfully and Card Written! Student ID: ${student.studentId} UID: ${student.uid}`;
@@ -193,25 +186,31 @@ onMounted(() => {
 });
 
 // Opens the modal and resets its state.
+// Clears scannedCardUID, then shows the NFC scanning modal and emits "startScan".
 const openModal = () => {
     modalStudentInfo.value = null;
     studentID.value = "";
     semester.value = "";
     nfcStatus.value = "";
     nfcError.value = "";
+    scannedCardUID.value = "";
+    cardExists.value = false;
     modalRef.value.showModal();
+    socket.emit("startScan");
 };
 
+// Once student data is fetched/verified, process it and move to confirmation.
+// Extracts the semester from studentData, checks for an existing card (if needed),
+// then transitions to the Confirmation modal.
 const processStudentData = async (studentData) => {
-    // Extract the first digit (2 from "2nd")
     const semesterNumber = studentData.last_enrolled_at.match(/\d+/)[0];
-    // Extract the last two digits of the year (24 from "2024")
     const year = studentData.last_enrolled_at.match(/\d{4}/)[0].slice(2);
     semester.value = semesterNumber + year;
 
     console.log(semester.value);
 
-    // Proceed to check if the card exists **after** the student form is successfully stored
+    // For cases where card is not pre-registered,
+    // you may optionally re-check using studentID if needed.
     try {
         const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
             params: { studentId: studentID.value },
@@ -221,14 +220,13 @@ const processStudentData = async (studentData) => {
         console.error("Error checking card existence:", cardError);
     }
 
-    // Proceed with closing and opening modals
-    modalRef.value.closeModal();
-    modalRef1.value.showModal();
+    modalRef1.value.closeModal();
+    modalRef2.value.showModal();
     nfcStatus.value = "";
     nfcError.value = "";
 };
 
-
+// Called when student clicks "Register" after entering their Student ID manually.
 const registerStudent = async () => {
     if (!studentID.value) {
         alert("Please enter a Student ID first.");
@@ -236,20 +234,16 @@ const registerStudent = async () => {
     }
 
     try {
-        // Check if the student exists locally
         const checkStudentResponse = await axios.get(route("student-infos.check"), {
             params: { studentId: studentID.value },
         });
 
-        // If student not found locally, fetch from external API
         if (checkStudentResponse.data.error) {
-
             const fetchResponse = await axios.get(route("students.fetch", { studentId: studentID.value }));
             const studentData = fetchResponse.data.student;
 
             modalStudentInfo.value = studentData;
 
-            // Prepare the form data
             const studentForm = useForm({
                 studentId: studentData.studentId,
                 fName: studentData.fName,
@@ -258,46 +252,56 @@ const registerStudent = async () => {
                 department: studentData.department,
                 yearLevel: studentData.yearLevel,
                 image: studentData.image,
-                last_enrolled_at: studentData.last_enrolled_at
+                last_enrolled_at: studentData.last_enrolled_at,
             });
 
-            // Submit the form to store student info
             await studentForm.post(route("student-infos.store"), {
                 onSuccess: async () => {
-                    // Call the new function to handle processing
                     await processStudentData(studentData);
                 },
                 onError: (errors) => {
                     nfcStatus.value = "❌ " + (errors.error || "An error occurred while saving student data.");
-                }
+                },
             });
-
         } else {
             modalStudentInfo.value = checkStudentResponse.data.student;
-
-            // Call the new function to handle processing for locally found student
             await processStudentData(modalStudentInfo.value);
-
         }
-
     } catch (error) {
-        // General error handling
         console.error("An unexpected error occurred:", error);
         nfcStatus.value = "❌ " + (error.response?.data?.error || "An unexpected error occurred.");
     }
 };
 
+// Called when the user confirms registration in the Confirmation modal.
+// Emits "confirmRegistration" with studentID, semester, and scanned UID,
+// and then saves the card info using useForm.
+const confirmRegistration = async () => {
+    modalRef2.value.closeModal();
 
-// Called when the user confirms registration after reviewing student info.
-const confirmRegistration = () => {
-    modalRef1.value.closeModal();
-    modalRef2.value.showModal();
-    isModal2Open.value = true;
-    nfcStatus.value = "";
-    nfcError.value = "";
-    let studentInfo = { studentID: studentID.value, semester: semester.value };
-    socket.emit("registerStudent", studentInfo);
-    nfcStatus.value = "⏳ Waiting for NFC tap...";
+    let studentInfo = {
+        studentID: studentID.value,
+        semester: semester.value,
+        uid: scannedCardUID.value,
+    };
+
+    // Emit event to NFC server.
+    socket.emit("confirmRegistration", studentInfo);
+    nfcStatus.value = "⏳ Writing to NFC card...";
+
+    // Use useForm to save card info to the database.
+    form.studentId = studentID.value;
+    form.uid = scannedCardUID.value;
+
+    form.post(route("registered-cards.store"), {
+        onSuccess: () => {
+            toast.success("Card saved to database successfully!");
+        },
+        onError: (errors) => {
+            toast.error("Error saving card to database.");
+            console.error("Database save error:", errors);
+        },
+    });
 };
 
 // Cancels the registration process.
@@ -338,6 +342,4 @@ function handleCancelDelete() {
     cardToDelete.value = null;
     showConfirm.value = false;
 }
-
-
 </script>

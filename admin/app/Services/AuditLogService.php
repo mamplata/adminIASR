@@ -60,10 +60,6 @@ class AuditLogService
             ->toArray();
         $admins = array_unique(array_merge($auditAdminNames, $activeAdminNames)); // Merge deleted & active admin names
 
-        // Get min and max dates from audit logs
-        $min_date = AuditLog::min('created_at');
-        $max_date = AuditLog::max('created_at');
-
         $auditLogs = $query->paginate(5)->through(function ($log) {
             $details = $log->details;
 
@@ -95,6 +91,6 @@ class AuditLogService
             ];
         });
 
-        return compact('actions', 'types', 'admins', 'auditLogs', 'min_date', 'max_date');
+        return compact('actions', 'types', 'admins', 'auditLogs');
     }
 }
