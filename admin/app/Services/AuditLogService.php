@@ -16,8 +16,8 @@ class AuditLogService
             $query->where('action', $request->action);
         }
 
-        if ($request->filled('model')) {
-            $query->where('model', $request->model);
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
         }
 
         // Filter by admin_name instead of admin_id
@@ -40,8 +40,18 @@ class AuditLogService
             $query->where('created_at', '<=', $request->end_date . ' 23:59:59');
         }
 
+        // Search inside 'details' JSON field
+        if ($request->filled('searchDetails')) {
+            $search = $request->searchDetails;
+
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw("JSON_CONTAINS(details, '\"$search\"')")
+                    ->orWhere('details', 'LIKE', "%$search%");
+            });
+        }
+
         $actions = AuditLog::distinct()->pluck('action')->toArray();
-        $models = AuditLog::distinct()->pluck('model')->toArray();
+        $types = AuditLog::distinct()->pluck('type')->toArray();
 
         // Get unique list of admin names (from audit_logs & users)
         $auditAdminNames = AuditLog::whereNotNull('admin_name')->distinct()->pluck('admin_name')->toArray();
@@ -77,14 +87,14 @@ class AuditLogService
 
             return [
                 'action'   => $log->action,
-                'model'    => $log->model,
-                'model_id' => $log->model_id,
-                'details'  => $details,
+                'type'    => $log->type,
+                'type_id' => $log->type_id,
                 'admin'    => $log->admin ? $log->admin->name : $log->admin_name,
-                'created'  => $log->created_at->format('l, F j, Y')
+                'created'  => $log->created_at->format('l, F j, Y'),
+                'details'  => $details,
             ];
         });
 
-        return compact('actions', 'models', 'admins', 'auditLogs', 'min_date', 'max_date');
+        return compact('actions', 'types', 'admins', 'auditLogs', 'min_date', 'max_date');
     }
 }

@@ -13,8 +13,8 @@ class AuditLog extends Model
         'admin_id',
         'admin_name',
         'action',
-        'model',
-        'model_id',
+        'type',
+        'type_id',
         'details'
     ];
 

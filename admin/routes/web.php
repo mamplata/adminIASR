@@ -61,14 +61,22 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/devices/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');
 });
 
+//SEMESTER SETTINGS
+Route::middleware(['auth'])->group(function () {
+    Route::get('/settings', [SemesterController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SemesterController::class, 'store'])->name('settings.index');
+});
+
 use Faker\Factory as Faker;
 
+//STUDENT INFORMATION
 Route::middleware(['auth'])->group(
     function () {
         Route::post('/student-infos', [StudentInfoController::class, 'store'])->name('student-infos.store');
         Route::get('student-infos/check', [StudentInfoController::class, 'check'])->name('student-infos.check');
     }
 );
+
 Route::get('students/{studentId}', function ($studentId) {
     // Define the three students
     $students = [
@@ -118,8 +126,22 @@ Route::get('students/{studentId}', function ($studentId) {
 })->name('students.fetch');
 
 
-//SEMESTER SETTINGS
-Route::get('/settings', [SemesterController::class, 'index'])->name('settings.index');
-Route::post('/settings', [SemesterController::class, 'store'])->name('settings.index');
+//EMAIL VERIFICATION
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/home');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 require __DIR__ . '/auth.php';

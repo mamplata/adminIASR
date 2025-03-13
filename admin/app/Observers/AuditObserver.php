@@ -69,22 +69,25 @@ class AuditObserver
             'admin_id'   => $adminId,
             'admin_name' => $adminName,
             'action'     => $action,
-            'model'      => class_basename($model),
-            'model_id'   => $model->id,
+            'type'      => class_basename($model),
+            'type_id'   => $model->id,
             'details'    => $details,
         ];
+
+        unset($logData['details']['id'], $logData['details']['created_at'], $logData['details']['updated_at']);
 
         // Log to database
         AuditLog::create([
             'admin_id'   => $logData['admin_id'],
             'admin_name' => $logData['admin_name'],
             'action'     => $logData['action'],
-            'model'      => $logData['model'],
-            'model_id'   => $logData['model_id'],
-            'details'    => json_encode($logData['details']),
+            'type'      => $logData['type'],
+            'type_id'   => $logData['type_id'],
+            'details' => json_encode($logData['details']),
+
         ]);
 
         // Log to storage/logs/laravel.log
-        Log::info('Audit Log:', $logData);
+        Log::channel('audit')->info('Audit Log:', $logData);
     }
 }

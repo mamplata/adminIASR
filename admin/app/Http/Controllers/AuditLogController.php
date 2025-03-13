@@ -20,17 +20,18 @@ class AuditLogController extends Controller
         $data = $this->auditLogService->getAuditLogs($request);
 
         return Inertia::render('Logs/AuditLogs/Index', [
-            'models' => array_values($data['models']),
+            'types' => array_values($data['types']),
             'actions' => array_values($data['actions']),
             'admins' => $data['admins'],
             'auditLogs' => $data['auditLogs'],
             'minDate' => $data['min_date'],
             'maxDate' => $data['max_date'],
             'action' =>  $request->input('action'),
-            'model' =>  $request->input('model'),
+            'type' =>  $request->input('type'),
             'admin_id' =>  $request->input('admin_id'),
             'start_date' =>  $request->input('start_date'),
-            'end_date' =>  $request->input('end_date')
+            'end_date' =>  $request->input('end_date'),
+            'searchDetails' =>  $request->input('searchDetails')
         ]);
     }
 }

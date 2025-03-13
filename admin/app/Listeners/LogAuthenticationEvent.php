@@ -27,8 +27,8 @@ class LogAuthenticationEvent
         AuditLog::create([
             'admin_id' => $user->id,
             'action' => $action,
-            'model' => 'User',
-            'model_id' => $user->id,
+            'type' => 'User',
+            'type_id' => $user->id,
             'details' => json_encode([
                 'time' => $action . ' at ' . now()->format('F j, Y, g:i a')
             ])

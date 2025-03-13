@@ -13,8 +13,8 @@ class CreateAuditLogsTable extends Migration
             $table->unsignedBigInteger('admin_id')->nullable();
             $table->string('admin_name')->nullable();
             $table->string('action');  // The action (create, update, delete, login, logout)
-            $table->string('model');   // The model being affected (e.g., User, Post)
-            $table->string('model_id'); // The ID of the model instance affected
+            $table->string('type');   // The type being affected (e.g., User, Post)
+            $table->string('type_id'); // The ID of the type instance affected
             $table->text('details')->nullable(); // Any extra details (like old values or changes made)
             $table->timestamps();
 
