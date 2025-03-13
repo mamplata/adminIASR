@@ -9,6 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\VerifyNewEmailNotification;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,20 +28,44 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Update the user's name immediately
+        $user->name = $data['name'];
+
+        // Check if the email has changed
+        if ($data['email'] !== $user->email) {
+            // Instead of updating the email directly,
+            // store the new email in a temporary field (e.g., pending_email)
+            $user->pending_email = $data['email'];
+
+            // Optionally, you might want to nullify the verified timestamp now:
+            // $user->email_verified_at = null;
+
+            // Generate a signed verification URL valid for 60 minutes.
+            $verificationUrl = URL::temporarySignedRoute(
+                'verification.verify-new',
+                now()->addMinutes(60),
+                [
+                    'user' => $user->id,
+                    'hash' => sha1($user->pending_email),
+                ]
+            );
+
+            // Send a custom notification to the pending email address
+            Notification::route('mail', $user->pending_email)
+                ->notify(new VerifyNewEmailNotification($verificationUrl));
+
+            // Let the user know that a verification email was sent.
+            session()->flash('status', 'A verification link has been sent to your new email address. Please check your inbox to verify the change.');
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit');
+        return redirect()->route('profile.edit');
     }
 
     /**

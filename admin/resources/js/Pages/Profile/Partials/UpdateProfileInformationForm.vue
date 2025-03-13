@@ -5,6 +5,7 @@ import Button from '@/Components/Button.vue'
 import Input from '@/Components/Input.vue'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { useToast } from 'vue-toastification'
+import { ref } from 'vue'
 
 const props = defineProps({
     mustVerifyEmail: Boolean,
@@ -18,17 +19,23 @@ const form = useForm({
     email: user.email,
 })
 
-const toast = useToast();
+const toast = useToast()
+const emailChanged = ref(false)
 
 const updateProfile = () => {
+    emailChanged.value = user.email !== form.email // Check if the email was changed
+
     form.patch(route('profile.update'), {
         preserveScroll: true,
         onSuccess: () => {
-            toast.success('Profile updated successfully!')
+            if (emailChanged.value) {
+                toast.info('Please verify your new email before it takes effect.')
+            } else {
+                toast.success('Profile updated successfully!')
+            }
         }
     })
 }
-
 </script>
 
 <template>
@@ -80,6 +87,9 @@ const updateProfile = () => {
             <div class="flex items-center gap-4">
                 <Button :disabled="form.processing">Save</Button>
 
+                <span v-if="emailChanged" class="text-sm text-yellow-600 dark:text-yellow-400">
+                    Please verify your new email.
+                </span>
             </div>
         </form>
     </section>
