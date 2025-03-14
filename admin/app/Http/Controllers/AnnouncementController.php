@@ -68,16 +68,7 @@ class AnnouncementController extends Controller
 
     public function getAnnouncements()
     {
-        $announcements = Announcement::all()->map(function ($announcement) {
-            return [
-                'id' => $announcement->id,
-                'title' => $announcement->title,
-                'description' => $announcement->description,
-                'image_url' => $announcement->image_path
-                    ? asset("storage/announcements/" . $announcement->image_path) // Ensure full path
-                    : null,
-            ];
-        });
+        $announcements = Announcement::all();
 
         return response()->json(["announcements" => $announcements]);
     }

@@ -33,8 +33,8 @@
         <div class="flex w-full h-full" :style="containerStyle">
           <!-- Slides -->
           <div v-for="(announcement, index) in slides" :key="index" class="flex-none w-full h-full">
-            <img v-if="announcement.image_url" :src="announcement.image_url" alt="Announcement"
-              class="w-full h-full object-cover">
+            <img v-if="announcement.content.file_path" :src="`${apiUrl}/${announcement.content.file_path}`"
+              alt="Announcement" />
           </div>
         </div>
       </div>
@@ -54,6 +54,7 @@ const announcements = ref([]);
 const currentIndex = ref(0);
 const disableTransition = ref(false);
 let timer = null;
+const apiUrl = import.meta.env.VITE_API_URL;
 
 // Simulate card tap event
 const tapCard = () => {
@@ -63,7 +64,7 @@ const tapCard = () => {
 // Fetch announcements from API
 const fetchAnnouncements = async () => {
   try {
-    const response = await HTTP.get("/announcements");
+    const response = await HTTP.get("/api/announcements");
     announcements.value = response.data.announcements;
   } catch (error) {
     console.error("Error fetching announcements:", error);
