@@ -7,9 +7,7 @@ const {
     isPortAssigned,
     getPortFromUniqueKey,
     saveScannerRoles,
-} = require("./utils/port");
-let {
-    scannerRoles,
+    getScannerRoles,
 } = require("./utils/port");
 
 require("dotenv").config();
@@ -39,19 +37,19 @@ io.on("connection", (socket) => {
         console.log("No device fingerprint set");
     }
 
-    console.log(scannerRoles);
-
-    socket.on('assignRole', (data) => {
+    socket.on("assignRole", (data) => {
         const { uniqueKey, role } = data;
+        // Always read from disk to get the latest roles
+        const roles = getScannerRoles();
         const portPath = getPortFromUniqueKey(uniqueKey);
-        if (scannerRoles[uniqueKey]) {
-            socket.emit('scannerAssignmentError', { uniqueKey, message: "Scanner already assigned" });
+        if (roles[uniqueKey]) {
+            socket.emit("scannerAssignmentError", { uniqueKey, message: "Scanner already assigned" });
         } else if (isPortAssigned(portPath)) {
-            socket.emit('scannerAssignmentError', { uniqueKey, message: `Port ${portPath} already assigned` });
+            socket.emit("scannerAssignmentError", { uniqueKey, message: `Port ${portPath} already assigned` });
         } else {
-            scannerRoles[uniqueKey] = role;
-            saveScannerRoles();
-            socket.emit('scannerAssigned', { uniqueKey, role });
+            roles[uniqueKey] = role;
+            saveScannerRoles(roles);
+            socket.emit("scannerAssigned", { uniqueKey, role });
         }
     });
 });
