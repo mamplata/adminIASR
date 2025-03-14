@@ -10,7 +10,7 @@
                 <!-- Flex container with overflow handling -->
                 <div class="">
                     <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
-                        <h3 class="font-semibold text-white whitespace-normal break-words text-center text-3xl">
+                        <h3 class="font-semibold text-white whitespace-normal break-words text-center text-2xl">
                             {{ announcement.content.title }}
                         </h3>
                     </div>
