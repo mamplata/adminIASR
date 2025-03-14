@@ -33,7 +33,8 @@
         <div class="flex w-full h-full" :style="containerStyle">
           <!-- Slides -->
           <div v-for="(announcement, index) in slides" :key="index" class="flex-none w-full h-full">
-            <img :src="announcement.img" alt="Announcement" class="w-full h-full object-cover">
+            <img v-if="announcement.image_url" :src="announcement.image_url" alt="Announcement"
+              class="w-full h-full object-cover">
           </div>
         </div>
       </div>
@@ -43,20 +44,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import HTTP from "@/http"; // Import Axios instance
 import iASRPNC from "@/assets/img/iASRPNC.png";
 import logoRFID from "@/assets/img/logoRFID.png";
 import bgAnnounce from "@/assets/img/bgAnnounce.png";
-import announce1 from "@/assets/img/announce1.jpg";
-import announce2 from "@/assets/img/announce2.jpg";
 
 const cardTapped = ref(false);
-
-// Announcements array
-const images = [{ img: announce1 }, { img: announce2 }];
-
-// Duplicate the first slide to create an infinite loop effect
-const slides = [...images, images[0]];
-
+const announcements = ref([]);
 const currentIndex = ref(0);
 const disableTransition = ref(false);
 let timer = null;
@@ -66,6 +60,23 @@ const tapCard = () => {
   cardTapped.value = !cardTapped.value;
 };
 
+// Fetch announcements from API
+const fetchAnnouncements = async () => {
+  try {
+    const response = await HTTP.get("/announcements");
+    announcements.value = response.data.announcements;
+  } catch (error) {
+    console.error("Error fetching announcements:", error);
+  }
+};
+
+const slides = computed(() => {
+  return announcements.value.length > 0
+    ? [...announcements.value, announcements.value[0]]
+    : [];
+});
+
+
 // Compute transform styles for sliding effect
 const containerStyle = computed(() => ({
   transform: `translateX(-${currentIndex.value * 100}%)`,
@@ -73,16 +84,17 @@ const containerStyle = computed(() => ({
 }));
 
 // Auto-slide every 3 seconds
-onMounted(() => {
+onMounted(async () => {
+  await fetchAnnouncements();
+
   timer = setInterval(() => {
     currentIndex.value++;
 
-    // If reaching the last duplicate slide, reset the position instantly
-    if (currentIndex.value === images.length) {
+    if (currentIndex.value >= announcements.value.length) {
       setTimeout(() => {
         disableTransition.value = true;
         currentIndex.value = 0;
-        setTimeout(() => (disableTransition.value = false), 50);
+        setTimeout(() => disableTransition.value = false, 50);
       }, 500);
     }
   }, 3000);

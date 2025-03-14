@@ -9,6 +9,8 @@ use App\Http\Requests\Announcements\AnnouncementStoreRequest;
 use App\Http\Requests\Announcements\AnnouncementUpdateRequest;
 use App\Services\AnnouncementService;
 use App\Models\Department;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class AnnouncementController extends Controller
 {
@@ -62,5 +64,21 @@ class AnnouncementController extends Controller
 
         return redirect()->route('announcements.index')
             ->with('success', 'Announcement deleted!');
+    }
+
+    public function getAnnouncements()
+    {
+        $announcements = Announcement::all()->map(function ($announcement) {
+            return [
+                'id' => $announcement->id,
+                'title' => $announcement->title,
+                'description' => $announcement->description,
+                'image_url' => $announcement->image_path
+                    ? asset("storage/announcements/" . $announcement->image_path) // Ensure full path
+                    : null,
+            ];
+        });
+
+        return response()->json(["announcements" => $announcements]);
     }
 }
