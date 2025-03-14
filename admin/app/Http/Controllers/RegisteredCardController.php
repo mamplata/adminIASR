@@ -179,12 +179,16 @@ class RegisteredCardController extends Controller
         // Convert the full year from the database (e.g., "2025") into its two-digit suffix.
         $dbYearSuffix = $semesterRecord ? substr($semesterRecord->year, -2) : null;
 
-        // Check if the card is activated for the current semester and if it is registered.
-        $registeredCard = RegisteredCard::where('uid', $uid)
-            ->where('studentId', $studentId)
-            ->first();
+        // First, check if the UID is registered.
+        $registeredCard = RegisteredCard::where('uid', $uid)->first();
+        if (!$registeredCard) {
+            return response()->json(['error' => 'Unauthorized access.'], 400);
+        }
 
-        if (!$semesterRecord || $dbYearSuffix !== $yearSuffix || !$registeredCard) {
+
+        // Next, check that the studentId matches the registered card
+        // and that the enrollment details are valid.
+        if ($registeredCard->studentId != $studentId || !$semesterRecord || $dbYearSuffix !== $yearSuffix) {
             return response()->json(['error' => 'Card is not activated. Please activate it first by contacting the MSID team.'], 400);
         }
 
@@ -206,6 +210,7 @@ class RegisteredCardController extends Controller
             ]
         ], 200);
     }
+
 
 
     /**

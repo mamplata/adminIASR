@@ -13,11 +13,16 @@ class StudentInfoService
         $student = StudentInfo::where('studentId', $studentId)->first();
 
         if (!$student) {
-            // Fetch from external API if not found
-            $externalResponse = $this->fetchStudentFromExternalAPI($studentId);
-            if (!isset($externalResponse['error'])) {
-                $externalResponse['from_external'] = true;
+            // Attempt to fetch from external API if not found locally
+            try {
+                $externalResponse = $this->fetchStudentFromExternalAPI($studentId);
+            } catch (\Exception $e) {
+                return ['error' => 'Student not found.'];
             }
+            if (isset($externalResponse['error'])) {
+                return ['error' => 'Student not found.'];
+            }
+            $externalResponse['from_external'] = true;
             return $externalResponse;
         }
 
@@ -38,11 +43,16 @@ class StudentInfoService
             ->first();
 
         if (!$currentSemester) {
-            // Fetch updated student data if semester mismatch
-            $externalResponse = $this->fetchStudentFromExternalAPI($studentId);
-            if (!isset($externalResponse['error'])) {
-                $externalResponse['from_external'] = true;
+            // Attempt to fetch updated student data if there's a semester mismatch
+            try {
+                $externalResponse = $this->fetchStudentFromExternalAPI($studentId);
+            } catch (\Exception $e) {
+                return ['error' => 'Student not found.'];
             }
+            if (isset($externalResponse['error'])) {
+                return ['error' => 'Student not found.'];
+            }
+            $externalResponse['from_external'] = true;
             return $externalResponse;
         }
 
@@ -51,6 +61,7 @@ class StudentInfoService
             'from_external' => false,
         ];
     }
+
 
     /**
      * Fetch student data from an external API.
