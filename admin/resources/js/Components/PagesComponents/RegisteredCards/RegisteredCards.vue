@@ -37,7 +37,7 @@
         <DaisyModal title="Student Information" ref="modalRef2">
             <ConfirmStudentInfo :studentID="studentID" :modalStudentInfo="modalStudentInfo" :cardExists="cardExists"
                 :nfcStatus="nfcStatus" @cancel-registration="cancelRegistration"
-                @confirm-registration="confirmRegistration" :isEnrolled="isEnrolled" />
+                @confirm-registration="confirmRegistration" :isEnrolled="isEnrolled" :renew="renew" />
         </DaisyModal>
     </div>
 </template>
@@ -107,6 +107,7 @@ const scannedCardUID = ref("");
 const modalStudentInfo = ref(null); // Holds student info when loaded
 const cardExists = ref(false); // Tracks if a card already exists
 const isEnrolled = ref(true); // Tracks enrollment status
+const renew = ref(false); // Tracks card if renew or replacement
 
 // References to DaisyModal component instances
 const modalRef = ref(null); // NFC scanning modal
@@ -151,7 +152,7 @@ onMounted(() => {
         modalRef.value.closeModal();
 
         try {
-            // Step 1: Check if the card is already registered
+            // Step 1: Check if the card is registered and enrolled
             const checkResponse = await axios.get(route("registered-cards.checkCard"), {
                 params: { uid: scannedCardUID.value },
             });
@@ -160,28 +161,34 @@ onMounted(() => {
                 studentID.value = checkResponse.data.studentId;
                 modalStudentInfo.value = checkResponse.data.studentInfo;
 
-                // Step 2: Extract semester and year
-                const semesterNumber = modalStudentInfo.value.last_enrolled_at.match(/\d+/)[0];
-                const year = modalStudentInfo.value.last_enrolled_at.match(/\d{4}/)[0].slice(2);
-                semester.value = semesterNumber + year;
-                cardExists.value = true;
+                renew.value = true;
+                cardExists.value = false; // Skip "Card already exists" status.
 
-                // Step 3: Check enrollment status
-                const enrollmentResponse = await axios.get(route("check-enrollment-status", { studentId: studentID.value }));
-
-                if (!enrollmentResponse.data.isEnrolled) {
-                    isEnrolled.value = false;
+                // Step 2: Extract semester and year safely
+                if (modalStudentInfo.value?.last_enrolled_at) {
+                    const match = modalStudentInfo.value.last_enrolled_at.match(/(1st|2nd)\s(\d{4})/);
+                    if (match) {
+                        const semesterNumber = match[1] === "1st" ? "1" : "2";
+                        const year = match[2].slice(2); // Extract last two digits of the year
+                        semester.value = semesterNumber + year;
+                    } else {
+                        semester.value = "N/A"; // Fallback if format is incorrect
+                    }
+                } else {
+                    semester.value = "N/A"; // Fallback for missing data
                 }
 
-                // If enrolled, show the confirmation modal
+                // Step 3: Use updated enrollment status
+                isEnrolled.value = checkResponse.data.isEnrolled;
+
                 modalRef2.value.showModal();
             } else {
                 cardExists.value = false;
-                modalRef1.value.showModal();
+                modalRef1.value.showModal(); // Card not found modal
             }
         } catch (error) {
-            console.error("Error checking card existence or enrollment status:", error);
-            modalRef1.value.showModal();
+            console.error("Error checking card existence:", error);
+            modalRef1.value.showModal(); // Handle API errors
         }
     });
 
@@ -210,6 +217,7 @@ const openModal = () => {
     nfcError.value = "";
     scannedCardUID.value = "";
     cardExists.value = false;
+    isEnrolled.value = true;
     modalRef.value.showModal();
     socket.emit("startScan");
 };
@@ -230,10 +238,16 @@ const processStudentData = async (studentData) => {
         const checkCardResponse = await axios.get(route("registered-cards.checkStudentID"), {
             params: { studentId: studentID.value },
         });
-        cardExists.value = checkCardResponse.data.exists;
-    } catch (cardError) {
-        console.error("Error checking card existence:", cardError);
+
+        if (checkCardResponse.data.exists) {
+            // No card registered yet.
+            renew.value = false;
+            cardExists.value = true;
+        }
+    } catch (error) {
+        console.error("Error checking card existence:", error);
     }
+
 
     modalRef1.value.closeModal();
     modalRef2.value.showModal();
@@ -241,7 +255,7 @@ const processStudentData = async (studentData) => {
     nfcError.value = "";
 };
 
-// Called when student clicks "Register" after entering their Student ID manually.
+// Called when the student clicks "Register" after entering their Student ID manually.
 const registerStudent = async () => {
     if (!studentID.value) {
         alert("Please enter a Student ID first.");
@@ -249,44 +263,56 @@ const registerStudent = async () => {
     }
 
     try {
+        // Step 1: Check student data (handles local & external fetch automatically)
         const checkStudentResponse = await axios.get(route("student-infos.check"), {
             params: { studentId: studentID.value },
         });
 
         if (checkStudentResponse.data.error) {
-            const fetchResponse = await axios.get(route("students.fetch", { studentId: studentID.value }));
-            const studentData = fetchResponse.data.student;
+            nfcStatus.value = "❌ " + checkStudentResponse.data.error;
+            return;
+        }
 
-            modalStudentInfo.value = studentData;
+        // Step 2: Use the fetched student data
+        modalStudentInfo.value = checkStudentResponse.data.student;
 
+        // If the data came from external (i.e. it's new or outdated locally), then store it.
+        if (checkStudentResponse.data.from_external) {
+            // Prepare and submit form to store updated student info.
             const studentForm = useForm({
-                studentId: studentData.studentId,
-                fName: studentData.fName,
-                lName: studentData.lName,
-                program: studentData.program,
-                department: studentData.department,
-                yearLevel: studentData.yearLevel,
-                image: studentData.image,
-                last_enrolled_at: studentData.last_enrolled_at,
+                studentId: modalStudentInfo.value.studentId,
+                fName: modalStudentInfo.value.fName,
+                lName: modalStudentInfo.value.lName,
+                program: modalStudentInfo.value.program,
+                department: modalStudentInfo.value.department,
+                yearLevel: modalStudentInfo.value.yearLevel,
+                image: modalStudentInfo.value.image,
+                last_enrolled_at: modalStudentInfo.value.last_enrolled_at,
             });
 
             await studentForm.post(route("student-infos.store"), {
                 onSuccess: async () => {
-                    await processStudentData(studentData);
+                    await processStudentData(modalStudentInfo.value);
                 },
                 onError: (errors) => {
-                    nfcStatus.value = "❌ " + (errors.error || "An error occurred while saving student data.");
+                    nfcStatus.value =
+                        "❌ " +
+                        (errors.error || "An error occurred while saving student data.");
                 },
             });
         } else {
-            modalStudentInfo.value = checkStudentResponse.data.student;
+            // Data is already stored and up-to-date; simply process it.
             await processStudentData(modalStudentInfo.value);
         }
     } catch (error) {
         console.error("An unexpected error occurred:", error);
-        nfcStatus.value = "❌ " + (error.response?.data?.error || "An unexpected error occurred.");
+        nfcStatus.value =
+            "❌ " +
+            (error.response?.data?.error || "An unexpected error occurred.");
     }
 };
+
+
 
 // Called when the user confirms registration in the Confirmation modal.
 // Emits "confirmRegistration" with studentID, semester, and scanned UID,
@@ -319,12 +345,11 @@ const confirmRegistration = async () => {
     });
 };
 
-// Cancels the registration process.
 const cancelRegistration = () => {
     modalRef.value.closeModal();
     modalRef1.value.closeModal();
     modalRef2.value.closeModal();
-    isEnrolled.value = true;
+    socket.emit("cancelScan"); // Tell the server to stop scanning
 };
 
 onUnmounted(() => {

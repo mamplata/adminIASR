@@ -33,6 +33,11 @@ function initializeNFC(io) {
     console.log(`NFC Reader detected: ${reader.name}`);
     nfcReader = reader;
 
+    // Add an error listener to prevent the process from crashing
+    reader.on("error", (err) => {
+      console.error(`❌ Error on reader ${reader.name}:`, err);
+    });
+
     reader.on("card", async (card) => {
       // Only process card events if scanning is enabled.
       if (!nfcListening) {
@@ -51,6 +56,12 @@ function initializeNFC(io) {
     socket.on("startScan", () => {
       nfcListening = true;
       socket.emit("nfcStatus", "Tap your NFC card now!");
+    });
+
+    // Stop scanning when the client cancels.
+    socket.on("cancelScan", () => {
+      nfcListening = false;
+      console.log("NFC scanning cancelled by the client.");
     });
 
     // Handle registration confirmation, including the scanned UID.

@@ -14,7 +14,7 @@ class StoreStudentInfoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'studentId'  => 'required|integer|unique:student_infos,studentId',
+            'studentId'  => 'required|integer',
             'fName'      => 'required|string|max:255',
             'lName'      => 'required|string|max:255',
             'program'    => 'required|string|max:255',
@@ -30,7 +30,6 @@ class StoreStudentInfoRequest extends FormRequest
         return [
             'studentId.required'  => 'Student ID is required.',
             'studentId.integer'   => 'Student ID must be an integer.',
-            'studentId.unique'    => 'This Student ID is already registered.',
             'fName.required'      => 'First name is required.',
             'lName.required'      => 'Last name is required.',
             'program.required'    => 'Program is required.',

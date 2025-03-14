@@ -41,7 +41,8 @@
             </div>
             <div>
                 <strong>Status: </strong>
-                <span v-if="!isEnrolled" class="text-danger">Not yet enrolled.</span>
+                <span v-if="!isEnrolled" class="text-red-500 dark:text-red-300">Not yet enrolled.</span>
+                <span v-else-if="renew" class="text-info">Card renewal.</span>
                 <span v-else-if="cardExists" class="text-warning">Card already exists.</span>
                 <span v-else class="text-success">New registration.</span>
             </div>
@@ -53,7 +54,9 @@
         <!-- Action Buttons -->
         <footer class="mt-6 flex justify-end space-x-2">
             <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
-            <button v-if="isEnrolled" class="btn btn-primary" @click="handleConfirm">Validate</button>
+            <button v-if="isEnrolled" class="btn btn-primary" @click="handleConfirm">
+                {{ renew ? 'Renew' : (cardExists ? 'Replace' : 'Validate') }}
+            </button>
         </footer>
     </div>
 
@@ -83,7 +86,11 @@ const props = defineProps({
     isEnrolled: {
         type: Boolean,
         default: true
-    }
+    },
+    renew: {
+        type: Boolean,
+        default: false
+    },
 })
 
 // Define emitted events for cancellation and confirmation actions

@@ -79,69 +79,28 @@ Route::middleware(['auth'])->group(
     }
 );
 
-Route::get('students/{studentId}', function ($studentId) {
-    // Define the three students
-    $students = [
-        '1901234' => [
-            'studentId'  => '1901234',
-            'lName'      => 'Smith',
-            'fName'      => 'John',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "1st 2024",
-        ],
-        '1904568' => [
-            'studentId'  => '1904568',
-            'lName'      => 'Brown',
-            'fName'      => 'Emily',
-            'program'    => 'BSCS',
-            'department' => 'CCS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '1901111' => [
-            'studentId'  => '1901111',
-            'lName'      => 'Taylor',
-            'fName'      => 'Michael',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '1901112' => [
-            'studentId'  => '1901112',
-            'lName'      => 'Taylor',
-            'fName'      => 'Michael',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-    ];
-
-    // Check if the requested studentId exists
-    if (array_key_exists($studentId, $students)) {
-        return response()->json([
-            'student' => $students[$studentId]
-        ]);
-    }
-
-    // If studentId is not found, return an error response
-    return response()->json([
-        'error' => 'Student not found'
-    ], 404);
-})->name('students.fetch');
-
-
 //EMAIL VERIFICATION
 use App\Http\Controllers\EmailVerificationController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 Route::get('/email/verify-new/{user}/{hash}', [EmailVerificationController::class, 'verifyNewEmail'])
     ->name('verification.verify-new');
+
+Route::get('/students/{studentId}', function ($studentId) {
+    $externalApiUrl = "http://127.0.0.1:8001/api/students/{$studentId}";
+
+    try {
+        $response = Http::get($externalApiUrl);
+
+        if ($response->failed()) {
+            return response()->json(['error' => 'Failed to fetch student data from external API.'], 500);
+        }
+
+        return response()->json($response->json());
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'An error occurred while retrieving student data.'], 500);
+    }
+})->name('students.fetch');
 
 require __DIR__ . '/auth.php';

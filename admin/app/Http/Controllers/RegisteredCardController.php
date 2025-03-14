@@ -8,6 +8,8 @@ use App\Models\Semester;
 use App\Models\StudentInfo;
 use App\Services\RegisteredCardService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
 class RegisteredCardController extends Controller
@@ -40,26 +42,93 @@ class RegisteredCardController extends Controller
 
     public function checkCard(Request $request): array
     {
-        // Retrieve the 'uid' parameter from the request
         $uid = $request->input('uid');
 
-        // Check if a registered card exists with the provided UID
+        // Check if the card exists in the registered cards table
         $registeredCard = RegisteredCard::where('uid', $uid)->first();
-        $exists = $registeredCard !== null;
+        if (!$registeredCard) {
+            return [
+                'exists' => false,
+                'studentId' => null,
+                'studentInfo' => null,
+                'isEnrolled' => false,
+                'message' => 'Card is not registered.',
+            ];
+        }
 
-        // If the card exists, retrieve the associated student information
-        $studentInfo = $exists ? StudentInfo::where('studentId', $registeredCard->studentId)->first() : null;
+        // Get student info from local database
+        $studentInfo = StudentInfo::where('studentId', $registeredCard->studentId)->first();
+        $isEnrolled = false;
+        $needsUpdate = false;
 
-        // Return the response as an array
+        if ($studentInfo) {
+            if (preg_match('/(1st|2nd)\s(\d{4})/', $studentInfo->last_enrolled_at, $matches)) {
+                [$semester, $year] = [$matches[1], $matches[2]];
+
+                // Check if the student is enrolled in the current semester locally
+                $isEnrolled = DB::table('semesters')
+                    ->where('year', $year)
+                    ->where('semester', $semester)
+                    ->exists();
+
+                // If not enrolled, mark for potential update
+                if (!$isEnrolled) {
+                    $needsUpdate = true;
+                }
+            }
+        }
+
+        // If student is not enrolled locally, check external API
+        if ($needsUpdate) {
+            try {
+                $externalApiUrl = "http://127.0.0.1:8001/api/students/{$registeredCard->studentId}";
+
+                $externalResponse = Http::timeout(5)->retry(3, 100)->get($externalApiUrl);
+
+                if ($externalResponse->successful()) {
+                    $externalStudent = $externalResponse->json()['student'];
+
+                    if (preg_match('/(1st|2nd)\s(\d{4})/', $externalStudent['last_enrolled_at'], $matches)) {
+                        [$semester, $year] = [$matches[1], $matches[2]];
+
+                        // Check if the external semester is valid
+                        $isEnrolled = DB::table('semesters')
+                            ->where('year', $year)
+                            ->where('semester', $semester)
+                            ->exists();
+
+                        // If semester is valid, update the local database
+                        if ($isEnrolled) {
+                            StudentInfo::updateOrCreate(
+                                ['studentId' => $registeredCard->studentId],
+                                $externalStudent
+                            );
+
+                            // Refresh student info
+                            $studentInfo = StudentInfo::where('studentId', $registeredCard->studentId)->first();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                return [
+                    'exists' => true,
+                    'studentId' => (string) $registeredCard->studentId,
+                    'studentInfo' => $studentInfo,
+                    'isEnrolled' => false,
+                    'message' => 'Failed to retrieve student info from external API.',
+                ];
+            }
+        }
+
         return [
-            'exists'      => $exists,
-            'studentId'   => $exists ? (string) $registeredCard->studentId : null,
+            'exists' => true,
+            'studentId' => (string) $registeredCard->studentId,
             'studentInfo' => $studentInfo,
-            'message'     => $exists
-                ? 'Card already registered with Student ID: ' . $registeredCard->studentId
-                : 'Card is not registered.',
+            'isEnrolled' => $isEnrolled,
+            'message' => $isEnrolled ? 'Student is currently enrolled.' : 'Student is not enrolled. Semester information is outdated.',
         ];
     }
+
 
     public function store(StoreRegisteredCardRequest $request)
     {
