@@ -1,8 +1,16 @@
-// nfcReadServer.js
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const { initializeNFCRead } = require("./utils/nfcRead");
+const {
+    checkScanners,
+    isPortAssigned,
+    getPortFromUniqueKey,
+    saveScannerRoles,
+} = require("./utils/port");
+let {
+    scannerRoles,
+} = require("./utils/port");
 
 require("dotenv").config();
 
@@ -19,14 +27,36 @@ const io = new Server(server, {
     },
 });
 
-(async () => {
-    try {
-        console.log("✅ NFC Read Server initialized...");
-        initializeNFCRead(io);
-    } catch (err) {
-        console.error("❌ NFC Read Server error:", err);
+io.on("connection", (socket) => {
+    const deviceFingerprint = socket.handshake.query.deviceFingerprint;
+    console.log("Connected device fingerprint:", deviceFingerprint);
+
+    if (deviceFingerprint) {
+        setInterval(() => {
+            checkScanners(socket, deviceFingerprint);
+        }, 2000);
+    } else {
+        console.log("No device fingerprint set");
     }
-})();
+
+    console.log(scannerRoles);
+
+    socket.on('assignRole', (data) => {
+        const { uniqueKey, role } = data;
+        const portPath = getPortFromUniqueKey(uniqueKey);
+        if (scannerRoles[uniqueKey]) {
+            socket.emit('scannerAssignmentError', { uniqueKey, message: "Scanner already assigned" });
+        } else if (isPortAssigned(portPath)) {
+            socket.emit('scannerAssignmentError', { uniqueKey, message: `Port ${portPath} already assigned` });
+        } else {
+            scannerRoles[uniqueKey] = role;
+            saveScannerRoles();
+            socket.emit('scannerAssigned', { uniqueKey, role });
+        }
+    });
+});
+
+initializeNFCRead(io);
 
 const PORT = 4000;
 server.listen(PORT, () => {

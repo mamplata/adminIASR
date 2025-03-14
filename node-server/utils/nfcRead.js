@@ -10,6 +10,12 @@ function initializeNFCRead(io) {
     console.log(`📡 NFC Reader detected for reading: ${reader.name}`);
     nfcReader = reader;
 
+    // Add an error handler on the reader to prevent server crashes
+    reader.on("error", (err) => {
+      console.error(`❌ Error on NFC Reader ${reader.name}: ${err.message}`);
+      // Optionally, you can add logic here to attempt a reconnection or other fallback.
+    });
+
     io.on("connection", (socket) => {
       socket.on("readCard", async () => {
         try {
