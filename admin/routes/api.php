@@ -4,6 +4,7 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EntryLogController;
 use App\Http\Controllers\RegisteredCardController;
 use App\Http\Controllers\StudentInfoController;
+use App\Http\Controllers\AnnouncementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,5 @@ Route::middleware('device.check')->group(function () {
 
 
 Route::post('/device/register', [DeviceController::class, 'register']);
+
+Route::get('/announcements', [AnnouncementController::class, 'getAnnouncements']);
