@@ -33,12 +33,12 @@
         <div class="flex flex-col md:flex-row items-center gap-2 mb-4">
             <label class="whitespace-nowrap">Range Date:</label>
             <!-- Start Date with min and max -->
-            <input v-model="computedStartDate" type="date" :max="maxStartDate"
+            <input v-model="computedStartDate" type="date"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                        focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
             <!-- End Date with min and max -->
-            <input v-model="computedEndDate" type="date" :max="maxEndDate"
+            <input v-model="computedEndDate" type="date"
                 class="input w-full input-bordered bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600
                        focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500" />
 
