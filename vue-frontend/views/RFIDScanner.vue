@@ -25,6 +25,7 @@
       </button>
     </div>
 
+
     <!-- Right Section (Custom Carousel) -->
     <div class="w-full lg:w-3/5 relative overflow-hidden flex justify-center items-center"
       :style="{ backgroundImage: `url(${bgAnnounce})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
@@ -33,8 +34,8 @@
         <div class="flex w-full h-full" :style="containerStyle">
           <!-- Slides -->
           <div v-for="(announcement, index) in slides" :key="index" class="flex-none w-full h-full">
-            <img v-if="announcement.content.file_path" :src="`${apiUrl}/${announcement.content.file_path}`"
-              alt="Announcement" />
+            <img v-if="announcement.content.file_path && announcement.type == 'image'"
+              :src="`${apiUrl}${announcement.content.file_path}`" alt="Announcement" />
           </div>
         </div>
       </div>
