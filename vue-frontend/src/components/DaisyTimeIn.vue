@@ -36,3 +36,7 @@ const tapCard = () => {
 <style scoped>
 /* You can add styles specific to the left section here if needed */
 </style>
+
+
+here the logic will be when the card is tap it will show the student information menas the simulate tap card hre is the
+one will eb change absed on the reference
