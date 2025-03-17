@@ -1,3 +1,4 @@
+// utils/port.js
 const usb = require("usb");
 const fs = require("fs");
 const path = require("path");
@@ -45,11 +46,13 @@ function getPortFromUniqueKey(uniqueKey) {
     return index !== -1 ? uniqueKey.substring(index + 5) : "Unknown";
 }
 
-// Checks for connected scanners, emits events with the latest data from disk.
+// Checks for connected scanners and emits events with the latest data from disk.
+// This function now also emits events for assigned scanners that are offline.
 function checkScanners(socket, clientCookie) {
     const currentConnected = new Set();
     const roles = getScannerRoles();
 
+    // Process connected devices.
     usb.getDeviceList().forEach((device) => {
         if (isAcr122u(device)) {
             const portPath = device.portNumbers ? device.portNumbers.join(".") : "Unknown";
@@ -62,18 +65,34 @@ function checkScanners(socket, clientCookie) {
                     portPath,
                     assigned: true,
                     role: roles[uniqueKey],
+                    online: true,
                 });
             } else {
                 socket.emit("scannerDetected", {
                     uniqueKey,
                     portPath,
                     assigned: false,
+                    online: true,
                 });
             }
         }
     });
 
-    // Emit disconnect events for scanners no longer present.
+    // For each assigned scanner that is not currently connected, emit an event marking it as offline.
+    Object.keys(roles).forEach((uniqueKey) => {
+        if (!currentConnected.has(uniqueKey)) {
+            const portPath = getPortFromUniqueKey(uniqueKey);
+            socket.emit("scannerDetected", {
+                uniqueKey,
+                portPath,
+                assigned: true,
+                role: roles[uniqueKey],
+                online: false,
+            });
+        }
+    });
+
+    // Optionally, emit disconnect events for scanners that were previously connected but now not present.
     lastConnected.forEach((deviceKey) => {
         if (!currentConnected.has(deviceKey)) {
             console.log(`🔴 Scanner Disconnected: ${deviceKey}`);
