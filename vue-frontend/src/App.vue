@@ -7,5 +7,5 @@
 </template>
 
 <script setup>
-import RFIDScanner from "../views/RFIDScanner.vue";
+import RFIDScanner from "./views/RFIDScanner.vue";
 </script>
