@@ -38,25 +38,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import HTTP from "@/http"; // Axios instance
-import pncBg from "../assets/img/pnc-bg.jpg";
-import pncLogo from "../assets/img/pnc-logo-1.png";
+import pncBg from '../../assets/img/pnc-bg.jpg';
+import pncLogo from '../../assets/img/pnc-logo-1.png';
 
 const apiUrl = import.meta.env.VITE_API_URL;
-const announcement = ref(null);
 
-const fetchAnnouncement = async () => {
-    try {
-        const response = await HTTP.get("/api/announcements");
-        console.log(response.value);
-        announcement.value = response.data.announcements[0]; // Fetching the first announcement
-    } catch (error) {
-        console.error("Error fetching announcement:", error);
-    }
-};
+const props = defineProps({
+    announcement: {
+        type: Object,
+        required: true,
+    },
+});
 
-onMounted(fetchAnnouncement);
+
 </script>
 
 <style scoped>
