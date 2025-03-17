@@ -31,6 +31,7 @@
                                     <span>{{ scannedStudent.fName }} {{ scannedStudent.lName }}</span>
                                 </div>
                                 <div>
+                                    <!-- Assuming studentId exists; if not, you can remove or adjust -->
                                     <span class="text-gray-500 text-sm">{{ scannedStudent.studentId }}</span>
                                 </div>
                             </div>
@@ -62,21 +63,7 @@
             <!-- Scanning Prompt (Shown only when there is no error and no student info) -->
             <div v-if="!scannedStudent && !nfcError" class="text-center mt-12">
                 <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto animate-zoom-in-out" />
-                <h1 class="text-4xl font-bold text-green-900 mt-4">
-                    {{ isReadingNfc ? "Scanning..." : "Tap your card" }}
-                </h1>
-                <p class="text-gray-600 mt-2" v-if="scanCount > 0">Scans: {{ scanCount }}</p>
-                <!-- Added spinner icon for "Ready to scan" status -->
-                <p class="text-green-700 font-semibold mt-1 flex items-center">
-                    <svg v-if="readyStatus === 'Ready to scan'" class="animate-spin h-5 w-5 mr-2 text-green-700"
-                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
-                        </path>
-                    </svg>
-                    {{ readyStatus }}
-                </p>
+                <h1 class="text-4xl font-bold text-green-900 mt-4">Tap your card</h1>
             </div>
         </div>
     </div>
