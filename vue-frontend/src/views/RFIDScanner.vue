@@ -11,7 +11,7 @@
       <div v-if="isRegistered" class="flex flex-col lg:flex-row h-screen w-full relative">
         <!-- Left Section -->
         <div class="w-full lg:w-2/5">
-          <DaisyTimeIn :deviceName="deviceName" :isRegistered="isRegistered" />
+          <DaisyTimeIn :deviceFingerprint="deviceFingerprint" />
         </div>
         <!-- Right Section (Custom Carousel) -->
         <AnnouncementsCarousel />
@@ -29,93 +29,38 @@
       </div>
     </div>
 
-    <!-- Modal for scanner assignment using daisyUI -->
-    <div v-if="showModal" class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Assign Scanner Role</h3>
-        <p class="py-2"><strong>Scanner:</strong> {{ newScannerInfo.uniqueKey }}</p>
-        <p class="py-2"><strong>Port:</strong> {{ newScannerInfo.portPath }}</p>
-        <p class="py-2">Please choose a role:</p>
-        <div class="modal-action">
-          <button @click="assignRole('Time In')" class="btn btn-success">Time In</button>
-          <button @click="assignRole('Time Out')" class="btn btn-warning">Time Out</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal for port status info -->
-    <div v-if="showPortStatusModal" class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Port and Device Status</h3>
-        <p class="py-2"><strong>Device:</strong> {{ deviceName }}</p>
-        <div class="py-2">
-          <p>
-            <strong>Time In: </strong>
-            <span>
-              <template v-if="timeInInfo">
-                <template v-if="timeInInfo.online">
-                  <i class="fas fa-check text-green-500 mr-1"></i>
-                  Online - Port {{ timeInInfo.portPath }}
-                </template>
-                <template v-else>
-                  <i class="fas fa-times text-red-500 mr-1"></i>
-                  Offline - Port {{ timeInInfo.portPath }}
-                </template>
-              </template>
-              <template v-else>
-                <i class="fas fa-times text-red-500 mr-1"></i>
-                Not Connected
-              </template>
-            </span>
-          </p>
-          <p>
-            <strong>Time Out: </strong>
-            <span>
-              <template v-if="timeOutInfo">
-                <template v-if="timeOutInfo.online">
-                  <i class="fas fa-check text-green-500 mr-1"></i>
-                  Online - Port {{ timeOutInfo.portPath }}
-                </template>
-                <template v-else>
-                  <i class="fas fa-times text-red-500 mr-1"></i>
-                  Offline - Port {{ timeOutInfo.portPath }}
-                </template>
-              </template>
-              <template v-else>
-                <i class="fas fa-times text-red-500 mr-1"></i>
-                Not Connected
-              </template>
-            </span>
-          </p>
-        </div>
-        <div class="modal-action">
-          <button @click="closePortStatusModal" class="btn">Close</button>
-        </div>
-      </div>
-    </div>
-
+    <!-- Port Status Modal including assignment UI -->
+    <PortStatus v-if="showPortStatusModal" :deviceName="deviceName" :timeInInfo="timeInInfo" :timeOutInfo="timeOutInfo"
+      :newScannerInfo="newScannerInfo" @close="closePortStatusModal" @assignRole="assignRole" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { io } from 'socket.io-client';
+import { initializeSocket, getSocket } from '@/composables/socket';
 import HTTP from '@/http';
 import AnnouncementsCarousel from "@/components/AnnouncementsCarousel.vue";
 import DaisyTimeIn from "@/components/DaisyTimeIn.vue";
 import DeviceRegistration from "@/components/DeviceRegistration.vue";
+import PortStatus from "@/components/PortStatus.vue";
 
 const isRegistered = ref(false);
 const deviceName = ref('');
-const checkingRegistration = ref(true);
-let socket = null;
+const deviceFingerprint = ref('');
 
-const showModal = ref(false);
-const newScannerInfo = ref({ uniqueKey: '', portPath: '' });
+const checkingRegistration = ref(true);
+
+// Initially, try to get the socket instance (might be null if not initialized yet)
+let socket = getSocket();
 
 const showPortStatusModal = ref(false);
+
+// Holds current port status info
 const timeInInfo = ref(null);
 const timeOutInfo = ref(null);
+
+// Holds new scanner info if a scanner is detected and not assigned
+const newScannerInfo = ref({ uniqueKey: '', portPath: '' });
 
 onMounted(() => {
   checkRegistration();
@@ -128,11 +73,12 @@ async function checkRegistration() {
       if (response.data.device_name) {
         deviceName.value = response.data.device_name;
       }
-      // If a device fingerprint exists, initialize the socket connection.
+      // If a device fingerprint exists, initialize the shared socket connection.
       if (response.data.device_fingerprint) {
-        socket = io('http://localhost:4000', {
-          query: { deviceFingerprint: response.data.device_fingerprint },
-        });
+        deviceFingerprint.value = response.data.device_fingerprint;
+        initializeSocket(deviceFingerprint.value);
+        // Update local socket variable from our composable.
+        socket = getSocket();
         setupSocketListeners();
       }
       isRegistered.value = true;
@@ -148,9 +94,10 @@ function handleRegistered(payload) {
   // Called when DeviceRegistration emits the 'registered' event.
   deviceName.value = payload.deviceName;
   if (payload.deviceFingerprint) {
-    socket = io('http://localhost:4000', {
-      query: { deviceFingerprint: payload.deviceFingerprint },
-    });
+    deviceFingerprint.value = payload.deviceFingerprint;
+    // Initialize the shared socket connection for the newly registered device.
+    initializeSocket(payload.deviceFingerprint);
+    socket = getSocket();
     setupSocketListeners();
   }
   isRegistered.value = true;
@@ -166,7 +113,8 @@ function setupSocketListeners() {
   socket.on('scannerDetected', (data) => {
     if (!data.assigned) {
       newScannerInfo.value = data;
-      showModal.value = true;
+      // Optionally open the port status modal automatically if desired.
+      showPortStatusModal.value = true;
     } else {
       if (data.role === 'Time In') {
         timeInInfo.value = data;
@@ -177,7 +125,8 @@ function setupSocketListeners() {
   });
 
   socket.on('scannerAssigned', (data) => {
-    showModal.value = false;
+    // Clear newScannerInfo after assignment.
+    newScannerInfo.value = { uniqueKey: '', portPath: '' };
     if (data.role === 'Time In') {
       timeInInfo.value = data;
     } else if (data.role === 'Time Out') {

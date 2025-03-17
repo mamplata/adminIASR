@@ -22,9 +22,10 @@ Route::middleware('device.check')->group(function () {
 
     // ENTRY LOGS
     Route::post('/entry-logs', [EntryLogController::class, 'store']);
+
+    //ANNOUNCEMENTS
+    Route::get('/announcements', [AnnouncementController::class, 'getAnnouncements']);
 });
 
 
 Route::post('/device/register', [DeviceController::class, 'register']);
-
-Route::get('/announcements', [AnnouncementController::class, 'getAnnouncements']);

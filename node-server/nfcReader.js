@@ -40,18 +40,31 @@ io.on("connection", (socket) => {
 
     socket.on("assignRole", (data) => {
         const { uniqueKey, role } = data;
-        // Always read from disk to get the latest roles
         const roles = getScannerRoles();
         const portPath = getPortFromUniqueKey(uniqueKey);
+
+        // If this exact device (unique key) is already assigned, do nothing.
         if (roles[uniqueKey]) {
-            socket.emit("scannerAssignmentError", { uniqueKey, message: "Scanner already assigned" });
-        } else if (isPortAssigned(portPath)) {
-            socket.emit("scannerAssignmentError", { uniqueKey, message: `Port ${portPath} already assigned` });
-        } else {
-            roles[uniqueKey] = role;
-            saveScannerRoles(roles);
-            socket.emit("scannerAssigned", { uniqueKey, role });
+            socket.emit("scannerAssignmentError", {
+                uniqueKey,
+                message: "Scanner already assigned",
+            });
+            return;
         }
+
+        // For a new scanner on a different port:
+        // If the same role is already assigned to any device on a different port,
+        // remove that assignment to allow the new scanner to override it.
+        Object.keys(roles).forEach((key) => {
+            if (roles[key] === role && getPortFromUniqueKey(key) !== portPath) {
+                delete roles[key];
+            }
+        });
+
+        // Assign the role to the new scanner.
+        roles[uniqueKey] = role;
+        saveScannerRoles(roles);
+        socket.emit("scannerAssigned", { uniqueKey, role });
     });
 });
 

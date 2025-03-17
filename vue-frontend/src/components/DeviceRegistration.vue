@@ -1,155 +1,52 @@
 <template>
-    <div class="h-screen w-full">
-        <!-- Loading state while checking registration -->
-        <div v-if="checkingRegistration" class="flex items-center justify-center h-full">
-            <p>Checking device registration...</p>
-        </div>
-
-        <!-- Once registration check is done -->
-        <div v-else>
-            <!-- Main page view: display full layout if device is registered -->
-            <div v-if="isRegistered" class="flex flex-col lg:flex-row h-screen w-full relative">
-                <!-- Left Section -->
-                <div class="w-full lg:w-2/5">
-                    <DaisyTimeIn :deviceName="deviceName" :isRegistered="isRegistered" />
-                </div>
-                <!-- Right Section (Custom Carousel) -->
-                <AnnouncementsCarousel />
-
-                <!-- Port Info Button (fixed at top-right) -->
-                <button @click="openPortStatusModal"
-                    class="fixed top-4 right-4 bg-[#198754] text-white p-3 rounded-full flex items-center justify-center">
-                    <i class="fas fa-info-circle text-2xl"></i>
-                </button>
-            </div>
-
-            <!-- Registration view: show only when not registered -->
-            <div v-else>
-                <DeviceRegistration @registered="handleRegistered" />
+    <div class="flex items-center justify-center h-screen">
+        <div class="card w-full max-w-md bg-base-200 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Register Device</h2>
+                <form @submit.prevent="registerDevice" class="space-y-4">
+                    <input v-model="shortCode" type="text" placeholder="Enter short code"
+                        class="input input-bordered w-full" required />
+                    <button type="submit" class="btn btn-success w-full">Register</button>
+                </form>
+                <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
             </div>
         </div>
-
-        <!-- Port Status Modal including assignment UI -->
-        <PortStatus v-if="showPortStatusModal" :deviceName="deviceName" :timeInInfo="timeInInfo"
-            :timeOutInfo="timeOutInfo" :newScannerInfo="newScannerInfo" @close="closePortStatusModal"
-            @assignRole="assignRole" />
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { io } from 'socket.io-client';
+import { ref } from 'vue';
 import HTTP from '@/http';
-import AnnouncementsCarousel from "@/components/AnnouncementsCarousel.vue";
-import DaisyTimeIn from "@/components/DaisyTimeIn.vue";
-import DeviceRegistration from "@/components/DeviceRegistration.vue";
-import PortStatus from "@/components/PortStatus.vue";
+import { initializeSocket } from '@/composables/socket';
 
-const isRegistered = ref(false);
-const deviceName = ref('');
-const checkingRegistration = ref(true);
-let socket = null;
+const shortCode = ref('');
+const errorMessage = ref('');
 
-const showPortStatusModal = ref(false);
+// Define an event emitter to notify the parent when registration is complete.
+const emit = defineEmits(['registered']);
 
-// Holds current port status info
-const timeInInfo = ref(null);
-const timeOutInfo = ref(null);
-
-// Holds new scanner info if a scanner is detected and not assigned
-const newScannerInfo = ref({ uniqueKey: '', portPath: '' });
-
-onMounted(() => {
-    checkRegistration();
-});
-
-async function checkRegistration() {
+async function registerDevice() {
+    errorMessage.value = '';
     try {
-        const response = await HTTP.get('/api/device/status', { withCredentials: true });
-        if (response.data) {
-            if (response.data.device_name) {
-                deviceName.value = response.data.device_name;
-            }
-            // If a device fingerprint exists, initialize the socket connection.
+        const response = await HTTP.post(
+            '/api/device/register',
+            { short_code: shortCode.value },
+            { withCredentials: true }
+        );
+        if (response.data && response.data.success) {
+            // Initialize the shared socket connection using the device fingerprint.
             if (response.data.device_fingerprint) {
-                socket = io('http://localhost:4000', {
-                    query: { deviceFingerprint: response.data.device_fingerprint },
-                });
-                setupSocketListeners();
+                initializeSocket(response.data.device_fingerprint);
             }
-            isRegistered.value = true;
+            // Emit the device info to the parent component.
+            emit('registered', {
+                deviceName: response.data.device_name || '',
+                deviceFingerprint: response.data.device_fingerprint || '',
+            });
         }
     } catch (error) {
-        isRegistered.value = false;
-    } finally {
-        checkingRegistration.value = false;
+        errorMessage.value =
+            error.response?.data?.message || 'An unexpected error occurred.';
     }
-}
-
-function handleRegistered(payload) {
-    // Called when DeviceRegistration emits the 'registered' event.
-    deviceName.value = payload.deviceName;
-    if (payload.deviceFingerprint) {
-        socket = io('http://localhost:4000', {
-            query: { deviceFingerprint: payload.deviceFingerprint },
-        });
-        setupSocketListeners();
-    }
-    isRegistered.value = true;
-}
-
-function setupSocketListeners() {
-    if (!socket) return;
-
-    socket.on('connect', () => {
-        console.log("Socket connected");
-    });
-
-    socket.on('scannerDetected', (data) => {
-        if (!data.assigned) {
-            newScannerInfo.value = data;
-            // Optionally open the port status modal automatically if desired.
-            showPortStatusModal.value = true;
-        } else {
-            if (data.role === 'Time In') {
-                timeInInfo.value = data;
-            } else if (data.role === 'Time Out') {
-                timeOutInfo.value = data;
-            }
-        }
-    });
-
-    socket.on('scannerAssigned', (data) => {
-        // Clear newScannerInfo after assignment.
-        newScannerInfo.value = { uniqueKey: '', portPath: '' };
-        if (data.role === 'Time In') {
-            timeInInfo.value = data;
-        } else if (data.role === 'Time Out') {
-            timeOutInfo.value = data;
-        }
-    });
-
-    socket.on('scannerDisconnected', (data) => {
-        if (timeInInfo.value && timeInInfo.value.uniqueKey === data.uniqueKey) {
-            timeInInfo.value.online = false;
-        }
-        if (timeOutInfo.value && timeOutInfo.value.uniqueKey === data.uniqueKey) {
-            timeOutInfo.value.online = false;
-        }
-    });
-}
-
-function assignRole(role) {
-    if (socket) {
-        socket.emit('assignRole', { uniqueKey: newScannerInfo.value.uniqueKey, role });
-    }
-}
-
-function openPortStatusModal() {
-    showPortStatusModal.value = true;
-}
-
-function closePortStatusModal() {
-    showPortStatusModal.value = false;
 }
 </script>
