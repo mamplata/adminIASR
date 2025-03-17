@@ -18,24 +18,14 @@
 
         <!-- Port Info Button (fixed at top-right) -->
         <button @click="openPortStatusModal"
-          class="fixed top-4 right-4 bg-black text-white p-3 rounded-full flex items-center justify-center">
+          class="fixed top-4 right-4 bg-[#198754] text-white p-3 rounded-full flex items-center justify-center">
           <i class="fas fa-info-circle text-2xl"></i>
         </button>
       </div>
 
       <!-- Registration view: show only when not registered -->
-      <div v-else class="flex items-center justify-center h-screen">
-        <div class="card w-full max-w-md bg-base-200 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title mb-4">Register Device</h2>
-            <form @submit.prevent="registerDevice" class="space-y-4">
-              <input v-model="shortCode" type="text" placeholder="Enter short code" class="input input-bordered w-full"
-                required />
-              <button type="submit" class="btn btn-success w-full">Register</button>
-            </form>
-            <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
-          </div>
-        </div>
+      <div v-else>
+        <DeviceRegistration @registered="handleRegistered" />
       </div>
     </div>
 
@@ -57,7 +47,6 @@
     <div v-if="showPortStatusModal" class="modal modal-open">
       <div class="modal-box">
         <h3 class="font-bold text-lg">Port and Device Status</h3>
-        <!-- Added device name display -->
         <p class="py-2"><strong>Device:</strong> {{ deviceName }}</p>
         <div class="py-2">
           <p>
@@ -111,26 +100,19 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { io } from 'socket.io-client';
-import HTTP from '@/http'; // Adjust this import path as needed
-
+import HTTP from '@/http';
 import AnnouncementsCarousel from "@/components/AnnouncementsCarousel.vue";
 import DaisyTimeIn from "@/components/DaisyTimeIn.vue";
+import DeviceRegistration from "@/components/DeviceRegistration.vue";
 
-// Registration and port management state
 const isRegistered = ref(false);
 const deviceName = ref('');
-const errorMessage = ref('');
-const shortCode = ref('');
 const checkingRegistration = ref(true);
-
-// Socket management and scanner status
 let socket = null;
 
-// Modal and role assignment state
 const showModal = ref(false);
 const newScannerInfo = ref({ uniqueKey: '', portPath: '' });
 
-// State for port management info modal
 const showPortStatusModal = ref(false);
 const timeInInfo = ref(null);
 const timeOutInfo = ref(null);
@@ -139,7 +121,6 @@ onMounted(() => {
   checkRegistration();
 });
 
-// Function to check if the device is already registered
 async function checkRegistration() {
   try {
     const response = await HTTP.get('/api/device/status', { withCredentials: true });
@@ -147,7 +128,7 @@ async function checkRegistration() {
       if (response.data.device_name) {
         deviceName.value = response.data.device_name;
       }
-      // Initialize socket connection if fingerprint is provided.
+      // If a device fingerprint exists, initialize the socket connection.
       if (response.data.device_fingerprint) {
         socket = io('http://localhost:4000', {
           query: { deviceFingerprint: response.data.device_fingerprint },
@@ -163,31 +144,18 @@ async function checkRegistration() {
   }
 }
 
-// Function to register the device with the provided short code
-async function registerDevice() {
-  errorMessage.value = '';
-  try {
-    const response = await HTTP.post(
-      '/api/device/register',
-      { short_code: shortCode.value },
-      { withCredentials: true }
-    );
-    if (response.data && response.data.success) {
-      deviceName.value = response.data.device_name || '';
-      if (response.data.device_fingerprint) {
-        socket = io('http://localhost:4000', {
-          query: { deviceFingerprint: response.data.device_fingerprint },
-        });
-        setupSocketListeners();
-      }
-      isRegistered.value = true;
-    }
-  } catch (error) {
-    errorMessage.value = error.response?.data?.message || 'An unexpected error occurred.';
+function handleRegistered(payload) {
+  // Called when DeviceRegistration emits the 'registered' event.
+  deviceName.value = payload.deviceName;
+  if (payload.deviceFingerprint) {
+    socket = io('http://localhost:4000', {
+      query: { deviceFingerprint: payload.deviceFingerprint },
+    });
+    setupSocketListeners();
   }
+  isRegistered.value = true;
 }
 
-// Setup socket listeners for scanner/port management events and role assignment logic
 function setupSocketListeners() {
   if (!socket) return;
 
@@ -197,11 +165,9 @@ function setupSocketListeners() {
 
   socket.on('scannerDetected', (data) => {
     if (!data.assigned) {
-      // When a scanner is detected and not assigned, store its info and show modal for role assignment
       newScannerInfo.value = data;
       showModal.value = true;
     } else {
-      // Use the online status as provided by the server without overriding it.
       if (data.role === 'Time In') {
         timeInInfo.value = data;
       } else if (data.role === 'Time Out') {
@@ -212,7 +178,6 @@ function setupSocketListeners() {
 
   socket.on('scannerAssigned', (data) => {
     showModal.value = false;
-    // Use the online status from the server.
     if (data.role === 'Time In') {
       timeInInfo.value = data;
     } else if (data.role === 'Time Out') {
@@ -221,7 +186,6 @@ function setupSocketListeners() {
   });
 
   socket.on('scannerDisconnected', (data) => {
-    // Mark the scanner as offline so that the port number remains displayed.
     if (timeInInfo.value && timeInInfo.value.uniqueKey === data.uniqueKey) {
       timeInInfo.value.online = false;
     }
@@ -231,14 +195,12 @@ function setupSocketListeners() {
   });
 }
 
-// Function to assign role to the scanner via socket event
 function assignRole(role) {
   if (socket) {
     socket.emit('assignRole', { uniqueKey: newScannerInfo.value.uniqueKey, role });
   }
 }
 
-// Functions to open and close the port status modal
 function openPortStatusModal() {
   showPortStatusModal.value = true;
 }
@@ -247,7 +209,3 @@ function closePortStatusModal() {
   showPortStatusModal.value = false;
 }
 </script>
-
-<style scoped>
-/* Additional custom styling if needed */
-</style>
