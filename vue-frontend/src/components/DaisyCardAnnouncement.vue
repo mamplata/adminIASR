@@ -49,6 +49,7 @@ const announcement = ref(null);
 const fetchAnnouncement = async () => {
     try {
         const response = await HTTP.get("/api/announcements");
+        console.log(response.value);
         announcement.value = response.data.announcements[0]; // Fetching the first announcement
     } catch (error) {
         console.error("Error fetching announcement:", error);

@@ -149,13 +149,14 @@ onMounted(() => {
     socket.on("cardScanned", async (data) => {
         scannedCardUID.value = data.uid;
         nfcStatus.value = null;
-        modalRef.value.closeModal();
 
         try {
             // Step 1: Check if the card is registered and enrolled
             const checkResponse = await axios.get(route("registered-cards.checkCard"), {
                 params: { uid: scannedCardUID.value },
             });
+
+            modalRef.value.closeModal();
 
             if (checkResponse.data.exists) {
                 studentID.value = checkResponse.data.studentId;
@@ -180,7 +181,7 @@ onMounted(() => {
 
                 // Step 3: Use updated enrollment status
                 isEnrolled.value = checkResponse.data.isEnrolled;
-
+                nfcStatus.value = checkResponse.data.message;
                 modalRef2.value.showModal();
             } else {
                 cardExists.value = false;

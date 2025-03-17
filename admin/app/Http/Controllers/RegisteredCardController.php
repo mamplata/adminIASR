@@ -125,7 +125,6 @@ class RegisteredCardController extends Controller
             'studentId' => (string) $registeredCard->studentId,
             'studentInfo' => $studentInfo,
             'isEnrolled' => $isEnrolled,
-            'message' => $isEnrolled ? 'Student is currently enrolled.' : 'Student is not enrolled. Semester information is outdated.',
         ];
     }
 
