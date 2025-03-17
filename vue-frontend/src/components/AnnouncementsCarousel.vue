@@ -1,7 +1,7 @@
 <template>
-  <div class="w-full lg:w-3/5 relative overflow-hidden flex justify-center items-center"
+  <div class="w-screen h-full lg:h-full relative overflow-hidden flex justify-center items-center"
     :style="{ backgroundImage: `url(${bgAnnounce})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
-    <div class="w-full h-[400px] lg:h-[500px] overflow-hidden relative">
+    <div class="w-full h-full overflow-hidden relative">
       <div class="flex w-full h-full" :style="containerStyle">
         <div v-for="(announcement, index) in slides" :key="index" class="flex-none w-full h-full">
           <DaisyCardAnnouncement :announcement="announcement" />
@@ -13,7 +13,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import HTTP from "@/http"; // Axios instances
+import HTTP from "@/http"; // Axios instance
 import bgAnnounce from "@/assets/img/bgAnnounce.png";
 import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue";
 
@@ -31,6 +31,7 @@ const fetchAnnouncements = async () => {
   }
 };
 
+// Duplicate first slide for smooth infinite loop
 const slides = computed(() =>
   announcements.value.length > 0 ? [...announcements.value, announcements.value[0]] : []
 );
@@ -40,19 +41,20 @@ const containerStyle = computed(() => ({
   transition: disableTransition.value ? "none" : "transform 0.5s ease-in-out",
 }));
 
+const nextSlide = () => {
+  currentIndex.value++;
+  if (currentIndex.value >= announcements.value.length) {
+    setTimeout(() => {
+      disableTransition.value = true;
+      currentIndex.value = 0;
+      setTimeout(() => (disableTransition.value = false), 50);
+    }, 500);
+  }
+};
+
 onMounted(async () => {
   await fetchAnnouncements();
-  timer = setInterval(() => {
-    currentIndex.value++;
-    if (currentIndex.value >= announcements.value.length) {
-      setTimeout(() => {
-        disableTransition.value = true;
-        currentIndex.value = 0;
-        // re-enable transition shortly after
-        setTimeout(() => (disableTransition.value = false), 50);
-      }, 500);
-    }
-  }, 3000);
+  timer = setInterval(nextSlide, 3000);
 });
 
 onUnmounted(() => clearInterval(timer));
