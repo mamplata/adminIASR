@@ -6,7 +6,8 @@
                 <form @submit.prevent="registerDevice" class="space-y-4">
                     <input v-model="shortCode" type="text" placeholder="Enter short code"
                         class="input input-bordered w-full" required />
-                    <button type="submit" class="btn btn-success w-full">Register</button>
+                    <button type="submit"
+                        class="w-full btn text-white btn-success shadow-lg hover:bg-[#20714c]">Register</button>
                 </form>
                 <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
             </div>

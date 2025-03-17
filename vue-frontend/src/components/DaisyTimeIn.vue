@@ -1,38 +1,87 @@
 <template>
-    <div class="flex flex-col items-center justify-center h-full">
-        <!-- iASR Logo -->
-        <img :src="iASRPNC" alt="iASR Logo" class="w-48" />
+    <div class="relative h-full">
+        <!-- Header positioned in the top left corner -->
+        <header class="absolute top-0 left-0 m-4">
+            <img :src="iASRPNC" alt="iASR Logo" class="w-64" />
+        </header>
 
-        <!-- Card with Transition for Error or Scanned Student Info -->
-        <transition name="fade">
-            <div v-if="scannedStudent || nfcError" class="card bg-base-100 shadow-md p-4 mt-4 w-full max-w-md">
-                <div class="card-body">
+        <!-- Main content container -->
+        <div class="flex flex-col items-center justify-center h-full">
+            <transition name="fade">
+                <div v-if="scannedStudent || nfcError"
+                    class="p-6 w-96 mx-auto rounded-lg uppercase bg-base-100 shadow-md">
+                    <!-- Error State -->
                     <template v-if="nfcError">
-                        <h3 class="card-title text-red-500">{{ nfcError }}</h3>
+                        <h3 class="text-red-500 text-center">{{ nfcError }}</h3>
                     </template>
+
+                    <!-- Student Information -->
                     <template v-else>
-                        <h3 class="card-title">Scanned Student Information</h3>
-                        <div v-if="scannedStudent.image" class="my-2">
-                            <img :src="scannedStudent.image" alt="Student Image"
-                                class="w-32 h-32 object-cover rounded-full" />
-                        </div>
-                        <p><strong>Name:</strong> {{ scannedStudent.fName }} {{ scannedStudent.lName }}</p>
-                        <p><strong>Program:</strong> {{ scannedStudent.program }}</p>
-                        <p><strong>Department:</strong> {{ scannedStudent.department }}</p>
-                        <p><strong>Year Level:</strong> {{ scannedStudent.yearLevel }}</p>
-                        <p><strong>Last Enrolled At:</strong> {{ scannedStudent.last_enrolled_at }}</p>
+                        <!-- Primary Information Section -->
+                        <section class="flex flex-col items-center justify-around gap-4">
+                            <!-- Student Image -->
+                            <div v-if="scannedStudent.image" class="flex-shrink-0">
+                                <img :src="scannedStudent.image" alt="Student Image"
+                                    class="w-40 h-40 rounded-full object-cover shadow-lg" />
+                            </div>
+
+                            <!-- Essential Details -->
+                            <div class="flex flex-col text-center">
+                                <div>
+                                    <span>{{ scannedStudent.fName }} {{ scannedStudent.lName }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500 text-sm">{{ scannedStudent.studentId }}</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Additional Information Section -->
+                        <section class="mt-4 text-justify gap-4 space-y-3">
+                            <div>
+                                <strong>Program: </strong>
+                                <span>{{ scannedStudent.program }}</span>
+                            </div>
+                            <div>
+                                <strong>Department: </strong>
+                                <span>{{ scannedStudent.department }}</span>
+                            </div>
+                            <div>
+                                <strong>Year Level: </strong>
+                                <span>{{ scannedStudent.yearLevel }}</span>
+                            </div>
+                            <div>
+                                <strong>Last Enrolled At: </strong>
+                                <span>{{ scannedStudent.last_enrolled_at }}</span>
+                            </div>
+                        </section>
                     </template>
                 </div>
-            </div>
-        </transition>
+            </transition>
 
-        <!-- Scanning Prompt (Shown only when there is no error and no student info) -->
-        <div v-if="!scannedStudent && !nfcError" class="text-center mt-12">
-            <img :src="logoRFID" alt="RFID Icon" class="w-32 mx-auto animate-zoom-in-out" />
-            <h1 class="text-4xl font-bold text-green-900 mt-4">Tap your card</h1>
+            <!-- Scanning Prompt (Shown only when there is no error and no student info) -->
+            <div v-if="!scannedStudent && !nfcError" class="text-center mt-12">
+                <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto animate-zoom-in-out" />
+                <h1 class="text-4xl font-bold text-green-900 mt-4">
+                    {{ isReadingNfc ? "Scanning..." : "Tap your card" }}
+                </h1>
+                <p class="text-gray-600 mt-2" v-if="scanCount > 0">Scans: {{ scanCount }}</p>
+                <!-- Added spinner icon for "Ready to scan" status -->
+                <p class="text-green-700 font-semibold mt-1 flex items-center">
+                    <svg v-if="readyStatus === 'Ready to scan'" class="animate-spin h-5 w-5 mr-2 text-green-700"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                        </path>
+                    </svg>
+                    {{ readyStatus }}
+                </p>
+            </div>
         </div>
     </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -88,7 +137,7 @@ async function processScannedCard(card) {
         // After 3 seconds, trigger the next scan.
         setTimeout(() => {
             readNfcCard();
-        }, 3000);
+        }, 1000);
     } catch (err) {
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
         scannedStudent.value = null;
