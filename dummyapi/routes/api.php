@@ -64,3 +64,40 @@ Route::get('students/{studentId}', function ($studentId) {
         'error' => 'Student not found'
     ], 404);
 })->name('students.fetch');
+
+Route::get('schedule/{studentId}', function ($studentId) {
+    // Generate a dynamic schedule with random courses
+    $courses = [
+        ['courseCode' => 'IT101', 'courseDescription' => 'Introduction to IT'],
+        ['courseCode' => 'CS102', 'courseDescription' => 'Programming Basics'],
+        ['courseCode' => 'CS301', 'courseDescription' => 'Data Structures'],
+        ['courseCode' => 'IT202', 'courseDescription' => 'Networking Fundamentals'],
+        ['courseCode' => 'CS401', 'courseDescription' => 'Software Engineering'],
+        ['courseCode' => 'IT305', 'courseDescription' => 'Database Management'],
+    ];
+
+    $days = ['MWF', 'TTh', 'Sat'];
+    $times = ['08:00 AM - 09:30 AM', '10:00 AM - 11:30 AM', '01:00 PM - 02:30 PM', '02:00 PM - 03:30 PM'];
+    $rooms = ['Room 101', 'Room 202', 'Room 303', 'Lab 101'];
+    $sections = ['A1', 'B1', 'C1', 'D1'];
+
+    // Generate a random schedule for the given student
+    $schedule = [];
+    for ($i = 1; $i <= rand(2, 5); $i++) {
+        $course = $courses[array_rand($courses)];
+        $schedule[] = [
+            'id'                => $i,
+            'courseCode'        => $course['courseCode'],
+            'courseDescription' => $course['courseDescription'],
+            'day'               => $days[array_rand($days)],
+            'time'              => $times[array_rand($times)],
+            'room'              => $rooms[array_rand($rooms)],
+            'section'           => $sections[array_rand($sections)],
+        ];
+    }
+
+    return response()->json([
+        'studentId' => $studentId,
+        'schedule'  => $schedule,
+    ]);
+})->name('schedule.fetch');
