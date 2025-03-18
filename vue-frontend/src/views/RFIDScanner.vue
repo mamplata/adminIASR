@@ -15,7 +15,7 @@
         </div>
         <!-- Right Section: AnnouncementsCarousel with 8/12 width -->
         <div class="w-full lg:w-8/12 relative">
-          <AnnouncementsCarousel />
+          <AnnouncementsCarousel :deviceName="deviceName" />
         </div>
       </div>
 
