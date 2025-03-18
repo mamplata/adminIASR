@@ -3,3 +3,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* This media query applies when the viewport width is 1024px or less */
+@media only screen and (max-width: 1024px) {
+    /* Create a pseudo-element on the body to serve as an overlay */
+    body::before {
+      content: "Please use desktop only";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 1); /* Semi-transparent dark background */
+      color: #000;
+      font-size: 2em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 10000; /* Ensure the overlay is on top */
+    }
+  }
+  

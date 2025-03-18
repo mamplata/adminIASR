@@ -1,8 +1,8 @@
 <template>
-    <div class="card-wrapper m-10 p-5 flex justify-center items-center w-full h-full">
+    <div class="card-wrapper p-5 flex justify-center items-center w-full h-full">
         <!-- Card for text announcement -->
         <div v-if="announcement.type === 'text'"
-            class="card border-8 border-gray-200 shadow-md rounded-md w-full h-full flex flex-col relative"
+            class="card border-8 border-gray-200 shadow-md rounded-md flex flex-col relative w-full h-full"
             :style="{ backgroundImage: `url(${pncBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
             <img :src="pncLogo" alt="PNC Logo" class="absolute top-2 right-2 w-6 h-6" />
             <div class="flex flex-col flex-grow">
@@ -18,6 +18,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Card for image announcement -->
         <div v-else-if="announcement.type === 'image'"

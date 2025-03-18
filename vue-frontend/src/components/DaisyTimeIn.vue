@@ -1,5 +1,5 @@
 <template>
-    <div class="relative h-full">
+    <div class="relative h-full texture-bg">
         <!-- Header positioned in the top left corner -->
         <header class="absolute top-0 left-0 m-4">
             <img :src="iASRPNC" alt="iASR Logo" class="w-64" />
@@ -31,7 +31,6 @@
                                     <span>{{ scannedStudent.fName }} {{ scannedStudent.lName }}</span>
                                 </div>
                                 <div>
-                                    <!-- Assuming studentId exists; if not, you can remove or adjust -->
                                     <span class="text-gray-500 text-sm">{{ scannedStudent.studentId }}</span>
                                 </div>
                             </div>
@@ -69,7 +68,6 @@
     </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getSocket } from '@/composables/socket';
@@ -96,7 +94,6 @@ function readNfcCard() {
     if (isReadingNfc.value) return;
     isReadingNfc.value = true;
     nfcData.value = null;
-    // Do not clear scannedStudent here so that a successful scan remains visible until a new scan occurs
     console.log("📡 Requesting to read NFC card...");
     if (socket) {
         socket.emit('readCard');
@@ -107,10 +104,7 @@ function readNfcCard() {
 }
 
 /**
- * Processes a scanned card. If successful, it updates the student info.
- * In case of error, it clears the student info, shows an error message,
- * and after 3 seconds, clears the error to display the scanning prompt.
- * In both cases, a new scan is triggered after 3 seconds.
+ * Processes a scanned card.
  */
 async function processScannedCard(card) {
     try {
@@ -119,16 +113,13 @@ async function processScannedCard(card) {
             { uid: card.uid, data: card.data },
             { withCredentials: true }
         );
-        // Update or replace the current student info with the new one.
         scannedStudent.value = response.data.student;
-        // After 3 seconds, trigger the next scan.
         setTimeout(() => {
             readNfcCard();
         }, 1000);
     } catch (err) {
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
         scannedStudent.value = null;
-        // After 3 seconds, clear error and trigger the next scan.
         setTimeout(() => {
             nfcError.value = '';
             readNfcCard();
@@ -158,7 +149,6 @@ function setupSocketListeners() {
         nfcError.value = "Unauthorized access.";
         isReadingNfc.value = false;
         scannedStudent.value = null;
-        // After 3 seconds, clear error and trigger the next scan.
         setTimeout(() => {
             nfcError.value = '';
             readNfcCard();
@@ -178,6 +168,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Background texture style */
+.texture-bg {
+    background-color: #f6f7fb;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='%23198754' fill-opacity='0.35'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
+}
+
 /* Fade transition CSS */
 .fade-enter-active,
 .fade-leave-active {
