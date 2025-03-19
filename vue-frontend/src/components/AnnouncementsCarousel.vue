@@ -6,7 +6,7 @@
   }">
     <!-- Header -->
     <header class="w-full px-6 h-24 flex items-center relative" :style="{
-      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url(${pncBg})`,
+      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1)), url(${pncBg})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center'
     }">
