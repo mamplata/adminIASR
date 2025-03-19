@@ -72,7 +72,15 @@ const props = defineProps({
   selectedDepartment: { type: String, default: "GENERAL" }
 });
 
-const currentDepartment = ref(props.selectedDepartment);
+const announcements = ref([]);
+const showPortStatusModal = ref(false);
+const timeInInfo = ref(null);
+const timeOutInfo = ref(null);
+const newScannerInfo = ref({ uniqueKey: "", portPath: "" });
+const socket = ref(getSocket());
+const apiUrl = import.meta.env.VITE_API_URL;
+
+const currentDepartment = ref("GENERAL");
 
 // Watch for changes in selectedDepartment prop
 watch(
@@ -93,14 +101,6 @@ watch(filteredAnnouncements, (newFiltered) => {
   console.log('Filtered Announcements:', newFiltered);
 });
 
-
-const announcements = ref([]);
-const showPortStatusModal = ref(false);
-const timeInInfo = ref(null);
-const timeOutInfo = ref(null);
-const newScannerInfo = ref({ uniqueKey: "", portPath: "" });
-const socket = ref(getSocket());
-const apiUrl = import.meta.env.VITE_API_URL;
 
 // Swiper references
 const mainSwiper = ref(null);
