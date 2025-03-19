@@ -7,68 +7,67 @@
 
         <!-- Main content container -->
         <div class="flex flex-col items-center justify-center h-full mx-10">
-            <transition name="fade">
-                <div v-if="scannedStudent || nfcError">
-                    <!-- Error State -->
-                    <template v-if="nfcError">
-                        <!-- Error Card: Unauthorized Access with 3D effect -->
-                        <div v-if="nfcError == 'Unauthorized access'"
-                            class="card card-side bg-error text-white shadow-sm relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row my-4">
-                            <!-- Background Pattern Overlay -->
-                            <div class="absolute inset-0 z-0"
-                                style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
-                            </div>
-                            <!-- Icon Section -->
-                            <figure class="z-10 flex-shrink-0 p-4">
-                                <i class="fas fa-exclamation-triangle text-5xl"></i>
-                            </figure>
-                            <!-- Message Section -->
-                            <div class="card-body z-10">
-                                <h2 class="card-title">Unauthorized Access</h2>
-                                <p class="text-sm">
-                                    You do not have permission to access this resource.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Error Card: Card Activation Expired with 3D effect -->
-                        <div v-if="nfcError == 'Card is not activated'"
-                            class="card card-side bg-warning text-white shadow-sm relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row my-4">
-                            <!-- Background Pattern Overlay -->
-                            <div class="absolute inset-0 z-0"
-                                style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
-                            </div>
-                            <!-- Icon Section -->
-                            <figure class="z-10 flex-shrink-0 p-4">
-                                <i class="fas fa-info-circle text-5xl"></i>
-                            </figure>
-                            <!-- Message Section -->
-                            <div class="card-body z-10">
-                                <h2 class="card-title">Card Activation Expired</h2>
-                                <p class="text-sm">
-                                    Your card activation period has expired. Please contact support for further
-                                    assistance.
-                                </p>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template v-else>
-                        <div
-                            class="card bg-base-100 shadow-sm relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
-                            <!-- Background Pattern Overlay -->
-                            <div class="absolute inset-0 z-0"
-                                style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
+            <!-- Single transition wrapping both states with a keyed container -->
+            <transition name="fade" mode="out-in">
+                <div :key="(scannedStudent || nfcError) ? 'card' : 'prompt'">
+                    <template v-if="scannedStudent || nfcError">
+                        <!-- Error State -->
+                        <template v-if="nfcError">
+                            <!-- Error Card: Unauthorized Access with 3D effect -->
+                            <div v-if="nfcError == 'Unauthorized access'"
+                                class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-64">
+                                <!-- Background Pattern Overlay -->
+                                <div class="absolute inset-0 z-0"
+                                    style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
+                                </div>
+                                <!-- Icon Section -->
+                                <figure class="z-10 flex-shrink-0 p-4">
+                                    <i class="fas fa-exclamation-triangle text-5xl"></i>
+                                </figure>
+                                <!-- Message Section -->
+                                <div class="card-body z-10">
+                                    <h2 class="card-title text-2xl">Unauthorized Access</h2>
+                                    <p class="text-lg">
+                                        You do not have permission to access this resource.
+                                    </p>
+                                </div>
                             </div>
 
-                            <template v-if="scannedStudent">
+                            <!-- Error Card: Card Activation Expired with 3D effect -->
+                            <div v-if="nfcError == 'Card is not activated'"
+                                class="card card-side bg-warning text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-64">
+                                <!-- Background Pattern Overlay -->
+                                <div class="absolute inset-0 z-0"
+                                    style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
+                                </div>
+                                <!-- Icon Section -->
+                                <figure class="z-10 flex-shrink-0 p-4">
+                                    <i class="fas fa-info-circle text-5xl"></i>
+                                </figure>
+                                <!-- Message Section -->
+                                <div class="card-body z-10">
+                                    <h2 class="card-title text-2xl">Card Activation Expired</h2>
+                                    <p class="text-lg">
+                                        Your card activation period has expired. Please contact support for further
+                                        assistance.
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template v-else>
+                            <!-- Student Card Display -->
+                            <div
+                                class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
+                                <!-- Background Pattern Overlay -->
+                                <div class="absolute inset-0 z-0"
+                                    style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
+                                </div>
+
                                 <!-- Image Section -->
                                 <figure class="z-10">
                                     <img v-if="scannedStudent.image" :src="scannedStudent.image" alt="Student Photo"
-                                        class="w-full md:w-64 object-cover" />
-                                    <!-- Fallback image if no student image exists -->
-                                    <img v-else src="https://api.dicebear.com/9.x/avataaars/svg?seed=default-avatar"
-                                        alt="Default Avatar" class="w-full md:w-64 object-cover" />
+                                        class="w-48 md:w-48 object-cover" />
                                 </figure>
 
                                 <!-- Details Section -->
@@ -79,18 +78,18 @@
                                     <p class="text-sm">Year Level: {{ scannedStudent.yearLevel }}</p>
                                     <p class="text-sm">Last Enrolled: {{ scannedStudent.last_enrolled_at }}</p>
                                 </div>
-                            </template>
+                            </div>
+                        </template>
+                    </template>
+                    <template v-else>
+                        <!-- "Tap your card" prompt -->
+                        <div class="text-center mt-12">
+                            <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto animate-zoom-in-out" />
+                            <h1 class="text-4xl font-bold text-green-900 mt-4">Tap your card</h1>
                         </div>
                     </template>
-
                 </div>
             </transition>
-
-            <!-- Scanning Prompt (Shown only when there is no error and no student info) -->
-            <div v-if="!scannedStudent && !nfcError" class="text-center mt-12">
-                <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto animate-zoom-in-out" />
-                <h1 class="text-4xl font-bold text-green-900 mt-4">Tap your card</h1>
-            </div>
         </div>
     </div>
 </template>
@@ -141,9 +140,11 @@ async function processScannedCard(card) {
             { withCredentials: true }
         );
         scannedStudent.value = response.data.student;
+        // After showing student info, clear it to revert to the "Tap your card" state
         setTimeout(() => {
+            scannedStudent.value = null;
             readNfcCard();
-        }, 1000);
+        }, 3000);
     } catch (err) {
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
         scannedStudent.value = null;
@@ -204,7 +205,7 @@ onMounted(() => {
 /* Fade transition CSS */
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.5s;
+    transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,
