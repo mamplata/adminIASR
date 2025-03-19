@@ -10,7 +10,7 @@
     }">
       <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
       <button @click="openPortStatusModal"
-        class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-[#20714c] text-white p-3 rounded-full flex items-center justify-center">
+        class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
         <i class="fas fa-info-circle text-2xl"></i>
       </button>
     </header>
