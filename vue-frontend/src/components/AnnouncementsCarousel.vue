@@ -6,9 +6,7 @@
   }">
     <!-- Header -->
     <header class="w-full px-6 h-24 flex items-center relative" :style="{
-      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1)), url(${pncBg})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
+      backgroundColor: '#198754'
     }">
       <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
       <button @click="openPortStatusModal"
@@ -41,7 +39,7 @@
                 class="w-full h-40 object-cover rounded border border-gray-200 shadow-md" />
               <div v-else
                 class="w-full h-40 rounded flex items-center justify-center text-xs text-white bg-cover bg-center border border-gray-200 shadow-md"
-                :style="{ backgroundImage: `url(${pncBg})` }">
+                :style="{ backgroundColor: '#198754' }">
                 <span class="p-1 text-center">{{ announcement.content.title }}</span>
               </div>
             </div>
