@@ -20,10 +20,10 @@
     <!-- Main Carousel Section -->
     <main class="container mx-auto flex items-center justify-center" style="min-height: calc(100vh - 6rem);">
       <div class="rounded-lg shadow-lg w-full mx-auto">
-        <!-- Main Slider -->
+        <!-- Main Slider with Two Columns -->
         <Swiper :modules="[EffectCreative, Autoplay, Thumbs]" :autoplay="{ delay: 1500, disableOnInteraction: false }"
-          :slides-per-view="4" :thumbs="{ swiper: thumbsSwiperComputed }" class="mySwiper2" @swiper="setMainSwiper"
-          @slideChange="updateActiveIndex">
+          :slides-per-view="2" :space-between="20" :thumbs="{ swiper: thumbsSwiperComputed }" class="mySwiper2"
+          @swiper="setMainSwiper" @slideChange="updateActiveIndex">
           <SwiperSlide v-for="(announcement, index) in announcements" :key="index">
             <div class="w-full h-96 flex justify-center items-center">
               <DaisyCardAnnouncement :announcement="announcement" class="w-full h-full" />
@@ -127,7 +127,6 @@ function assignRole(role) {
     socket.value.emit("assignRole", { uniqueKey: newScannerInfo.value.uniqueKey, role });
   }
 }
-
 
 function setupSocketListeners() {
   if (!socket.value) return;

@@ -181,14 +181,14 @@ class RegisteredCardController extends Controller
         // First, check if the UID is registered.
         $registeredCard = RegisteredCard::where('uid', $uid)->first();
         if (!$registeredCard) {
-            return response()->json(['error' => 'Unauthorized access.'], 400);
+            return response()->json(['error' => 'Unauthorized access'], 400);
         }
 
 
         // Next, check that the studentId matches the registered card
         // and that the enrollment details are valid.
         if ($registeredCard->studentId != $studentId || !$semesterRecord || $dbYearSuffix !== $yearSuffix) {
-            return response()->json(['error' => 'Card is not activated. Please activate it first by contacting the MSID team.'], 400);
+            return response()->json(['error' => 'Card is not activated'], 400);
         }
 
         // Fetch the student information.

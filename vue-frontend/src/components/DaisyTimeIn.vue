@@ -6,56 +6,83 @@
         </header>
 
         <!-- Main content container -->
-        <div class="flex flex-col items-center justify-center h-full">
+        <div class="flex flex-col items-center justify-center h-full mx-10">
             <transition name="fade">
-                <div v-if="scannedStudent || nfcError"
-                    class="p-6 w-96 mx-auto rounded-lg uppercase bg-base-100 shadow-md">
+                <div v-if="scannedStudent || nfcError">
                     <!-- Error State -->
                     <template v-if="nfcError">
-                        <h3 class="text-red-500 text-center">{{ nfcError }}</h3>
+                        <!-- Error Card: Unauthorized Access with 3D effect -->
+                        <div v-if="nfcError == 'Unauthorized access'"
+                            class="card card-side bg-error text-white shadow-sm relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row my-4">
+                            <!-- Background Pattern Overlay -->
+                            <div class="absolute inset-0 z-0"
+                                style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
+                            </div>
+                            <!-- Icon Section -->
+                            <figure class="z-10 flex-shrink-0 p-4">
+                                <i class="fas fa-exclamation-triangle text-5xl"></i>
+                            </figure>
+                            <!-- Message Section -->
+                            <div class="card-body z-10">
+                                <h2 class="card-title">Unauthorized Access</h2>
+                                <p class="text-sm">
+                                    You do not have permission to access this resource.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Error Card: Card Activation Expired with 3D effect -->
+                        <div v-if="nfcError == 'Card is not activated'"
+                            class="card card-side bg-warning text-white shadow-sm relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row my-4">
+                            <!-- Background Pattern Overlay -->
+                            <div class="absolute inset-0 z-0"
+                                style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
+                            </div>
+                            <!-- Icon Section -->
+                            <figure class="z-10 flex-shrink-0 p-4">
+                                <i class="fas fa-info-circle text-5xl"></i>
+                            </figure>
+                            <!-- Message Section -->
+                            <div class="card-body z-10">
+                                <h2 class="card-title">Card Activation Expired</h2>
+                                <p class="text-sm">
+                                    Your card activation period has expired. Please contact support for further
+                                    assistance.
+                                </p>
+                            </div>
+                        </div>
                     </template>
 
-                    <!-- Student Information -->
                     <template v-else>
-                        <!-- Primary Information Section -->
-                        <section class="flex flex-col items-center justify-around gap-4">
-                            <!-- Student Image -->
-                            <div v-if="scannedStudent.image" class="flex-shrink-0">
-                                <img :src="scannedStudent.image" alt="Student Image"
-                                    class="w-40 h-40 rounded-full object-cover shadow-lg" />
+                        <div
+                            class="card bg-base-100 shadow-sm relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
+                            <!-- Background Pattern Overlay -->
+                            <div class="absolute inset-0 z-0"
+                                style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
                             </div>
 
-                            <!-- Essential Details -->
-                            <div class="flex flex-col text-center">
-                                <div>
-                                    <span>{{ scannedStudent.fName }} {{ scannedStudent.lName }}</span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500 text-sm">{{ scannedStudent.studentId }}</span>
-                                </div>
-                            </div>
-                        </section>
+                            <template v-if="scannedStudent">
+                                <!-- Image Section -->
+                                <figure class="z-10">
+                                    <img v-if="scannedStudent.image" :src="scannedStudent.image" alt="Student Photo"
+                                        class="w-full md:w-64 object-cover" />
+                                    <!-- Fallback image if no student image exists -->
+                                    <img v-else src="https://api.dicebear.com/9.x/avataaars/svg?seed=default-avatar"
+                                        alt="Default Avatar" class="w-full md:w-64 object-cover" />
+                                </figure>
 
-                        <!-- Additional Information Section -->
-                        <section class="mt-4 text-justify gap-4 space-y-3">
-                            <div>
-                                <strong>Program: </strong>
-                                <span>{{ scannedStudent.program }}</span>
-                            </div>
-                            <div>
-                                <strong>Department: </strong>
-                                <span>{{ scannedStudent.department }}</span>
-                            </div>
-                            <div>
-                                <strong>Year Level: </strong>
-                                <span>{{ scannedStudent.yearLevel }}</span>
-                            </div>
-                            <div>
-                                <strong>Last Enrolled At: </strong>
-                                <span>{{ scannedStudent.last_enrolled_at }}</span>
-                            </div>
-                        </section>
+                                <!-- Details Section -->
+                                <div class="card-body z-10">
+                                    <h2 class="card-title">{{ scannedStudent.fName }} {{ scannedStudent.lName }}</h2>
+                                    <p class="text-sm">Program: {{ scannedStudent.program }}</p>
+                                    <p class="text-sm">Department: {{ scannedStudent.department }}</p>
+                                    <p class="text-sm">Year Level: {{ scannedStudent.yearLevel }}</p>
+                                    <p class="text-sm">Last Enrolled: {{ scannedStudent.last_enrolled_at }}</p>
+                                </div>
+                            </template>
+                        </div>
                     </template>
+
                 </div>
             </transition>
 
