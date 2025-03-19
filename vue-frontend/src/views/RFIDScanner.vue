@@ -11,11 +11,11 @@
       <div v-if="isRegistered" class="flex flex-col lg:flex-row h-screen w-full relative">
         <!-- Left Section: DaisyTimeIn with 4/12 width -->
         <div class="w-full lg:w-4/12">
-          <DaisyTimeIn :deviceFingerprint="deviceFingerprint" />
+          <DaisyTimeIn @scannedStudent="handleScannedStudent" :deviceFingerprint="deviceFingerprint" />
         </div>
         <!-- Right Section: AnnouncementsCarousel with 8/12 width -->
         <div class="w-full lg:w-8/12 relative">
-          <AnnouncementsCarousel :deviceName="deviceName" />
+          <AnnouncementsCarousel :selectedDepartment="selectedDepartment" :deviceName="deviceName" />
         </div>
       </div>
 
@@ -38,6 +38,7 @@ import DeviceRegistration from "@/components/DeviceRegistration.vue";
 const isRegistered = ref(false);
 const deviceName = ref('');
 const deviceFingerprint = ref('');
+const selectedDepartment = ref('');
 const checkingRegistration = ref(true);
 
 onMounted(() => {
@@ -72,4 +73,21 @@ function handleRegistered(payload) {
   }
   isRegistered.value = true;
 }
+
+function handleScannedStudent(student) {
+  try {
+    if (!student) {
+      console.warn("Received empty student data.");
+      return;
+    }
+    if (!student.department) {
+      console.warn("Student data does not include a department.");
+      return;
+    }
+    selectedDepartment.value = student.department;
+  } catch (error) {
+    console.error("Error handling scanned student:", error);
+  }
+}
+
 </script>

@@ -130,6 +130,9 @@ const props = defineProps({
     deviceFingerprint: String
 });
 
+// Define the custom event to emit the scanned student data to the parent
+const emit = defineEmits(['scannedStudent']);
+
 let socket = null;
 
 /**
@@ -166,6 +169,9 @@ async function processScannedCard(card) {
             { withCredentials: true }
         );
         scannedStudent.value = response.data.student;
+
+        // Emit the scanned student to the parent component
+        emit('scannedStudent', scannedStudent.value);
 
         // Fetch the student's schedule
         HTTP.get(`/api/fetch-schedule/${scannedStudent.value.studentId}`)

@@ -22,7 +22,7 @@
         <Swiper :modules="[EffectCreative, Autoplay, Thumbs]" :autoplay="{ delay: 1500, disableOnInteraction: false }"
           :slides-per-view="2" :space-between="20" :thumbs="{ swiper: thumbsSwiperComputed }" class="mySwiper2"
           @swiper="setMainSwiper" @slideChange="updateActiveIndex">
-          <SwiperSlide v-for="(announcement, index) in announcements" :key="index">
+          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="index">
             <div class="w-full h-96 flex justify-center items-center">
               <DaisyCardAnnouncement :announcement="announcement" class="w-full h-full" />
             </div>
@@ -32,7 +32,7 @@
         <!-- Thumbnail Preview Slider -->
         <Swiper :modules="[FreeMode, Thumbs]" @swiper="setThumbsSwiper" :slides-per-view="4" :space-between="10"
           freeMode watchSlidesProgress centeredSlides slideToClickedSlide class="mySwiperThumbs mt-5">
-          <SwiperSlide v-for="(announcement, index) in announcements" :key="index"
+          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="index"
             :class="{ 'opacity-100': index === activeIndex, 'opacity-50': index !== activeIndex }">
             <div class="cursor-pointer">
               <img v-if="announcement.type === 'image'" :src="apiUrl + announcement.content.file_path" alt="preview"
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { EffectCreative, Autoplay, Thumbs, FreeMode } from "swiper/modules";
 import "swiper/css";
@@ -69,7 +69,30 @@ import { initializeSocket, getSocket } from "@/composables/socket";
 
 const props = defineProps({
   deviceName: { type: String, required: true },
+  selectedDepartment: { type: String, default: "GENERAL" }
 });
+
+const currentDepartment = ref(props.selectedDepartment);
+
+// Watch for changes in selectedDepartment prop
+watch(
+  () => props.selectedDepartment,
+  (newDepartment) => {
+    currentDepartment.value = newDepartment;
+  }
+);
+
+const filteredAnnouncements = computed(() => {
+  return announcements.value.filter((announcement) => {
+    return announcement.departments === currentDepartment.value;
+  });
+});
+
+// Log filtered announcements whenever the computed value changes
+watch(filteredAnnouncements, (newFiltered) => {
+  console.log('Filtered Announcements:', newFiltered);
+});
+
 
 const announcements = ref([]);
 const showPortStatusModal = ref(false);
