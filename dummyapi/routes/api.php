@@ -64,9 +64,18 @@ Route::get('students/{studentId}', function ($studentId) {
         'error' => 'Student not found'
     ], 404);
 })->name('students.fetch');
-
 Route::get('schedule/{studentId}', function ($studentId) {
-    // Generate a dynamic schedule with random courses
+    // List of valid student IDs
+    $validStudents = ['1901234', '1904568', '1901111', '1901112'];
+
+    // Check if the student exists
+    if (!in_array($studentId, $validStudents)) {
+        return response()->json([
+            'error' => 'Student not found'
+        ], 404);
+    }
+
+    // Define available courses (no filtering by program)
     $courses = [
         ['courseCode' => 'IT101', 'courseDescription' => 'Introduction to IT'],
         ['courseCode' => 'CS102', 'courseDescription' => 'Programming Basics'],
@@ -76,12 +85,43 @@ Route::get('schedule/{studentId}', function ($studentId) {
         ['courseCode' => 'IT305', 'courseDescription' => 'Database Management'],
     ];
 
-    $days = ['MWF', 'TTh', 'Sat'];
-    $times = ['08:00 AM - 09:30 AM', '10:00 AM - 11:30 AM', '01:00 PM - 02:30 PM', '02:00 PM - 03:30 PM'];
-    $rooms = ['Room 101', 'Room 202', 'Room 303', 'Lab 101'];
+    // Determine the schedule day:
+    // Forced days for specific student IDs:
+    if ($studentId === '1901111') {
+        $day = 'Wednesday';
+    } elseif ($studentId === '1904568') {
+        $day = 'Thursday';
+    } else {
+        // For other students, derive a day group based on today's day
+        $today = date('l'); // e.g., Monday, Tuesday, etc.
+        if (in_array($today, ['Monday', 'Wednesday', 'Friday'])) {
+            $day = 'MWF';
+        } elseif (in_array($today, ['Tuesday', 'Thursday'])) {
+            $day = 'TTh';
+        } elseif ($today === 'Saturday') {
+            $day = 'Sat';
+        } else {
+            $day = null;
+        }
+    }
+
+    // Optionally return no schedule if there's no valid day (for non-forced students)
+    if (!$day && !in_array($studentId, ['1901111', '1904568'])) {
+        if (rand(0, 1) === 0) {
+            return response()->json([
+                'studentId' => $studentId,
+                'schedule'  => [],
+                'message'   => 'No schedule for today'
+            ]);
+        }
+    }
+
+    // Define additional schedule details
+    $times    = ['08:00 AM - 09:30 AM', '10:00 AM - 11:30 AM', '01:00 PM - 02:30 PM', '02:00 PM - 03:30 PM'];
+    $rooms    = ['Room 101', 'Room 202', 'Room 303', 'Lab 101'];
     $sections = ['A1', 'B1', 'C1', 'D1'];
 
-    // Generate a random schedule for the given student
+    // Generate a random schedule (between 2 and 5 courses)
     $schedule = [];
     for ($i = 1; $i <= rand(2, 5); $i++) {
         $course = $courses[array_rand($courses)];
@@ -89,7 +129,7 @@ Route::get('schedule/{studentId}', function ($studentId) {
             'id'                => $i,
             'courseCode'        => $course['courseCode'],
             'courseDescription' => $course['courseDescription'],
-            'day'               => $days[array_rand($days)],
+            'day'               => $day,
             'time'              => $times[array_rand($times)],
             'room'              => $rooms[array_rand($rooms)],
             'section'           => $sections[array_rand($sections)],

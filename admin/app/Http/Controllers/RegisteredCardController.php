@@ -181,7 +181,7 @@ class RegisteredCardController extends Controller
         // First, check if the UID is registered.
         $registeredCard = RegisteredCard::where('uid', $uid)->first();
         if (!$registeredCard) {
-            return response()->json(['error' => 'Unauthorized access'], 400);
+            return response()->json(['error' => 'Unauthorized access.'], 400);
         }
 
 

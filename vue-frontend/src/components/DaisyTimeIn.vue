@@ -14,21 +14,18 @@
                         <!-- Error State -->
                         <template v-if="nfcError">
                             <!-- Error Card: Unauthorized Access with 3D effect -->
-                            <div v-if="nfcError == 'Unauthorized access'"
-                                class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-64">
-                                <!-- Background Pattern Overlay -->
-                                <div class="absolute inset-0 z-0"
-                                    style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
-                                </div>
+                            <div v-if="nfcError == 'Unauthorized access.'"
+                                class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center h-64">
+
                                 <!-- Icon Section -->
-                                <figure class="z-10 flex-shrink-0 p-4">
-                                    <i class="fas fa-exclamation-triangle text-5xl"></i>
+                                <figure class="z-10 flex-shrink-0 px-4">
+                                    <i class="fas fa-exclamation-triangle ml-2 text-4xl"></i>
                                 </figure>
                                 <!-- Message Section -->
                                 <div class="card-body z-10">
                                     <h2 class="card-title text-2xl">Unauthorized Access</h2>
                                     <p class="text-lg">
-                                        You do not have permission to access this resource.
+                                        You do not have permission to access this school.
                                     </p>
                                 </div>
                             </div>
@@ -36,20 +33,16 @@
                             <!-- Error Card: Card Activation Expired with 3D effect -->
                             <div v-if="nfcError == 'Card is not activated'"
                                 class="card card-side bg-warning text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-64">
-                                <!-- Background Pattern Overlay -->
-                                <div class="absolute inset-0 z-0"
-                                    style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
-                                </div>
                                 <!-- Icon Section -->
-                                <figure class="z-10 flex-shrink-0 p-4">
-                                    <i class="fas fa-info-circle text-5xl"></i>
+                                <figure class="z-10 flex-shrink-0 px-4">
+                                    <i class="fas fa-info-circle ml-2 text-5xl"></i>
                                 </figure>
                                 <!-- Message Section -->
                                 <div class="card-body z-10">
                                     <h2 class="card-title text-2xl">Card Activation Expired</h2>
                                     <p class="text-lg">
                                         Your card activation period has expired. Please contact support for further
-                                        assistance.
+                                        assistance (MIS Department).
                                     </p>
                                 </div>
                             </div>
@@ -59,10 +52,6 @@
                             <!-- Student Card Display -->
                             <div
                                 class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
-                                <!-- Background Pattern Overlay -->
-                                <div class="absolute inset-0 z-0"
-                                    style="background-image: url('https://www.transparenttextures.com/patterns/bubbles.png'); opacity: 0.15;">
-                                </div>
 
                                 <!-- Image Section -->
                                 <figure class="z-10">
@@ -77,6 +66,35 @@
                                     <p class="text-sm">Department: {{ scannedStudent.department }}</p>
                                     <p class="text-sm">Year Level: {{ scannedStudent.yearLevel }}</p>
                                     <p class="text-sm">Last Enrolled: {{ scannedStudent.last_enrolled_at }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Weekly Schedule Card with matching 3D effect -->
+                            <div
+                                class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d mt-8">
+                                <div class="card-body">
+                                    <!-- Header with badge and current date -->
+                                    <span class="badge badge-xs badge-primary">Today</span>
+                                    <div class="flex justify-between">
+                                        <h2 class="text-3xl font-bold">Schedule</h2>
+                                        <span class="text-xl">
+                                            {{ new Date().toLocaleDateString('en-US', {
+                                                month: 'long', day: 'numeric',
+                                                year: 'numeric'
+                                            }) }}
+                                        </span>
+                                    </div>
+                                    <!-- Schedule Items: only show items scheduled for Wednesday -->
+                                    <ul class="mt-6 flex flex-col gap-2 text-xs" v-if="todaySchedule.length">
+                                        <li v-for="item in todaySchedule" :key="item.id" class="flex items-center">
+                                            <i class="fas fa-check-circle text-green-500 me-2"></i>
+                                            <span>
+                                                {{ item.courseCode }}: {{ item.courseDescription }} |
+                                                {{ item.time }} | {{ item.room }} | Section {{ item.section }}
+                                            </span>
+                                        </li>
+                                    </ul>
+                                    <p v-else class="mt-6 text-center text-lg">No schedule for today</p>
                                 </div>
                             </div>
                         </template>
@@ -95,13 +113,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { getSocket } from '@/composables/socket';
 import iASRPNC from '@/assets/img/iASRPNC.png';
 import logoRFID from '@/assets/img/logoRFID.png';
 import HTTP from '@/http'; // adjust the path to your axios instance
 
 const scannedStudent = ref(null);
+const schedule = ref([]);
 const isReadingNfc = ref(false);
 const nfcData = ref(null);
 const nfcError = ref('');
@@ -112,6 +131,13 @@ const props = defineProps({
 });
 
 let socket = null;
+
+/**
+ * Computed property to filter the schedule for items with day "Wednesday"
+ */
+const todaySchedule = computed(() => {
+    return schedule.value.filter(item => item.day === 'Wednesday');
+});
 
 /**
  * Initiates the NFC card reading process.
@@ -130,7 +156,7 @@ function readNfcCard() {
 }
 
 /**
- * Processes a scanned card.
+ * Processes a scanned card and fetches the student's schedule.
  */
 async function processScannedCard(card) {
     try {
@@ -140,14 +166,26 @@ async function processScannedCard(card) {
             { withCredentials: true }
         );
         scannedStudent.value = response.data.student;
-        // After showing student info, clear it to revert to the "Tap your card" state
+
+        // Fetch the student's schedule
+        HTTP.get(`/api/fetch-schedule/${scannedStudent.value.studentId}`)
+            .then(scheduleResponse => {
+                schedule.value = scheduleResponse.data.schedule;
+            })
+            .catch(scheduleError => {
+                console.error("Error fetching schedule", scheduleError);
+            });
+
+        // After showing student info and schedule, clear the data to revert to the "Tap your card" state
         setTimeout(() => {
             scannedStudent.value = null;
+            schedule.value = [];
             readNfcCard();
-        }, 3000);
+        }, 5000);
     } catch (err) {
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
         scannedStudent.value = null;
+        schedule.value = [];
         setTimeout(() => {
             nfcError.value = '';
             readNfcCard();
@@ -177,6 +215,7 @@ function setupSocketListeners() {
         nfcError.value = "Unauthorized access.";
         isReadingNfc.value = false;
         scannedStudent.value = null;
+        schedule.value = [];
         setTimeout(() => {
             nfcError.value = '';
             readNfcCard();

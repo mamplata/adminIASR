@@ -62,7 +62,6 @@ import "swiper/css";
 import "swiper/css/effect-creative";
 import "swiper/css/free-mode";
 import HTTP from "@/http";
-import pncBg from "@/assets/img/pnc-bg.jpg";
 import bgAnnouncement from "@/assets/img/bgAnnounce.png";
 import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue";
 import PortStatus from "@/components/PortStatus.vue";
