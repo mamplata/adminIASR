@@ -6,22 +6,25 @@
 
 /* This media query applies when the viewport width is 1024px or less */
 @media only screen and (max-width: 1024px) {
-    /* Create a pseudo-element on the body to serve as an overlay */
-    body::before {
-      content: "Please use desktop only";
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 255, 255, 1); /* Semi-transparent dark background */
-      color: #000;
-      font-size: 2em;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      z-index: 10000; /* Ensure the overlay is on top */
-    }
+
+  /* Create a pseudo-element on the body to serve as an overlay */
+  body::before {
+    content: "PLEASE USE DESKTOP ONLY!";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fbf7f5;
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23198754' fill-opacity='0.19' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+    color: #000;
+    font-size: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 10000;
+    font-weight: bold;
+    /* Ensure the overlay is on top */
   }
-  
+}

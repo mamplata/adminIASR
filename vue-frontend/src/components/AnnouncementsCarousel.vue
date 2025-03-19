@@ -5,12 +5,12 @@
     backgroundPosition: 'center'
   }">
     <!-- Header -->
-    <header class="w-full px-6 h-20 flex items-center relative" :style="{
+    <header class="w-full px-6 h-24 flex items-center relative" :style="{
       backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url(${pncBg})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center'
     }">
-      <h1 class="text-white text-5xl font-bold mx-auto">Announcements</h1>
+      <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
       <button @click="openPortStatusModal"
         class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-[#20714c] text-white p-3 rounded-full flex items-center justify-center">
         <i class="fas fa-info-circle text-2xl"></i>
@@ -18,14 +18,14 @@
     </header>
 
     <!-- Main Carousel Section -->
-    <main class="container mx-auto flex justify-center mt-10">
-      <div class="rounded-lg shadow-lg w-full max-auto">
+    <main class="container mx-auto flex items-center justify-center" style="min-height: calc(100vh - 6rem);">
+      <div class="rounded-lg shadow-lg w-full mx-auto">
         <!-- Main Slider -->
         <Swiper :modules="[EffectCreative, Autoplay, Thumbs]" :autoplay="{ delay: 1500, disableOnInteraction: false }"
-          :slides-per-view="2" :thumbs="{ swiper: thumbsSwiperComputed }" class="mySwiper2" @swiper="setMainSwiper"
+          :slides-per-view="4" :thumbs="{ swiper: thumbsSwiperComputed }" class="mySwiper2" @swiper="setMainSwiper"
           @slideChange="updateActiveIndex">
           <SwiperSlide v-for="(announcement, index) in announcements" :key="index">
-            <div class="w-full h-80 flex justify-center items-center">
+            <div class="w-full h-96 flex justify-center items-center">
               <DaisyCardAnnouncement :announcement="announcement" class="w-full h-full" />
             </div>
           </SwiperSlide>
@@ -33,14 +33,14 @@
 
         <!-- Thumbnail Preview Slider -->
         <Swiper :modules="[FreeMode, Thumbs]" @swiper="setThumbsSwiper" :slides-per-view="4" :space-between="10"
-          freeMode watchSlidesProgress centeredSlides slideToClickedSlide class="mySwiperThumbs mt-4">
+          freeMode watchSlidesProgress centeredSlides slideToClickedSlide class="mySwiperThumbs mt-5">
           <SwiperSlide v-for="(announcement, index) in announcements" :key="index"
             :class="{ 'opacity-100': index === activeIndex, 'opacity-50': index !== activeIndex }">
             <div class="cursor-pointer">
               <img v-if="announcement.type === 'image'" :src="apiUrl + announcement.content.file_path" alt="preview"
-                class="w-full h-32 object-cover rounded border border-gray-200 shadow-md" />
+                class="w-full h-40 object-cover rounded border border-gray-200 shadow-md" />
               <div v-else
-                class="w-full h-32 rounded flex items-center justify-center text-xs text-white bg-cover bg-center border border-gray-200 shadow-md"
+                class="w-full h-40 rounded flex items-center justify-center text-xs text-white bg-cover bg-center border border-gray-200 shadow-md"
                 :style="{ backgroundImage: `url(${pncBg})` }">
                 <span class="p-1 text-center">{{ announcement.content.title }}</span>
               </div>
