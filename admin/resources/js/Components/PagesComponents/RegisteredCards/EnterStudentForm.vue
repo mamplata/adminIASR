@@ -2,7 +2,7 @@
     <div>
         <div class="py-2">
             <input type="text" class="input input-bordered dark:text-white w-full mb-2" v-model="studentID"
-                placeholder="Student ID" />
+                placeholder="Student ID" @keydown.enter="handleRegister" />
             <div v-if="nfcStatus" class="mt-2">
                 <span>{{ nfcStatus }}</span>
             </div>
