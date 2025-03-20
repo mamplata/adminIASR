@@ -19,8 +19,13 @@
     <main class="w-full flex flex-col" style="height: calc(100vh - 6rem);">
       <!-- Main Slider Container -->
       <div class="main-slider-container w-full relative" style="height: calc(100% - 10rem);">
-        <!-- Wrap the slider and overlay inside a container with v-if -->
-        <div v-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
+        <!-- Check loading state -->
+        <div v-if="loading" class="w-full h-full flex items-center justify-center">
+          <!-- Optionally, replace this with a spinner -->
+          <p class="text-white text-2xl text-center">Loading announcements...</p>
+        </div>
+        <!-- Show slider if announcements exist -->
+        <div v-else-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
           <Swiper :modules="[Autoplay, Thumbs, EffectFade]" effect="fade" :fadeEffect="{ crossFade: true }"
             :speed="3000" :slidesPerView="1" :autoplay="{ delay: 3000 }" loop :thumbs="{ swiper: thumbsSwiper }"
             @slideChangeTransitionStart="onSlideChangeTransitionStart"
@@ -42,7 +47,8 @@
       </div>
 
       <!-- Thumbs Slider Container (only if announcements exist) -->
-      <div class="thumb-slider-container w-full" style="height: 10rem;" v-if="filteredAnnouncements.length > 0">
+      <div class="thumb-slider-container w-full" style="height: 10rem;"
+        v-if="!loading && filteredAnnouncements.length > 0">
         <Swiper :modules="[Thumbs]" slidesPerView="4" watchSlidesVisibility watchSlidesProgress
           :onSwiper="onThumbsSwiper" class="mySwiperThumbs">
           <SwiperSlide v-for="(announcement, index) in filteredAnnouncements"
@@ -81,6 +87,7 @@ const props = defineProps({
 });
 
 const announcements = ref([]);
+const loading = ref(true); // new loading state
 const showPortStatusModal = ref(false);
 const timeInInfo = ref(null);
 const timeOutInfo = ref(null);
@@ -105,6 +112,8 @@ const fetchAnnouncements = async () => {
     announcements.value = response.data.announcements;
   } catch (error) {
     console.error("Error fetching announcements:", error);
+  } finally {
+    loading.value = false; // finish loading regardless of success or error
   }
 };
 
