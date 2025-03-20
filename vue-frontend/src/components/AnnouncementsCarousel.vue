@@ -59,9 +59,10 @@
       </div>
     </main>
 
+    <!-- Live Scanner Assignment display -->
+    <ScannerAssignment />
     <!-- Port Status Modal -->
-    <PortStatus v-if="showPortStatusModal" :deviceName="deviceName" :timeInInfo="timeInInfo" :timeOutInfo="timeOutInfo"
-      :newScannerInfo="newScannerInfo" @close="closePortStatusModal" @assignRole="assignRole" />
+    <PortStatus v-show="showPortStatusModal" :deviceName="deviceName" @close="closePortStatusModal" />
   </div>
 </template>
 
@@ -80,6 +81,7 @@ import "swiper/css/effect-fade";
 
 // Import modules including the Fade effect
 import { Autoplay, Thumbs, EffectFade } from "swiper/modules";
+import ScannerAssignment from "./ScannerAssignment.vue";
 
 const props = defineProps({
   deviceName: { type: String, required: true },
@@ -89,9 +91,6 @@ const props = defineProps({
 const announcements = ref([]);
 const loading = ref(true); // new loading state
 const showPortStatusModal = ref(false);
-const timeInInfo = ref(null);
-const timeOutInfo = ref(null);
-const newScannerInfo = ref({ uniqueKey: "", portPath: "" });
 const currentDepartment = ref("GENERAL");
 const thumbsSwiper = ref(null);
 const whiteOverlayOpacity = ref(0);
@@ -104,6 +103,10 @@ const filteredAnnouncements = computed(() => {
   return announcements.value.filter(
     (announcement) => announcement.departments === currentDepartment.value
   );
+});
+
+watch([announcements, currentDepartment], () => {
+  console.log("Filtered announcements updated:", filteredAnnouncements.value);
 });
 
 const fetchAnnouncements = async () => {
@@ -123,10 +126,6 @@ function openPortStatusModal() {
 
 function closePortStatusModal() {
   showPortStatusModal.value = false;
-}
-
-function assignRole(role) {
-  console.log("Assigning role:", role);
 }
 
 function onThumbsSwiper(swiper) {
