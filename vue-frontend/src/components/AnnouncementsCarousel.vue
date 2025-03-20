@@ -5,44 +5,49 @@
     backgroundPosition: 'center'
   }">
     <!-- Header -->
-    <header class="w-full px-6 h-24 flex items-center relative" :style="{
-      backgroundColor: '#198754'
-    }">
-      <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
+    <header class="w-full px-6 h-24 flex items-center relative" :style="{ backgroundColor: '#198754' }">
+      <h1 class="text-white text-6xl font-bold mx-auto">
+        Announcements
+      </h1>
       <button @click="openPortStatusModal"
         class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
         <i class="fas fa-info-circle text-2xl"></i>
       </button>
     </header>
 
-    <!-- Main Carousel Section -->
-    <main class="container mx-auto flex items-center justify-center" style="min-height: calc(100vh - 6rem);">
-      <div class="rounded-lg shadow-lg w-full mx-auto">
-        <!-- Main Slider with Two Columns -->
-        <Swiper :modules="[EffectCreative, Autoplay, Thumbs]" :autoplay="{ delay: 1500, disableOnInteraction: false }"
-          :slides-per-view="2" :space-between="20" :thumbs="{ swiper: thumbsSwiperComputed }" class="mySwiper2"
-          @swiper="setMainSwiper" @slideChange="updateActiveIndex">
-          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="index">
-            <div class="w-full h-96 flex justify-center items-center">
-              <DaisyCardAnnouncement :announcement="announcement" class="w-full h-full" />
-            </div>
-          </SwiperSlide>
-        </Swiper>
+    <!-- Main Content: Slider and Thumbnails -->
+    <main class="w-full flex flex-col" style="height: calc(100vh - 6rem);">
+      <!-- Main Slider Container -->
+      <div class="main-slider-container w-full relative" style="height: calc(100% - 10rem);">
+        <!-- Wrap the slider and overlay inside a container with v-if -->
+        <div v-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
+          <Swiper :modules="[Autoplay, Thumbs, EffectFade]" effect="fade" :fadeEffect="{ crossFade: true }"
+            :speed="3000" :slidesPerView="1" :autoplay="{ delay: 3000 }" loop :thumbs="{ swiper: thumbsSwiper }"
+            @slideChangeTransitionStart="onSlideChangeTransitionStart"
+            @slideChangeTransitionEnd="onSlideChangeTransitionEnd" class="mySwiper">
+            <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="announcement.id || index"
+              class="w-full h-full">
+              <DaisyCardAnnouncement :announcement="announcement" :isThumb="false" class="w-full h-full" />
+            </SwiperSlide>
+          </Swiper>
+          <!-- Black Overlay for fade effect -->
+          <div class="black-overlay" :style="{ opacity: whiteOverlayOpacity }"></div>
+        </div>
+        <!-- Fallback Card when no announcements are available -->
+        <div v-else class="w-full h-full flex items-center justify-center">
+          <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
+            <p class="text-gray-800 text-2xl text-center">No Announcements Available</p>
+          </div>
+        </div>
+      </div>
 
-        <!-- Thumbnail Preview Slider -->
-        <Swiper :modules="[FreeMode, Thumbs]" @swiper="setThumbsSwiper" :slides-per-view="4" :space-between="10"
-          freeMode watchSlidesProgress centeredSlides slideToClickedSlide class="mySwiperThumbs mt-5">
-          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="index"
-            :class="{ 'opacity-100': index === activeIndex, 'opacity-50': index !== activeIndex }">
-            <div class="cursor-pointer">
-              <img v-if="announcement.type === 'image'" :src="apiUrl + announcement.content.file_path" alt="preview"
-                class="w-full h-40 object-cover rounded border border-gray-200 shadow-md" />
-              <div v-else
-                class="w-full h-40 rounded flex items-center justify-center text-xs text-white bg-cover bg-center border border-gray-200 shadow-md"
-                :style="{ backgroundColor: '#198754' }">
-                <span class="p-1 text-center">{{ announcement.content.title }}</span>
-              </div>
-            </div>
+      <!-- Thumbs Slider Container (only if announcements exist) -->
+      <div class="thumb-slider-container w-full" style="height: 10rem;" v-if="filteredAnnouncements.length > 0">
+        <Swiper :modules="[Thumbs]" slidesPerView="4" watchSlidesVisibility watchSlidesProgress
+          :onSwiper="onThumbsSwiper" class="mySwiperThumbs">
+          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements"
+            :key="'thumb-' + (announcement.id || index)" class="thumb">
+            <DaisyCardAnnouncement :announcement="announcement" :isThumb="true" />
           </SwiperSlide>
         </Swiper>
       </div>
@@ -56,20 +61,23 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { EffectCreative, Autoplay, Thumbs, FreeMode } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/effect-creative";
-import "swiper/css/free-mode";
 import HTTP from "@/http";
 import bgAnnouncement from "@/assets/img/bgAnnounce.png";
 import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue";
 import PortStatus from "@/components/PortStatus.vue";
-import { initializeSocket, getSocket } from "@/composables/socket";
+
+// Import Swiper Vue components and styles
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css";
+import "swiper/css/thumbs";
+import "swiper/css/effect-fade";
+
+// Import modules including the Fade effect
+import { Autoplay, Thumbs, EffectFade } from "swiper/modules";
 
 const props = defineProps({
   deviceName: { type: String, required: true },
-  selectedDepartment: { type: String, default: "GENERAL" }
+  selectedDepartment: { type: String, default: "GENERAL" },
 });
 
 const announcements = ref([]);
@@ -77,52 +85,18 @@ const showPortStatusModal = ref(false);
 const timeInInfo = ref(null);
 const timeOutInfo = ref(null);
 const newScannerInfo = ref({ uniqueKey: "", portPath: "" });
-const socket = ref(getSocket());
-const apiUrl = import.meta.env.VITE_API_URL;
-
 const currentDepartment = ref("GENERAL");
+const thumbsSwiper = ref(null);
+const whiteOverlayOpacity = ref(0);
 
-// Watch for changes in selectedDepartment prop
-watch(
-  () => props.selectedDepartment,
-  (newDepartment) => {
-    currentDepartment.value = newDepartment;
-  }
-);
+watch(() => props.selectedDepartment, (newDepartment) => {
+  currentDepartment.value = newDepartment;
+});
 
 const filteredAnnouncements = computed(() => {
-  return announcements.value.filter((announcement) => {
-    return announcement.departments === currentDepartment.value;
-  });
-});
-
-// Log filtered announcements whenever the computed value changes
-watch(filteredAnnouncements, (newFiltered) => {
-  console.log('Filtered Announcements:', newFiltered);
-});
-
-
-// Swiper references
-const mainSwiper = ref(null);
-const thumbsSwiper = ref(null);
-const activeIndex = ref(0);
-
-// Set swiper instances
-const setMainSwiper = (swiper) => {
-  mainSwiper.value = swiper;
-};
-const setThumbsSwiper = (swiper) => {
-  thumbsSwiper.value = swiper;
-};
-
-// Update active index on slide change
-const updateActiveIndex = (swiper) => {
-  activeIndex.value = swiper.realIndex;
-};
-
-// Computed thumbs instance (only if valid)
-const thumbsSwiperComputed = computed(() => {
-  return thumbsSwiper.value && !thumbsSwiper.value.destroyed ? thumbsSwiper.value : null;
+  return announcements.value.filter(
+    (announcement) => announcement.departments === currentDepartment.value
+  );
 });
 
 const fetchAnnouncements = async () => {
@@ -143,68 +117,58 @@ function closePortStatusModal() {
 }
 
 function assignRole(role) {
-  if (socket.value) {
-    socket.value.emit("assignRole", { uniqueKey: newScannerInfo.value.uniqueKey, role });
-  }
+  console.log("Assigning role:", role);
 }
 
-function setupSocketListeners() {
-  if (!socket.value) return;
-  socket.value.on("connect", () => {
-    console.log("Socket connected");
-  });
-  socket.value.on("scannerDetected", (data) => {
-    if (!data.assigned) {
-      newScannerInfo.value = data;
-      showPortStatusModal.value = true;
-    } else {
-      if (data.role === "Time In") {
-        timeInInfo.value = data;
-      } else if (data.role === "Time Out") {
-        timeOutInfo.value = data;
-      }
-    }
-  });
-  socket.value.on("scannerAssigned", (data) => {
-    newScannerInfo.value = { uniqueKey: "", portPath: "" };
-    if (data.role === "Time In") {
-      timeInInfo.value = data;
-    } else if (data.role === "Time Out") {
-      timeOutInfo.value = data;
-    }
-  });
-  socket.value.on("scannerDisconnected", (data) => {
-    if (timeInInfo.value && timeInInfo.value.uniqueKey === data.uniqueKey) {
-      timeInInfo.value.online = false;
-    }
-    if (timeOutInfo.value && timeOutInfo.value.uniqueKey === data.uniqueKey) {
-      timeOutInfo.value.online = false;
-    }
-  });
+function onThumbsSwiper(swiper) {
+  thumbsSwiper.value = swiper;
+}
+
+function onSlideChangeTransitionStart() {
+  // Trigger the black overlay to appear during the transition
+  whiteOverlayOpacity.value = 1;
+}
+
+function onSlideChangeTransitionEnd() {
+  // Hide the overlay once the transition ends
+  whiteOverlayOpacity.value = 0;
 }
 
 onMounted(async () => {
   await fetchAnnouncements();
-  if (!socket.value) {
-    initializeSocket();
-    socket.value = getSocket();
-  }
-  setupSocketListeners();
 });
 </script>
 
 <style scoped>
-.mySwiper2 .swiper-slide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.mySwiper {
   width: 100%;
+  height: 100%;
+  position: relative;
 }
 
-.mySwiper2 .swiper-slide img {
+.mySwiperThumbs {
   width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 8px;
+  height: 100%;
+}
+
+.mySwiperThumbs ::v-deep .swiper-slide {
+  opacity: 0.5;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.mySwiperThumbs ::v-deep .swiper-slide-thumb-active {
+  opacity: 1 !important;
+}
+
+/* Black overlay to create a "black fade" effect */
+.black-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  pointer-events: none;
+  transition: opacity 4s ease-in-out;
 }
 </style>

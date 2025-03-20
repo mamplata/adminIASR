@@ -321,3 +321,9 @@ function viewAnnouncement(row) {
     selectedAnnouncement.value = row;
 }
 </script>
+
+<style scoped>
+::v-deep(.modal-box) {
+    max-width: 52rem;
+}
+</style>

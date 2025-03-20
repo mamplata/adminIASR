@@ -41,8 +41,4 @@ defineExpose({
 });
 </script>
 
-<style scoped>
-.modal-box {
-    max-width: 52rem;
-}
-</style>
+<style scoped></style>

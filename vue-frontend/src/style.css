@@ -25,6 +25,5 @@
     text-align: center;
     z-index: 10000;
     font-weight: bold;
-    /* Ensure the overlay is on top */
   }
 }

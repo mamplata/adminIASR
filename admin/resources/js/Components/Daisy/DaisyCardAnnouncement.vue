@@ -96,4 +96,8 @@ export default {
     word-wrap: break-word;
     /* Fallback for older browsers */
 }
+
+.modal-box {
+    max-width: 52rem !important;
+}
 </style>
