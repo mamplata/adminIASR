@@ -2,7 +2,7 @@
     <div class="relative h-full texture-bg">
         <!-- Header positioned in the top left corner -->
         <header class="absolute top-0 left-0 m-4">
-            <img :src="iASRPNC" alt="iASR Logo" class="w-64" />
+            <img :src="ITAPLOGO" alt="iASR Logo" class="w-48" />
         </header>
 
         <!-- Main content container -->
@@ -115,7 +115,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { getSocket } from '@/composables/socket';
-import iASRPNC from '@/assets/img/iASRPNC.png';
+import ITAPLOGO from '@/assets/img/ITAPLOGO.png';
 import logoRFID from '@/assets/img/logoRFID.png';
 import HTTP from '@/http'; // adjust the path to your axios instance
 

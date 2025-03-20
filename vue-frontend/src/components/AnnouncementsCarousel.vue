@@ -27,9 +27,11 @@
         <!-- Show slider if announcements exist -->
         <div v-else-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
           <Swiper :modules="[Autoplay, Thumbs, EffectFade]" effect="fade" :fadeEffect="{ crossFade: true }"
-            :speed="3000" :slidesPerView="1" :autoplay="{ delay: 3000 }" loop :thumbs="{ swiper: thumbsSwiper }"
+            :speed="3000" :slidesPerView="1" :autoplay="{ delay: 3000, disableOnInteraction: false }"
+            :loop="filteredAnnouncements.length > 1" :thumbs="{ swiper: thumbsSwiper }"
             @slideChangeTransitionStart="onSlideChangeTransitionStart"
             @slideChangeTransitionEnd="onSlideChangeTransitionEnd" class="mySwiper">
+
             <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="announcement.id || index"
               class="w-full h-full">
               <DaisyCardAnnouncement :announcement="announcement" :isThumb="false" class="w-full h-full" />
@@ -100,25 +102,45 @@ watch(() => props.selectedDepartment, (newDepartment) => {
 });
 
 const filteredAnnouncements = computed(() => {
-  return announcements.value.filter(
-    (announcement) => announcement.departments === currentDepartment.value
-  );
+  return announcements.value.filter((announcement) => {
+    // Split the departments string by colon and trim any whitespace
+    const dept = announcement.departments.split(':')[0].trim();
+    return dept === currentDepartment.value;
+  });
 });
 
 watch([announcements, currentDepartment], () => {
+  console.log(currentDepartment.value);
   console.log("Filtered announcements updated:", filteredAnnouncements.value);
 });
+
+watch(filteredAnnouncements, (newList) => {
+  if (newList.length === 0 || newList.length === 1) {
+    setTimeout(() => {
+      currentDepartment.value = "GENERAL";
+
+    }, 5000);
+  }
+});
+
 
 const fetchAnnouncements = async () => {
   try {
     const response = await HTTP.get("/api/announcements");
-    announcements.value = response.data.announcements;
+    const fetchedAnnouncements = response.data.announcements || [];
+
+    if (fetchedAnnouncements.length === 0) {
+      currentDepartment.value = "GENERAL";
+    }
+
+    announcements.value = fetchedAnnouncements;
   } catch (error) {
     console.error("Error fetching announcements:", error);
   } finally {
-    loading.value = false; // finish loading regardless of success or error
+    loading.value = false;
   }
 };
+
 
 function openPortStatusModal() {
   showPortStatusModal.value = true;
@@ -137,9 +159,14 @@ function onSlideChangeTransitionStart() {
   whiteOverlayOpacity.value = 1;
 }
 
-function onSlideChangeTransitionEnd() {
-  // Hide the overlay once the transition ends
+function onSlideChangeTransitionEnd(swiper) {
   whiteOverlayOpacity.value = 0;
+  // If it's the last slide, also reset
+  if (swiper.isEnd) {
+    setTimeout(() => {
+      currentDepartment.value = "GENERAL";
+    }, 500);
+  }
 }
 
 onMounted(async () => {

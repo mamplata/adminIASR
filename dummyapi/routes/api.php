@@ -371,8 +371,10 @@ Route::get('schedule/{studentId}', function ($studentId) {
     // Check if the student exists
     if (!in_array($studentId, $validStudents)) {
         return response()->json([
-            'error' => 'Student not found'
-        ], 404);
+            'studentId' => $studentId,
+            'schedule'  => [],
+            'message'   => 'No schedule for today'
+        ]);
     }
 
     // Define available courses (no filtering by program)
@@ -386,13 +388,12 @@ Route::get('schedule/{studentId}', function ($studentId) {
     ];
 
     // Determine the schedule day:
-    // Forced days for specific student IDs:
     if ($studentId === '1901111') {
         $day = 'Wednesday';
     } elseif ($studentId === '1904568') {
         $day = 'Thursday';
     } else {
-        // For other students, derive a day group based on today's day
+        // Assign schedule based on today's day
         $today = date('l'); // e.g., Monday, Tuesday, etc.
         if (in_array($today, ['Monday', 'Wednesday', 'Friday'])) {
             $day = 'MWF';
@@ -405,15 +406,13 @@ Route::get('schedule/{studentId}', function ($studentId) {
         }
     }
 
-    // Optionally return no schedule if there's no valid day (for non-forced students)
-    if (!$day && !in_array($studentId, ['1901111', '1904568'])) {
-        if (rand(0, 1) === 0) {
-            return response()->json([
-                'studentId' => $studentId,
-                'schedule'  => [],
-                'message'   => 'No schedule for today'
-            ]);
-        }
+    // No schedule case
+    if (!$day) {
+        return response()->json([
+            'studentId' => $studentId,
+            'schedule'  => [],
+            'message'   => 'No schedule for today'
+        ]);
     }
 
     // Define additional schedule details
