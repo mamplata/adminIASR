@@ -29,9 +29,26 @@ Route::middleware('device.check')->group(function () {
         // Call the existing schedule endpoint
         $externalApiUrl = "http://127.0.0.1:8001/api/schedule/{$studentId}";
 
-        $response = Http::timeout(5)->retry(3, 100)->get($externalApiUrl);
-        // Optionally, you can process or log the response here
-        return response()->json($response->json());
+        try {
+            $response = Http::get($externalApiUrl);
+
+            // If the API call fails, return a no schedule response
+            if ($response->failed()) {
+                return response()->json([
+                    'studentId' => $studentId,
+                    'schedule'  => [],
+                    'message'   => 'Fetching schedule unavailable'
+                ]);
+            }
+
+            return response()->json($response->json());
+        } catch (\Exception $e) {
+            return response()->json([
+                'studentId' => $studentId,
+                'schedule'  => [],
+                'message'   => 'Fetching schedule unavailable'
+            ]);
+        }
     })->name('schedule.fetch.proxy');
 
     //ANNOUNCEMENTS

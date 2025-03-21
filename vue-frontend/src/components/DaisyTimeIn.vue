@@ -7,10 +7,18 @@
 
         <!-- Main content container -->
         <div class="flex flex-col items-center justify-center h-full mx-10">
-            <!-- Single transition wrapping both states with a keyed container -->
+            <!-- Single transition wrapping different states with keyed container -->
             <transition name="fade" mode="out-in">
-                <div :key="(scannedStudent || nfcError) ? 'card' : 'prompt'">
-                    <template v-if="scannedStudent || nfcError">
+                <div :key="isLoading ? 'loading' : (scannedStudent || nfcError) ? 'card' : 'prompt'">
+                    <template v-if="isLoading">
+                        <!-- Loading Spinner -->
+                        <div class="flex flex-col items-center justify-center mt-12">
+                            <i class="fas fa-spinner fa-spin text-6xl text-green-700"></i>
+                            <h1 class="text-2xl mt-4">Loading...</h1>
+                        </div>
+                    </template>
+
+                    <template v-else-if="scannedStudent || nfcError">
                         <!-- Error State -->
                         <template v-if="nfcError">
                             <!-- Error Card: Unauthorized Access with 3D effect -->
@@ -94,7 +102,7 @@
                                             </span>
                                         </li>
                                     </ul>
-                                    <p v-else class="mt-6 text-center text-lg">No schedule for today</p>
+                                    <p v-else class="mt-6 text-center text-lg">{{ scheduleError }}</p>
                                 </div>
                             </div>
                         </template>
@@ -121,7 +129,9 @@ import HTTP from '@/http'; // adjust the path to your axios instance
 
 const scannedStudent = ref(null);
 const schedule = ref([]);
+const scheduleError = ref(null);
 const isReadingNfc = ref(false);
+const isLoading = ref(false); // New loading state
 const nfcData = ref(null);
 const nfcError = ref('');
 
@@ -131,7 +141,7 @@ const props = defineProps({
 });
 
 // Define the custom event to emit the scanned student data to the parent
-const emit = defineEmits(['scannedStudent']);
+const emit = defineEmits(['scannedStudent', 'loading']);
 
 let socket = null;
 
@@ -158,40 +168,42 @@ function readNfcCard() {
     }
 }
 
-/**
- * Processes a scanned card and fetches the student's schedule.
- */
 async function processScannedCard(card) {
+    // Show spinner while fetching data and notify the parent
+    isLoading.value = true;
+    emit('loading', true);
     try {
         const response = await HTTP.post(
             '/api/card/scan',
             { uid: card.uid, data: card.data },
             { withCredentials: true }
         );
-        scannedStudent.value = response.data.student;
-
-        // Emit the scanned student to the parent component
+        const studentData = response.data.student;
+        const scheduleResponse = await HTTP.get(`/api/fetch-schedule/${studentData.studentId}`);
+        if (scheduleResponse.data.schedule && scheduleResponse.data.schedule.length > 0) {
+            schedule.value = scheduleResponse.data.schedule;
+        } else {
+            schedule.value = [];
+            scheduleError.value = scheduleResponse.data.message || "No schedule available.";
+        }
+        scannedStudent.value = studentData;
         emit('scannedStudent', scannedStudent.value);
-
-        // Fetch the student's schedule
-        HTTP.get(`/api/fetch-schedule/${scannedStudent.value.studentId}`)
-            .then(scheduleResponse => {
-                schedule.value = scheduleResponse.data.schedule;
-            })
-            .catch(scheduleError => {
-                console.error("Error fetching schedule", scheduleError);
-            });
-
-        // After showing student info and schedule, clear the data to revert to the "Tap your card" state
+        // Data is ready so turn off the spinner
+        isLoading.value = false;
+        emit('loading', false);
         setTimeout(() => {
             scannedStudent.value = null;
             schedule.value = [];
+            scheduleError.value = "";
             readNfcCard();
-        }, 5000);
+        }, 3000);
     } catch (err) {
+        isLoading.value = false;
+        emit('loading', false);
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
         scannedStudent.value = null;
         schedule.value = [];
+        scheduleError.value = "";
         setTimeout(() => {
             nfcError.value = '';
             readNfcCard();
@@ -239,6 +251,7 @@ onMounted(() => {
     readNfcCard();
 });
 </script>
+
 
 <style scoped>
 /* Background texture style */

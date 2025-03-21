@@ -364,6 +364,7 @@ Route::get('students/{studentId}', function ($studentId) {
         'error' => 'Student not found'
     ], 404);
 })->name('students.fetch');
+
 Route::get('schedule/{studentId}', function ($studentId) {
     // List of valid student IDs
     $validStudents = ['1901234', '1904568', '1901111', '1901112'];
