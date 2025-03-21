@@ -24,7 +24,6 @@
                             <!-- Error Card: Unauthorized Access with 3D effect -->
                             <div v-if="nfcError == 'Unauthorized access.'"
                                 class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center h-64">
-
                                 <!-- Icon Section -->
                                 <figure class="z-10 flex-shrink-0 px-4">
                                     <i class="fas fa-exclamation-triangle ml-2 text-4xl"></i>
@@ -60,13 +59,11 @@
                             <!-- Student Card Display -->
                             <div
                                 class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
-
                                 <!-- Image Section -->
                                 <figure class="z-10">
                                     <img v-if="scannedStudent.image" :src="scannedStudent.image" alt="Student Photo"
                                         class="w-48 md:w-48 object-cover" />
                                 </figure>
-
                                 <!-- Details Section -->
                                 <div class="card-body z-10">
                                     <h2 class="card-title">{{ scannedStudent.fName }} {{ scannedStudent.lName }}</h2>
@@ -92,7 +89,7 @@
                                             }) }}
                                         </span>
                                     </div>
-                                    <!-- Schedule Items: only show items scheduled for Wednesday -->
+                                    <!-- Schedule Items: only show items for today -->
                                     <ul class="mt-6 flex flex-col gap-2 text-xs" v-if="todaySchedule.length">
                                         <li v-for="item in todaySchedule" :key="item.id" class="flex items-center">
                                             <i class="fas fa-check-circle text-green-500 me-2"></i>
@@ -131,7 +128,7 @@ const scannedStudent = ref(null);
 const schedule = ref([]);
 const scheduleError = ref(null);
 const isReadingNfc = ref(false);
-const isLoading = ref(false); // New loading state
+const isLoading = ref(false);
 const nfcData = ref(null);
 const nfcError = ref('');
 
@@ -146,11 +143,10 @@ const emit = defineEmits(['scannedStudent', 'loading']);
 let socket = null;
 
 /**
- * Computed property to filter the schedule for items with day "Wednesday"
+ * Computed property to return today's schedule.
+ * Since processScannedCard filters the schedule, we simply return schedule.value.
  */
-const todaySchedule = computed(() => {
-    return schedule.value.filter(item => item.day === 'Wednesday');
-});
+const todaySchedule = computed(() => schedule.value);
 
 /**
  * Initiates the NFC card reading process.
@@ -180,15 +176,31 @@ async function processScannedCard(card) {
         );
         const studentData = response.data.student;
         const scheduleResponse = await HTTP.get(`/api/fetch-schedule/${studentData.studentId}`);
-        if (scheduleResponse.data.schedule && scheduleResponse.data.schedule.length > 0) {
-            schedule.value = scheduleResponse.data.schedule;
+        console.log(scheduleResponse);
+        if (scheduleResponse.data.schedule) {
+            // Normalize the schedule data to always be an array.
+            let allSchedules = Array.isArray(scheduleResponse.data.schedule)
+                ? scheduleResponse.data.schedule
+                : [scheduleResponse.data.schedule];
+
+            // Get today's day name (for example, "Friday")
+            const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+            console.log(todayName);
+            // Filter the schedule to only include items for today
+            const todaySchedules = allSchedules.filter(item => item.day.includes(todayName));
+            if (todaySchedules.length > 0) {
+                schedule.value = todaySchedules;
+            } else {
+                schedule.value = [];
+                scheduleError.value = "No schedule available for today.";
+            }
         } else {
             schedule.value = [];
             scheduleError.value = scheduleResponse.data.message || "No schedule available.";
         }
         scannedStudent.value = studentData;
         emit('scannedStudent', scannedStudent.value);
-        // Data is ready so turn off the spinner
+        // Data is ready so turn off the spinner and notify parent
         isLoading.value = false;
         emit('loading', false);
         setTimeout(() => {
@@ -251,7 +263,6 @@ onMounted(() => {
     readNfcCard();
 });
 </script>
-
 
 <style scoped>
 /* Background texture style */

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swiper with Inner Scrolling - Fixed Glitching</title>
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <style>
+        /* Basic reset */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        /* Swiper container full viewport height */
+        .swiper-container {
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* Swiper slide styling */
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+        }
+
+        /* Inner container to clip the scrolling text */
+        .inner-content {
+            width: 90%;
+            height: 300px;
+            /* Set a fixed height for the visible area */
+            overflow: hidden;
+            /* Hide any overflow */
+            position: relative;
+        }
+
+        /* Container for the scrolling text with the animation */
+        .scrolling-text {
+            /* Full width and automatic height based on content */
+            width: 100%;
+            /* Add a smooth transform change with hardware acceleration hint */
+            will-change: transform;
+            /* Start the auto-scroll animation */
+            animation: autoScroll 10s linear infinite;
+        }
+
+        /* Hide scrollbar if it ever appears */
+        .scrolling-text::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes autoScroll {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-50%);
+                /* Adjust based on content length */
+            }
+        }
+
+        /* Swiper slide styling */
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            /* slide background */
+        }
+
+        /* Inner container to clip the scrolling text */
+        .inner-content {
+            width: 90%;
+            height: 300px;
+            /* Set a fixed height for the visible area */
+            overflow: hidden;
+            /* Hide any overflow */
+            position: relative;
+            background: #f0f0f0;
+            /* match the slide background */
+        }
+
+        /* Container for the scrolling text with the animation */
+        .scrolling-text {
+            width: 100%;
+            will-change: transform;
+            animation: autoScroll 10s linear infinite;
+            background: #f0f0f0;
+            /* match the slide background */
+            backface-visibility: hidden;
+            /* may help reduce rendering artifacts */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Swiper container -->
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <!-- Slide 1 -->
+            <div class="swiper-slide">
+                <div class="inner-content">
+                    <div class="scrolling-text">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae
+                            vestibulum vestibulum.
+                            Cras venenatis euismod malesuada.
+                        </p>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris tempus eros at purus
+                            finibus, sit amet blandit mi mollis.
+                        </p>
+                        <p>
+                            Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Duis
+                            consequat odio vitae neque efficitur, vitae vestibulum mauris tincidunt.
+                        </p>
+                        <p>
+                            Proin vitae urna nec massa suscipit sagittis. Nulla facilisi. Vivamus pharetra, augue vitae
+                            dignissim condimentum, velit lacus mollis ante.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="swiper-slide">
+                <div class="inner-content">
+                    <div class="scrolling-text">
+                        <p>
+                            This is slide 2. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sit amet
+                            accumsan tortor.
+                        </p>
+                        <p>
+                            Curabitur in metus nec arcu volutpat tristique. Vestibulum ante ipsum primis in faucibus
+                            orci luctus et ultrices posuere cubilia curae.
+                        </p>
+                        <p>
+                            Integer non magna at justo varius tristique. Aenean eget consequat nulla. Phasellus ut
+                            tortor in sapien condimentum ullamcorper.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- Additional slides can be added here -->
+        </div>
+
+        <!-- Optional Pagination -->
+        <div class="swiper-pagination"></div>
+        <!-- Optional Navigation Buttons -->
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+
+    <!-- Swiper JS -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+        // Initialize Swiper
+        var swiper = new Swiper('.swiper-container', {
+            slidesPerView: 1,
+            spaceBetween: 10,
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+    </script>
+</body>
+
+</html>

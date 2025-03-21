@@ -25,22 +25,24 @@
                 }">
                     {{ announcement.content.title }}
                 </h3>
-
-                <!-- Body content centered below the title -->
-                <div class="flex flex-grow items-center justify-center">
-                    <p :class="[
-                        isThumb ? 'text-xs' : 'whitespace-normal break-words text-center',
-                        'text-white leading-relaxed'
-                    ]" :style="{
-                        fontSize: isThumb ? 'calc(0.6rem + 0.4vh)' : 'calc(0.9rem + 0.8vh)'
-                    }">
-                        {{ announcement.content.body }}
-                    </p>
+                <!-- Scroll container for body text -->
+                <div class="scroll-container flex-1 items-center relative overflow-hidden mt-2">
+                    <div ref="scrollContent" class="scroll-content absolute w-full"
+                        :style="{ animation: computedAnimation }">
+                        <p :class="[
+                            isThumb ? 'text-xs' : 'whitespace-normal break-words text-center',
+                            'text-white leading-relaxed'
+                        ]" :style="{
+                            fontSize: isThumb ? 'calc(0.6rem + 0.4vh)' : 'calc(0.9rem + 0.8vh)'
+                        }">
+                            {{ announcement.content.body }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card for image announcement -->
+        <!-- Card for image announcement remains unchanged -->
         <div v-else-if="announcement.type === 'image'" :class="[
             'card',
             isThumb
@@ -55,19 +57,49 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import pncBg from '../../assets/img/pnc-bg.jpg';
 import pncLogo from '../../assets/img/pnc-logo-1.png';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const props = defineProps({
-    announcement: {
-        type: Object,
-        required: true,
-    },
-    isThumb: {
-        type: Boolean,
-        default: false,
-    },
+    announcement: { type: Object, required: true },
+    isThumb: { type: Boolean, default: false },
+    active: { type: Boolean, default: false }
+});
+
+const scrollContent = ref(null);
+// This ref will indicate whether the text overflows its container.
+const needsMarquee = ref(false);
+
+// Function to check if the text content overflows its container.
+function checkOverflow() {
+    if (scrollContent.value) {
+        const container = scrollContent.value.parentElement; // the .scroll-container element
+        if (container) {
+            // If the scrollHeight of the content is greater than the container's height, it overflows.
+            needsMarquee.value = scrollContent.value.scrollHeight > container.clientHeight;
+        }
+    }
+}
+
+onMounted(() => {
+    // Use nextTick to ensure the DOM is rendered before measuring.
+    nextTick(() => {
+        checkOverflow();
+    });
+    window.addEventListener("resize", checkOverflow);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener("resize", checkOverflow);
+});
+
+// Compute the animation style: only apply marquee if the slide is active and the text overflows.
+const computedAnimation = computed(() => {
+    return (props.active && needsMarquee.value)
+        ? 'marquee 50s linear infinite'
+        : 'none';
 });
 </script>
 
@@ -77,5 +109,26 @@ const props = defineProps({
     margin: 0;
     padding: 0;
     overflow: hidden;
+}
+</style>
+
+<style>
+@keyframes marquee {
+    0% {
+        transform: translateY(0%);
+    }
+
+    100% {
+        transform: translateY(-100%);
+    }
+}
+
+.scroll-content {
+    position: relative;
+    top: 0;
+    width: 100%;
+    will-change: transform;
+    transform: translateZ(0);
+    display: block;
 }
 </style>

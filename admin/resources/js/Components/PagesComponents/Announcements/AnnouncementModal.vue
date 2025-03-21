@@ -58,7 +58,7 @@
                         </div>
                         <!-- Text Announcement: Body -->
                         <label class="label text-gray-900 dark:text-white">Body</label>
-                        <textarea v-model="extraContent.body"
+                        <textarea rows="10" v-model="extraContent.body"
                             class="textarea textarea-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                             required></textarea>
                         <div v-if="announcementForm.errors.body" class="text-sm mb-2 text-red-500 dark:text-white">
