@@ -7,437 +7,491 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+// STUDENTS API: Returns full student details
 Route::get('students/{studentId}', function ($studentId) {
-    // Define the three students
+    // Dummy students data
     $students = [
         '1901234' => [
-            'studentId'  => '1901234',
-            'lName'      => 'Smith',
-            'fName'      => 'John',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '1901234',
+            'lName'            => 'Smith',
+            'fName'            => 'John',
+            'program'          => 'BSIT',
+            'department'       => 'CCS',
+            'yearLevel'        => '1',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "1st 2024",
         ],
         '1904568' => [
-            'studentId'  => '1904568',
-            'lName'      => 'Brown',
-            'fName'      => 'Emily',
-            'program'    => 'BSCS',
-            'department' => 'CCS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '1904568',
+            'lName'            => 'Brown',
+            'fName'            => 'Emily',
+            'program'          => 'BSCS',
+            'department'       => 'CCS',
+            'yearLevel'        => '3',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '1901111' => [
-            'studentId'  => '1901111',
-            'lName'      => 'Taylor',
-            'fName'      => 'Michael',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '1901111',
+            'lName'            => 'Taylor',
+            'fName'            => 'Michael',
+            'program'          => 'BSIT',
+            'department'       => 'CCS',
+            'yearLevel'        => '2',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '1901112' => [
-            'studentId'  => '1901112',
-            'lName'      => 'Taylor',
-            'fName'      => 'Michael',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '1901112',
+            'lName'            => 'Taylor',
+            'fName'            => 'Michael',
+            'program'          => 'BSIT',
+            'department'       => 'CCS',
+            'yearLevel'        => '2',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '1901113' => [
-            'studentId'  => '1901113',
-            'lName'      => 'Bennett',
-            'fName'      => 'Oliver',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '4',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '1901113',
+            'lName'            => 'Bennett',
+            'fName'            => 'Oliver',
+            'program'          => 'BSIT',
+            'department'       => 'CCS',
+            'yearLevel'        => '4',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '2301697' => [
-            'studentId'  => '2301697',
-            'lName'      => 'Reynolds',
-            'fName'      => 'Sophia',
-            'program'    => 'BSCpE',
-            'department' => 'COE',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '2301697',
+            'lName'            => 'Reynolds',
+            'fName'            => 'Sophia',
+            'program'          => 'BSCpE',
+            'department'       => 'COE',
+            'yearLevel'        => '3',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '2101996' => [
-            'studentId'  => '2101996',
-            'lName'      => 'Harrison',
-            'fName'      => 'Liam',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '2101996',
+            'lName'            => 'Harrison',
+            'fName'            => 'Liam',
+            'program'          => 'BSBA',
+            'department'       => 'CBAA',
+            'yearLevel'        => '2',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '2001225' => [
-            'studentId'  => '2001225',
-            'lName'      => 'Carter',
-            'fName'      => 'Isabella',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '2001225',
+            'lName'            => 'Carter',
+            'fName'            => 'Isabella',
+            'program'          => 'BSBA',
+            'department'       => 'CBAA',
+            'yearLevel'        => '1',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '2101355' => [
-            'studentId'  => '2101355',
-            'lName'      => 'Thompson',
-            'fName'      => 'Noah',
-            'program'    => 'BSPSY',
-            'department' => 'CAS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '2101355',
+            'lName'            => 'Thompson',
+            'fName'            => 'Noah',
+            'program'          => 'BSPSY',
+            'department'       => 'CAS',
+            'yearLevel'        => '3',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
         '2301197' => [
-            'studentId'  => '2301197',
-            'lName'      => 'Mitchell',
-            'fName'      => 'Ava',
-            'program'    => 'BSIE',
-            'department' => 'COE',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
+            'studentId'        => '2301197',
+            'lName'            => 'Mitchell',
+            'fName'            => 'Ava',
+            'program'          => 'BSIE',
+            'department'       => 'COE',
+            'yearLevel'        => '2',
+            'image'            => 'https://placehold.co/400',
             'last_enrolled_at' => "2nd 2025",
         ],
-        '2301888' => [
-            'studentId'  => '2301888',
-            'lName'      => 'Sullivan',
-            'fName'      => 'Elijah',
-            'program'    => 'BSA',
-            'department' => 'CBAA',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2301932' => [
-            'studentId'  => '2301932',
-            'lName'      => 'Richardson',
-            'fName'      => 'Mia',
-            'program'    => 'BSA',
-            'department' => 'CBAA',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2301887' => [
-            'studentId'  => '2301887',
-            'lName'      => 'Walker',
-            'fName'      => 'James',
-            'program'    => 'BSA',
-            'department' => 'CBAA',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2301999' => [
-            'studentId'  => '2301999',
-            'lName'      => 'Hayes',
-            'fName'      => 'Charlotte',
-            'program'    => 'BSEDM',
-            'department' => 'COED',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2300790' => [
-            'studentId'  => '2300790',
-            'lName'      => 'Cooper',
-            'fName'      => 'Benjamin',
-            'program'    => 'BSA',
-            'department' => 'CBAA',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2301638' => [
-            'studentId'  => '2301638',
-            'lName'      => 'Foster',
-            'fName'      => 'Amelia',
-            'program'    => 'BSEDE',
-            'department' => 'COED',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2301941' => [
-            'studentId'  => '2301941',
-            'lName'      => 'Stevenson',
-            'fName'      => 'Henry',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2302020' => [
-            'studentId'  => '2302020',
-            'lName'      => 'Collins',
-            'fName'      => 'Harper',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '4',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2201384' => [
-            'studentId'  => '2201384',
-            'lName'      => 'Bryant',
-            'fName'      => 'Lucas',
-            'program'    => 'BSPSY',
-            'department' => 'CAS',
-            'yearLevel'  => '4',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2101907' => [
-            'studentId'  => '2101907',
-            'lName'      => 'Parker',
-            'fName'      => 'Evelyn',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2102183' => [
-            'studentId'  => '2102183',
-            'lName'      => 'Turner',
-            'fName'      => 'Alexander',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '1901114' => [
-            'studentId'  => '1901114',
-            'lName'      => 'Brooks',
-            'fName'      => 'Abigail',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2404321' => [
-            'studentId'  => '2404321',
-            'lName'      => 'Morgan',
-            'fName'      => 'Daniel',
-            'program'    => 'BSEDF',
-            'department' => 'COED',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2202025' => [
-            'studentId'  => '2202025',
-            'lName'      => 'Fisher',
-            'fName'      => 'Scarlett',
-            'program'    => 'BSN',
-            'department' => 'CHAS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '1900624' => [
-            'studentId'  => '1900624',
-            'lName'      => 'Coleman',
-            'fName'      => 'Matthew',
-            'program'    => 'BSA',
-            'department' => 'CBAA',
-            'yearLevel'  => '4',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2302207' => [
-            'studentId'  => '2302207',
-            'lName'      => 'Chapman',
-            'fName'      => 'Grace',
-            'program'    => 'BSCS',
-            'department' => 'CCS',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2302041' => [
-            'studentId'  => '2302041',
-            'lName'      => 'Lawson',
-            'fName'      => 'David',
-            'program'    => 'BSA',
-            'department' => 'CBAA',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2302494' => [
-            'studentId'  => '2302494',
-            'lName'      => 'Anderson',
-            'fName'      => 'Lily',
-            'program'    => 'BSCS',
-            'department' => 'CCS',
-            'yearLevel'  => '2',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2301990' => [
-            'studentId'  => '2301990',
-            'lName'      => 'Dawson',
-            'fName'      => 'Samuel',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2302017' => [
-            'studentId'  => '2302017',
-            'lName'      => 'Greene',
-            'fName'      => 'Aurora',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '1',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2102400' => [
-            'studentId'  => '2102400',
-            'lName'      => 'Baldwin',
-            'fName'      => 'Christopher',
-            'program'    => 'BSCS',
-            'department' => 'CCS',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '1901115' => [
-            'studentId'  => '1901115',
-            'lName'      => 'Russell',
-            'fName'      => 'Hannah',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '4',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '2300995' => [
-            'studentId'  => '2300995',
-            'lName'      => 'Palmer',
-            'fName'      => 'Nathan',
-            'program'    => 'BSBA',
-            'department' => 'CBAA',
-            'yearLevel'  => '3',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
-        '1901116' => [
-            'studentId'  => '1901116',
-            'lName'      => 'Simmons',
-            'fName'      => 'Stella',
-            'program'    => 'BSIT',
-            'department' => 'CCS',
-            'yearLevel'  => '4',
-            'image'      => 'https://placehold.co/400',
-            'last_enrolled_at' => "2nd 2025",
-        ],
+        // ... add additional student entries as needed (total 31 or more)
     ];
 
-    // Check if the requested studentId exists
     if (array_key_exists($studentId, $students)) {
         return response()->json([
             'student' => $students[$studentId]
         ]);
     }
 
-    // If studentId is not found, return an error response
     return response()->json([
         'error' => 'Student not found'
     ], 404);
 })->name('students.fetch');
-Route::get('schedule/{studentId}', function ($studentId) {
-    // List of valid student IDs
-    $validStudents = ['1901234', '1904568', '1901111', '1901112'];
 
-    // Check if the student exists
-    if (!in_array($studentId, $validStudents)) {
+
+// SCHEDULE API: Returns the pre-defined schedule from dummy data
+Route::get('schedule/{studentId}', function ($studentId) {
+    // Dummy schedule data for students
+
+    $schedules = [
+        '1901234' => [
+            'schedule' => [
+                'id'                => 1,
+                'courseCode'        => 'ITEW6',
+                'courseDescription' => 'Web Frameworks',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-A',
+            ]
+        ],
+        // Dummy data for 30 other students
+        '1904568' => [
+            'schedule' => [
+                'id'                => 2,
+                'courseCode'        => 'IT101',
+                'courseDescription' => 'Introduction to IT',
+                'day'               => 'Wednesday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-B',
+            ]
+        ],
+        '1901111' => [
+            'schedule' => [
+                'id'                => 3,
+                'courseCode'        => 'CS102',
+                'courseDescription' => 'Programming Basics',
+                'day'               => 'Thursday',
+                'time'              => '10:00 AM - 11:30 AM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-C',
+            ]
+        ],
+        '1901112' => [
+            'schedule' => [
+                'id'                => 4,
+                'courseCode'        => 'CS301',
+                'courseDescription' => 'Data Structures',
+                'day'               => 'Friday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Lab 101',
+                'section'           => '4IT-D',
+            ]
+        ],
+        '1901113' => [
+            'schedule' => [
+                'id'                => 5,
+                'courseCode'        => 'IT202',
+                'courseDescription' => 'Networking Fundamentals',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '02:00 PM - 03:30 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-E',
+            ]
+        ],
+        '2301697' => [
+            'schedule' => [
+                'id'                => 6,
+                'courseCode'        => 'CS401',
+                'courseDescription' => 'Software Engineering',
+                'day'               => 'Tuesday/Thursday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-F',
+            ]
+        ],
+        '2101996' => [
+            'schedule' => [
+                'id'                => 7,
+                'courseCode'        => 'IT305',
+                'courseDescription' => 'Database Management',
+                'day'               => 'Wednesday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-G',
+            ]
+        ],
+        '2001225' => [
+            'schedule' => [
+                'id'                => 8,
+                'courseCode'        => 'IT101',
+                'courseDescription' => 'Introduction to IT',
+                'day'               => 'Thursday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-H',
+            ]
+        ],
+        '2101355' => [
+            'schedule' => [
+                'id'                => 9,
+                'courseCode'        => 'CS102',
+                'courseDescription' => 'Programming Basics',
+                'day'               => 'Friday',
+                'time'              => '10:00 AM - 11:30 AM',
+                'room'              => 'Lab 101',
+                'section'           => '4IT-I',
+            ]
+        ],
+        '2301197' => [
+            'schedule' => [
+                'id'                => 10,
+                'courseCode'        => 'CS301',
+                'courseDescription' => 'Data Structures',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-J',
+            ]
+        ],
+        '2301888' => [
+            'schedule' => [
+                'id'                => 11,
+                'courseCode'        => 'IT202',
+                'courseDescription' => 'Networking Fundamentals',
+                'day'               => 'Wednesday',
+                'time'              => '02:00 PM - 03:30 PM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-K',
+            ]
+        ],
+        '2301932' => [
+            'schedule' => [
+                'id'                => 12,
+                'courseCode'        => 'CS401',
+                'courseDescription' => 'Software Engineering',
+                'day'               => 'Tuesday/Thursday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-L',
+            ]
+        ],
+        '2301887' => [
+            'schedule' => [
+                'id'                => 13,
+                'courseCode'        => 'IT305',
+                'courseDescription' => 'Database Management',
+                'day'               => 'Friday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-M',
+            ]
+        ],
+        '2301999' => [
+            'schedule' => [
+                'id'                => 14,
+                'courseCode'        => 'ITEW6',
+                'courseDescription' => 'Web Frameworks',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-N',
+            ]
+        ],
+        '2300790' => [
+            'schedule' => [
+                'id'                => 15,
+                'courseCode'        => 'IT101',
+                'courseDescription' => 'Introduction to IT',
+                'day'               => 'Wednesday',
+                'time'              => '10:00 AM - 11:30 AM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-O',
+            ]
+        ],
+        '2301638' => [
+            'schedule' => [
+                'id'                => 16,
+                'courseCode'        => 'CS102',
+                'courseDescription' => 'Programming Basics',
+                'day'               => 'Thursday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Lab 101',
+                'section'           => '4IT-P',
+            ]
+        ],
+        '2301941' => [
+            'schedule' => [
+                'id'                => 17,
+                'courseCode'        => 'CS301',
+                'courseDescription' => 'Data Structures',
+                'day'               => 'Friday',
+                'time'              => '02:00 PM - 03:30 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-Q',
+            ]
+        ],
+        '2302020' => [
+            'schedule' => [
+                'id'                => 18,
+                'courseCode'        => 'IT202',
+                'courseDescription' => 'Networking Fundamentals',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-R',
+            ]
+        ],
+        '2201384' => [
+            'schedule' => [
+                'id'                => 19,
+                'courseCode'        => 'CS401',
+                'courseDescription' => 'Software Engineering',
+                'day'               => 'Wednesday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-S',
+            ]
+        ],
+        '2101907' => [
+            'schedule' => [
+                'id'                => 20,
+                'courseCode'        => 'IT305',
+                'courseDescription' => 'Database Management',
+                'day'               => 'Thursday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Lab 101',
+                'section'           => '4IT-T',
+            ]
+        ],
+        '2102183' => [
+            'schedule' => [
+                'id'                => 21,
+                'courseCode'        => 'ITEW6',
+                'courseDescription' => 'Web Frameworks',
+                'day'               => 'Friday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-U',
+            ]
+        ],
+        '1901114' => [
+            'schedule' => [
+                'id'                => 22,
+                'courseCode'        => 'IT101',
+                'courseDescription' => 'Introduction to IT',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-V',
+            ]
+        ],
+        '2404321' => [
+            'schedule' => [
+                'id'                => 23,
+                'courseCode'        => 'CS102',
+                'courseDescription' => 'Programming Basics',
+                'day'               => 'Wednesday',
+                'time'              => '10:00 AM - 11:30 AM',
+                'room'              => 'Lab 101',
+                'section'           => '4IT-W',
+            ]
+        ],
+        '2202025' => [
+            'schedule' => [
+                'id'                => 24,
+                'courseCode'        => 'CS301',
+                'courseDescription' => 'Data Structures',
+                'day'               => 'Thursday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-X',
+            ]
+        ],
+        '1900624' => [
+            'schedule' => [
+                'id'                => 25,
+                'courseCode'        => 'IT202',
+                'courseDescription' => 'Networking Fundamentals',
+                'day'               => 'Friday',
+                'time'              => '02:00 PM - 03:30 PM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-Y',
+            ]
+        ],
+        '2302207' => [
+            'schedule' => [
+                'id'                => 26,
+                'courseCode'        => 'CS401',
+                'courseDescription' => 'Software Engineering',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-Z',
+            ]
+        ],
+        '2302041' => [
+            'schedule' => [
+                'id'                => 27,
+                'courseCode'        => 'IT305',
+                'courseDescription' => 'Database Management',
+                'day'               => 'Wednesday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-AA',
+            ]
+        ],
+        '2302494' => [
+            'schedule' => [
+                'id'                => 28,
+                'courseCode'        => 'ITEW6',
+                'courseDescription' => 'Web Frameworks',
+                'day'               => 'Thursday',
+                'time'              => '10:00 AM - 1:00 PM',
+                'room'              => 'Room 101',
+                'section'           => '4IT-AB',
+            ]
+        ],
+        '2301990' => [
+            'schedule' => [
+                'id'                => 29,
+                'courseCode'        => 'IT101',
+                'courseDescription' => 'Introduction to IT',
+                'day'               => 'Friday',
+                'time'              => '01:00 PM - 02:30 PM',
+                'room'              => 'Lab 101',
+                'section'           => '4IT-AC',
+            ]
+        ],
+        '2302017' => [
+            'schedule' => [
+                'id'                => 30,
+                'courseCode'        => 'CS102',
+                'courseDescription' => 'Programming Basics',
+                'day'               => 'Monday/Tuesday',
+                'time'              => '08:00 AM - 09:30 AM',
+                'room'              => 'Room 202',
+                'section'           => '4IT-AD',
+            ]
+        ],
+        '2102400' => [
+            'schedule' => [
+                'id'                => 31,
+                'courseCode'        => 'CS301',
+                'courseDescription' => 'Data Structures',
+                'day'               => 'Wednesday',
+                'time'              => '10:00 AM - 11:30 AM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-AE',
+            ]
+        ],
+        '1901116' => [
+            'schedule' => [
+                'id'                => 32,
+                'courseCode'        => 'CS301',
+                'courseDescription' => 'Data Structures',
+                'day'               => 'Friday',
+                'time'              => '10:00 AM - 11:30 AM',
+                'room'              => 'Room 303',
+                'section'           => '4IT-A',
+            ]
+        ],
+    ];
+
+    if (!array_key_exists($studentId, $schedules)) {
         return response()->json([
             'error' => 'Student not found'
         ], 404);
     }
 
-    // Define available courses (no filtering by program)
-    $courses = [
-        ['courseCode' => 'IT101', 'courseDescription' => 'Introduction to IT'],
-        ['courseCode' => 'CS102', 'courseDescription' => 'Programming Basics'],
-        ['courseCode' => 'CS301', 'courseDescription' => 'Data Structures'],
-        ['courseCode' => 'IT202', 'courseDescription' => 'Networking Fundamentals'],
-        ['courseCode' => 'CS401', 'courseDescription' => 'Software Engineering'],
-        ['courseCode' => 'IT305', 'courseDescription' => 'Database Management'],
-    ];
-
-    // Determine the schedule day:
-    // Forced days for specific student IDs:
-    if ($studentId === '1901111') {
-        $day = 'Wednesday';
-    } elseif ($studentId === '1904568') {
-        $day = 'Thursday';
-    } else {
-        // For other students, derive a day group based on today's day
-        $today = date('l'); // e.g., Monday, Tuesday, etc.
-        if (in_array($today, ['Monday', 'Wednesday', 'Friday'])) {
-            $day = 'MWF';
-        } elseif (in_array($today, ['Tuesday', 'Thursday'])) {
-            $day = 'TTh';
-        } elseif ($today === 'Saturday') {
-            $day = 'Sat';
-        } else {
-            $day = null;
-        }
-    }
-
-    // Optionally return no schedule if there's no valid day (for non-forced students)
-    if (!$day && !in_array($studentId, ['1901111', '1904568'])) {
-        if (rand(0, 1) === 0) {
-            return response()->json([
-                'studentId' => $studentId,
-                'schedule'  => [],
-                'message'   => 'No schedule for today'
-            ]);
-        }
-    }
-
-    // Define additional schedule details
-    $times    = ['08:00 AM - 09:30 AM', '10:00 AM - 11:30 AM', '01:00 PM - 02:30 PM', '02:00 PM - 03:30 PM'];
-    $rooms    = ['Room 101', 'Room 202', 'Room 303', 'Lab 101'];
-    $sections = ['A1', 'B1', 'C1', 'D1'];
-
-    // Generate a random schedule (between 2 and 5 courses)
-    $schedule = [];
-    for ($i = 1; $i <= rand(2, 5); $i++) {
-        $course = $courses[array_rand($courses)];
-        $schedule[] = [
-            'id'                => $i,
-            'courseCode'        => $course['courseCode'],
-            'courseDescription' => $course['courseDescription'],
-            'day'               => $day,
-            'time'              => $times[array_rand($times)],
-            'room'              => $rooms[array_rand($rooms)],
-            'section'           => $sections[array_rand($sections)],
-        ];
-    }
-
-    return response()->json([
-        'studentId' => $studentId,
-        'schedule'  => $schedule,
-    ]);
+    // Simply return the pre-defined schedule for the student.
+    return response()->json($schedules[$studentId]);
 })->name('schedule.fetch');
