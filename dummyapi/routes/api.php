@@ -125,7 +125,6 @@ Route::get('students/{studentId}', function ($studentId) {
     ], 404);
 })->name('students.fetch');
 
-
 // SCHEDULE API: Returns the pre-defined schedule from dummy data
 Route::get('schedule/{studentId}', function ($studentId) {
     // Dummy schedule data for students
@@ -488,8 +487,10 @@ Route::get('schedule/{studentId}', function ($studentId) {
 
     if (!array_key_exists($studentId, $schedules)) {
         return response()->json([
-            'error' => 'Student not found'
-        ], 404);
+            'studentId' => $studentId,
+            'schedule'  => [],
+            'message'   => 'No schedule for today'
+        ]);
     }
 
     // Simply return the pre-defined schedule for the student.

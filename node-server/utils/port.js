@@ -95,8 +95,8 @@ function checkScanners(socket, clientCookie) {
     // Optionally, emit disconnect events for scanners that were previously connected but now not present.
     lastConnected.forEach((deviceKey) => {
         if (!currentConnected.has(deviceKey)) {
-            console.log(`🔴 Scanner Disconnected: ${deviceKey}`);
             socket.emit("scannerDisconnected", { uniqueKey: deviceKey });
+            console.log(`🔴 Scanner Disconnected: ${deviceKey}`);
         }
     });
     lastConnected = currentConnected;

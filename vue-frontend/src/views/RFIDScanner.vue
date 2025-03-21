@@ -11,11 +11,13 @@
       <div v-if="isRegistered" class="flex flex-col lg:flex-row h-screen w-full relative">
         <!-- Left Section: DaisyTimeIn with 4/12 width -->
         <div class="w-full lg:w-4/12">
-          <DaisyTimeIn @scannedStudent="handleScannedStudent" :deviceFingerprint="deviceFingerprint" />
+          <DaisyTimeIn @scannedStudent="handleScannedStudent" @loading="handleDaisyLoading"
+            :deviceFingerprint="deviceFingerprint" />
         </div>
         <!-- Right Section: AnnouncementsCarousel with 8/12 width -->
         <div class="w-full lg:w-8/12 relative">
-          <AnnouncementsCarousel :selectedDepartment="selectedDepartment" :deviceName="deviceName" />
+          <AnnouncementsCarousel v-model:selectedDepartment="selectedDepartment" :deviceName="deviceName"
+            :loading="daisyLoading" :key="departmentKey" />
         </div>
       </div>
 
@@ -28,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { initializeSocket } from '@/composables/socket';
 import HTTP from '@/http';
 import AnnouncementsCarousel from "@/components/AnnouncementsCarousel.vue";
@@ -38,8 +40,12 @@ import DeviceRegistration from "@/components/DeviceRegistration.vue";
 const isRegistered = ref(false);
 const deviceName = ref('');
 const deviceFingerprint = ref('');
-const selectedDepartment = ref('');
+const selectedDepartment = ref('GENERAL');
 const checkingRegistration = ref(true);
+const departmentKey = ref(Date.now());
+
+// New reactive state for DaisyTimeIn loading status
+const daisyLoading = ref(false);
 
 onMounted(() => {
   checkRegistration();
@@ -75,19 +81,18 @@ function handleRegistered(payload) {
 }
 
 function handleScannedStudent(student) {
-  try {
-    if (!student) {
-      console.warn("Received empty student data.");
-      return;
-    }
-    if (!student.department) {
-      console.warn("Student data does not include a department.");
-      return;
-    }
-    selectedDepartment.value = student.department;
-  } catch (error) {
-    console.error("Error handling scanned student:", error);
+  if (!student || !student.department) return;
+  if (selectedDepartment.value !== student.department + ": " + student.program) {
+    selectedDepartment.value = student.department + ": " + student.program;
+    console.log(selectedDepartment.value);
   }
+  // Always update the key to force a remount even if the department is the same.
+  departmentKey.value = Date.now();
+}
+
+// This handler will receive true/false from DaisyTimeIn when it starts/finishes loading
+function handleDaisyLoading(isLoading) {
+  daisyLoading.value = isLoading;
 }
 
 </script>
