@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="handleSubmit">
+    <form @submit.prevent="handleSubmit" @keydown.enter="handleEnter">
         <!-- Name Field -->
         <label class="label text-gray-700 dark:text-gray-300">Name</label>
         <input v-model="form.name" type="text" :class="[
@@ -45,5 +45,13 @@ const emit = defineEmits(['submit', 'cancel']);
 // Handle the form submission by emitting a submit event.
 function handleSubmit() {
     emit('submit');
+}
+
+// Handle Enter key press globally within the form
+function handleEnter(event) {
+    if (event.target.tagName !== 'TEXTAREA') {
+        event.preventDefault(); // Prevent unintended line breaks
+        handleSubmit();
+    }
 }
 </script>
