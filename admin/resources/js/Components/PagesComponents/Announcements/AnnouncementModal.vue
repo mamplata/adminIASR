@@ -9,7 +9,7 @@
                     <input v-model="announcementForm.publisher" type="text"
                         class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
-                    <div v-if="announcementForm.errors.publisher" class="text-sm mb-2 text-red-500 dark:text-white">
+                    <div v-if="announcementForm.errors.publisher" class="text-sm mb-2 text-red-500 dark:text-red-500">
                         {{ announcementForm.errors.publisher }}
                     </div>
 
@@ -20,7 +20,7 @@
                         class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
                     <div v-if="announcementForm.errors.publication_date"
-                        class="text-sm mb-2 text-red-500 dark:text-white">
+                        class="text-sm mb-2 text-red-500 dark:text-red-500">
                         {{ announcementForm.errors.publication_date }}
                     </div>
 
@@ -29,7 +29,7 @@
                     <input v-model="announcementForm.end_date" type="date" :min="announcementForm.publication_date"
                         class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                         required />
-                    <div v-if="announcementForm.errors.end_date" class="text-sm mb-2 text-red-500 dark:text-white">
+                    <div v-if="announcementForm.errors.end_date" class="text-sm mb-2 text-red-500 dark:text-red-500">
                         {{ announcementForm.errors.end_date }}
                     </div>
 
@@ -42,7 +42,7 @@
                         <option value="text">Text</option>
                         <option value="image">Image</option>
                     </select>
-                    <div v-if="announcementForm.errors.type" class="text-sm mb-2 text-red-500 dark:text-white">
+                    <div v-if="announcementForm.errors.type" class="text-sm mb-2 text-red-500 dark:text-red-500">
                         {{ announcementForm.errors.type }}
                     </div>
 
@@ -53,7 +53,7 @@
                         <input v-model="extraContent.title" type="text"
                             class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                             required />
-                        <div v-if="announcementForm.errors.title" class="text-sm mb-2 text-red-500 dark:text-white">
+                        <div v-if="announcementForm.errors.title" class="text-sm mb-2 text-red-500 dark:text-red-500">
                             {{ announcementForm.errors.title }}
                         </div>
                         <!-- Text Announcement: Body -->
@@ -61,7 +61,7 @@
                         <textarea rows="10" v-model="extraContent.body"
                             class="textarea textarea-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                             required></textarea>
-                        <div v-if="announcementForm.errors.body" class="text-sm mb-2 text-red-500 dark:text-white">
+                        <div v-if="announcementForm.errors.body" class="text-sm mb-2 text-red-500 dark:text-red-500">
                             {{ announcementForm.errors.body }}
                         </div>
                     </div>
@@ -105,7 +105,7 @@
                             </div>
                         </div>
                         <div v-if="announcementForm.errors.departments"
-                            class="text-sm mb-2 text-red-500 dark:text-white">
+                            class="text-sm mb-2 text-red-500 dark:text-red-500">
                             {{ announcementForm.errors.departments }}
                         </div>
                     </div>

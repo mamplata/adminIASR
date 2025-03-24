@@ -5,7 +5,7 @@
         <input v-model="deviceForm.name" type="text"
             class="input input-bordered rounded bg-white text-gray-900 w-full mb-1 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500"
             required />
-        <div v-if="deviceForm.errors.name" class="text-sm mb-2 text-red-500 dark:text-white">
+        <div v-if="deviceForm.errors.name" class="text-sm mb-2 text-red-500 dark:text-red-500">
             {{ deviceForm.errors.name }}
         </div>
 
@@ -18,7 +18,7 @@
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
             </select>
-            <div v-if="deviceForm.errors.status" class="text-sm mb-2 text-red-500 dark:text-white">
+            <div v-if="deviceForm.errors.status" class="text-sm mb-2 text-red-500 dark:text-red-500">
                 {{ deviceForm.errors.status }}
             </div>
         </div>

@@ -23,7 +23,7 @@
                     <option value="2nd">2nd</option>
                 </select>
             </div>
-            <div v-if="form.errors.semester" class="text-sm mb-2 text-red-500 dark:text-white">
+            <div v-if="form.errors.semester" class="text-sm mb-2 text-red-500 dark:text-red-500">
                 {{ form.errors.semester }}
             </div>
 
@@ -37,7 +37,7 @@
                     </option>
                 </select>
             </div>
-            <div v-if="form.errors.year" class="text-sm mb-2 text-red-500 dark:text-white">
+            <div v-if="form.errors.year" class="text-sm mb-2 text-red-500 dark:text-red-500">
                 {{ form.errors.year }}
             </div>
 

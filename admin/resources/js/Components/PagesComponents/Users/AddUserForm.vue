@@ -6,7 +6,7 @@
             'input input-bordered rounded bg-white text-gray-900 w-full mb-1 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500',
             form.errors.name ? 'border-red-500' : 'border-gray-500'
         ]" required />
-        <div v-if="form.errors.name" class="text-sm mb-2 text-red-500 dark:text-white">{{ form.errors.name }}</div>
+        <div v-if="form.errors.name" class="text-sm mb-2 text-red-500 dark:text-red-500">{{ form.errors.name }}</div>
 
         <!-- Email Field -->
         <label class="label text-gray-700 dark:text-gray-300">Email</label>
@@ -14,7 +14,7 @@
             'input input-bordered rounded bg-white text-gray-900 w-full mb-1 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500',
             form.errors.email ? 'border-red-500' : 'border-gray-500'
         ]" required />
-        <div v-if="form.errors.email" class="text-sm mb-2 text-red-500 dark:text-white">{{ form.errors.email }}</div>
+        <div v-if="form.errors.email" class="text-sm mb-2 text-red-500 dark:text-red-500">{{ form.errors.email }}</div>
 
         <!-- Modal Actions -->
         <div class="modal-action mt-4">
