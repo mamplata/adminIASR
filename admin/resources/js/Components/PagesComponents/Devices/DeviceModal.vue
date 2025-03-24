@@ -10,19 +10,19 @@
                 {{ deviceForm.errors.name }}
             </div>
 
-        <!-- Status Field (only for Edit Mode) -->
-        <div v-if="title === 'Edit Device'">
-            <label class="label text-gray-700 dark:text-gray-300">Status</label>
-            <select v-model="deviceForm.status"
-                class="select select-bordered w-full mb-1 bg-white text-gray-900 rounded focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500"
-                required>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-            <div v-if="deviceForm.errors.status" class="text-sm mb-2 text-red-500 dark:text-white">
-                {{ deviceForm.errors.status }}
+            <!-- Status Field (only for Edit Mode) -->
+            <div v-if="title === 'Edit Device'">
+                <label class="label text-gray-700 dark:text-gray-300">Status</label>
+                <select v-model="deviceForm.status"
+                    class="select select-bordered w-full mb-1 bg-white text-gray-900 rounded focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-500"
+                    required>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+                <div v-if="deviceForm.errors.status" class="text-sm mb-2 text-red-500 dark:text-white">
+                    {{ deviceForm.errors.status }}
+                </div>
             </div>
-        </div>
 
             <!-- Modal Actions -->
             <div class="modal-action mt-4">
