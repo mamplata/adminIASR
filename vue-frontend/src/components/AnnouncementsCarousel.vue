@@ -1,67 +1,67 @@
-  <template>
-    <div class="w-full relative min-h-screen" :style="{
-      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.1)), url(${bgAnnouncement})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center'
-    }">
-      <!-- Header -->
-      <header class="w-full px-6 h-24 flex items-center relative" :style="{ backgroundColor: '#198754' }">
-        <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
-        <button @click="openPortStatusModal"
-          class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
-          <i class="fas fa-info-circle text-2xl"></i>
-        </button>
-      </header>
+<template>
+  <div class="w-full relative min-h-screen" :style="{
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.1)), url(${bgAnnouncement})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center'
+  }">
+    <!-- Header -->
+    <header class="w-full px-6 h-24 flex items-center relative" :style="{ backgroundColor: '#198754' }">
+      <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
+      <button @click="openPortStatusModal"
+        class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
+        <i class="fas fa-info-circle text-2xl"></i>
+      </button>
+    </header>
 
-      <!-- Main Content: Slider and Thumbnails -->
-      <main class="w-full flex flex-col" style="height: calc(100vh - 6rem);">
-        <!-- Main Slider Container -->
-        <div class="main-slider-container w-full relative" style="height: calc(100% - 10rem);">
-          <div v-if="loading" class="w-full h-full flex items-center justify-center">
-            <p class="text-white text-2xl text-center">Loading announcements...</p>
-          </div>
-          <div v-else-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
-            <Swiper ref="mainSwiper" :modules="[Autoplay, Thumbs, EffectFade]" effect="fade"
-              :fadeEffect="{ crossFade: true }" :speed="3000" :slidesPerView="1"
-              :autoplay="{ delay: 3000, disableOnInteraction: false }" :loop="filteredAnnouncements.length > 1"
-              :thumbs="{ swiper: thumbsSwiper }" @swiper="onMainSwiper"
-              @slideChangeTransitionStart="onSlideChangeTransitionStart"
-              @slideChangeTransitionEnd="onSlideChangeTransitionEnd" class="mySwiper">
-              <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="announcement.id || index"
-                class="w-full h-full">
-                <DaisyCardAnnouncement :active="index === activeIndex" :announcement="announcement" :isThumb="false"
-                  class="w-full h-full" />
-              </SwiperSlide>
-            </Swiper>
-            <div class="black-overlay" :style="{ opacity: overlayOpacity }"></div>
-          </div>
-          <div v-else class="w-full h-full flex items-center justify-center">
-            <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
-              <p class="text-gray-800 text-2xl text-center">No Announcements Available</p>
-            </div>
-          </div>
+    <!-- Main Content: Slider and Thumbnails -->
+    <main class="w-full flex flex-col" style="height: calc(100vh - 6rem);">
+      <!-- Main Slider Container -->
+      <div class="main-slider-container w-full relative" style="height: calc(100% - 10rem);">
+        <div v-if="loading" class="w-full h-full flex items-center justify-center">
+          <p class="text-white text-2xl text-center">Loading announcements...</p>
         </div>
-
-        <!-- Thumbs Slider Container -->
-        <div class="thumb-slider-container w-full" style="height: 10rem;"
-          v-if="!loading && filteredAnnouncements.length > 0">
-          <Swiper :modules="[Thumbs]"
-            :slidesPerView="filteredAnnouncements.length < 3 ? filteredAnnouncements.length : 4"
-            :centeredSlides="filteredAnnouncements.length === 1"
-            :centerInsufficientSlides="filteredAnnouncements.length < 3" watchSlidesVisibility watchSlidesProgress
-            :onSwiper="onThumbsSwiper" class="mySwiperThumbs">
-            <SwiperSlide v-for="(announcement, index) in filteredAnnouncements"
-              :key="'thumb-' + (announcement.id || index)" class="thumb">
-              <DaisyCardAnnouncement :announcement="announcement" :isThumb="true" />
+        <div v-else-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
+          <Swiper ref="mainSwiper" :modules="[Autoplay, Thumbs, EffectFade]" effect="fade"
+            :fadeEffect="{ crossFade: true }" :speed="3000" :slidesPerView="1"
+            :autoplay="{ delay: 3000, disableOnInteraction: false }" :loop="filteredAnnouncements.length > 1"
+            :thumbs="{ swiper: thumbsSwiper }" @swiper="onMainSwiper"
+            @slideChangeTransitionStart="onSlideChangeTransitionStart"
+            @slideChangeTransitionEnd="onSlideChangeTransitionEnd" class="mySwiper">
+            <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="announcement.id || index"
+              class="w-full h-full">
+              <DaisyCardAnnouncement :active="index === activeIndex" :announcement="announcement" :isThumb="false"
+                @scrollFinished="handleScrollFinished" @scrollNeeded="updateScrollNeeded(index, $event)"
+                class="w-full h-full" />
             </SwiperSlide>
           </Swiper>
+          <div class="black-overlay" :style="{ opacity: overlayOpacity }"></div>
         </div>
-      </main>
+        <div v-else class="w-full h-full flex items-center justify-center">
+          <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
+            <p class="text-gray-800 text-2xl text-center">No Announcements Available</p>
+          </div>
+        </div>
+      </div>
 
-      <ScannerAssignment />
-      <PortStatus v-show="showPortStatusModal" :deviceName="deviceName" @close="closePortStatusModal" />
-    </div>
-  </template>
+      <!-- Thumbs Slider Container -->
+      <div class="thumb-slider-container w-full" style="height: 10rem;"
+        v-if="!loading && filteredAnnouncements.length > 0">
+        <Swiper :modules="[Thumbs]" :slidesPerView="filteredAnnouncements.length < 3 ? filteredAnnouncements.length : 4"
+          :centeredSlides="filteredAnnouncements.length === 1"
+          :centerInsufficientSlides="filteredAnnouncements.length < 3" watchSlidesVisibility watchSlidesProgress
+          :onSwiper="onThumbsSwiper" class="mySwiperThumbs">
+          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements"
+            :key="'thumb-' + (announcement.id || index)" class="thumb">
+            <DaisyCardAnnouncement :announcement="announcement" :isThumb="true" />
+          </SwiperSlide>
+        </Swiper>
+      </div>
+    </main>
+
+    <ScannerAssignment />
+    <PortStatus v-show="showPortStatusModal" :deviceName="deviceName" @close="closePortStatusModal" />
+  </div>
+</template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
@@ -77,7 +77,7 @@ import { Autoplay, Thumbs, EffectFade } from "swiper/modules";
 import ScannerAssignment from "./ScannerAssignment.vue";
 
 // Define the events that can be emitted to the parent.
-const emit = defineEmits(["update:selectedDepartment"]);
+const emit = defineEmits(["update:selectedDepartment", "filterMatch"]);
 
 const props = defineProps({
   deviceName: { type: String, required: true },
@@ -89,42 +89,72 @@ const loading = ref(true);
 const showPortStatusModal = ref(false);
 const thumbsSwiper = ref(null);
 const overlayOpacity = ref(1);
-const mainSwiper = ref(null);
 const activeIndex = ref(0);
 
-const filteredAnnouncements = computed(() => {
-  return announcements.value.filter(announcement => {
+// This object will store for each slide index whether the text needs scrolling.
+const scrollNeededStatus = ref({});
+
+function updateScrollNeeded(index, needed) {
+  scrollNeededStatus.value[index] = needed;
+}
+
+const filteredAnnouncements = ref([]);
+
+onMounted(async () => {
+  await fetchAnnouncements();
+  // On mount, default to GENERAL announcements.
+  filteredAnnouncements.value = announcements.value.filter(announcement => {
+    return announcement.departments.trim() === "GENERAL";
+  });
+});
+
+watch(() => props.selectedDepartment, (newDept, oldDept) => {
+
+  // If "GENERAL" is scanned, update the filtered list to only general announcements.
+  if (newDept.trim() === "GENERAL") {
+    filteredAnnouncements.value = announcements.value.filter(announcement =>
+      announcement.departments.trim() === "GENERAL"
+    );
+    return;
+  }
+
+
+  // Otherwise, filter for the new department.
+  const newFiltered = announcements.value.filter(announcement => {
     const announcementDepartments = announcement.departments.trim();
-
-    // Handle GENERAL announcements
-    if (announcementDepartments === "GENERAL") {
-      return props.selectedDepartment.trim() === "GENERAL";
-    }
-
-    // Split multiple groups by semicolon
+    // Split groups by semicolon.
     const groups = announcementDepartments
       .split(";")
       .map(group => group.trim())
       .filter(Boolean);
 
-    // Split the scanned selectedDepartment (e.g., "CCS: BSIT") into department and program.
-    const selectedParts = props.selectedDepartment.split(":").map(s => s.trim());
+    // Expecting a format like "CCS: BSIT" for the scanned department.
+    const selectedParts = newDept.split(":").map(s => s.trim());
     if (selectedParts.length !== 2) return false;
     const [selectedDept, selectedProgram] = selectedParts;
 
-    // Check if any group matches the scanned student's department and program.
+    // Check if any group matches.
     return groups.some(group => {
       if (group.includes(":")) {
         const [dept, programsStr] = group.split(":");
         const programs = programsStr.split(",").map(p => p.trim());
         return dept.trim() === selectedDept && programs.includes(selectedProgram);
       }
-      // Fallback: if the group doesn't use colon formatting, check for an exact match.
-      return group === props.selectedDepartment;
+
+
+      // Fallback for non-colon formatted groups.
+      return group === newDept;
     });
   });
-});
 
+  // Only update if there is at least one match.
+  if (newFiltered.length > 0) {
+    emit("filterMatch", true);
+    filteredAnnouncements.value = newFiltered;
+  } else {
+    emit("filterMatch", false);
+  }
+});
 
 const fetchAnnouncements = async () => {
   try {
@@ -146,8 +176,20 @@ function closePortStatusModal() {
   showPortStatusModal.value = false;
 }
 
+let swiperInstance = null;
+
 function onMainSwiper(swiper) {
-  // If only one announcement, reset immediately using the provided instance
+  swiperInstance = swiper;
+
+  // Delay the check slightly to allow scrollNeededStatus to update
+  setTimeout(() => {
+    const firstAnnouncement = filteredAnnouncements.value[0];
+    const needsScroll = scrollNeededStatus.value[0];
+    if (firstAnnouncement && firstAnnouncement.type === 'text' && needsScroll) {
+      swiper.autoplay.stop();
+    }
+  }, 500); // 100ms delay (adjust as needed)
+
   if (filteredAnnouncements.value.length === 1) {
     setTimeout(() => {
       swiper.autoplay.stop();
@@ -156,6 +198,7 @@ function onMainSwiper(swiper) {
     }, 3000);
   }
 }
+
 
 // Watch filteredAnnouncements to handle the case where there is only one announcement.
 watch(filteredAnnouncements, (newVal) => {
@@ -171,13 +214,30 @@ function onThumbsSwiper(swiper) {
   thumbsSwiper.value = swiper;
 }
 
-function onSlideChangeTransitionStart() {
+function onSlideChangeTransitionStart(swiper) {
   overlayOpacity.value = 1;
+
+  // Check if the current slide is text and needs scrolling.
+  const currentAnnouncement = filteredAnnouncements.value[activeIndex.value];
+  const needsScroll = scrollNeededStatus.value[activeIndex.value];
+
+  if (currentAnnouncement && currentAnnouncement.type === 'text' && needsScroll) {
+    swiper.autoplay.stop();
+  }
 }
 
 function onSlideChangeTransitionEnd(swiper) {
   overlayOpacity.value = 0;
   activeIndex.value = swiper.activeIndex;
+
+  const currentAnnouncement = filteredAnnouncements.value[activeIndex.value];
+  const needsScroll = scrollNeededStatus.value[activeIndex.value];
+
+
+  if (!(currentAnnouncement && currentAnnouncement.type === 'text' && needsScroll)) {
+    // For short text slides or non-text slides, resume autoplay.
+    swiper.autoplay.start();
+  }
 
   if (
     filteredAnnouncements.value.length > 1 &&
@@ -217,10 +277,13 @@ watch(
   }
 );
 
+function handleScrollFinished() {
+  if (swiperInstance && typeof swiperInstance.slideNext === "function") {
+    swiperInstance.slideNext();
+  }
 
-onMounted(async () => {
-  await fetchAnnouncements();
-});
+}
+
 </script>
 
 <style scoped>
@@ -235,14 +298,15 @@ onMounted(async () => {
   height: 100%;
 }
 
-.mySwiperThumbs ::v-deep .swiper-slide {
+.mySwiperThumbs :deep(.swiper-slide) {
   opacity: 0.5;
   transition: opacity 0.3s ease-in-out;
 }
 
-.mySwiperThumbs ::v-deep .swiper-slide-thumb-active {
+.mySwiperThumbs :deep(.swiper-slide-thumb-active) {
   opacity: 1 !important;
 }
+
 
 .black-overlay {
   position: absolute;

@@ -53,6 +53,9 @@ Route::middleware('device.check')->group(function () {
 
     //ANNOUNCEMENTS
     Route::get('/announcements', [AnnouncementController::class, 'getAnnouncements']);
+
+    //ENTRY LOGS
+    Route::get('/entry-logs', [EntryLogController::class, 'store']);
 });
 
 

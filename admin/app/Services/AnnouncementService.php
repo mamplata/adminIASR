@@ -46,7 +46,7 @@ class AnnouncementService
 
         return $query->paginate(5)
             ->appends($request->only(['search', 'departments', 'programs', 'start_date', 'end_date']))
-            ->through(fn($announcement) => [
+            ->through(fn ($announcement) => [
                 'id'                => $announcement->id,
                 'departments'       => $announcement->departments,
                 'publisher'         => $announcement->publisher,
@@ -65,15 +65,15 @@ class AnnouncementService
         // Get unique departments
         $rawDepartments = Announcement::distinct()->pluck('departments')->toArray();
         $searchDepartments = collect($rawDepartments)
-            ->flatMap(fn($deptString) => explode(';', $deptString))
-            ->map(fn($dept) => strpos(trim($dept), ':') !== false ? trim(explode(':', $dept)[0]) : trim($dept))
+            ->flatMap(fn ($deptString) => explode(';', $deptString))
+            ->map(fn ($dept) => strpos(trim($dept), ':') !== false ? trim(explode(':', $dept)[0]) : trim($dept))
             ->unique()
             ->values()
             ->toArray();
 
         // Get programs grouped by department
         $searchPrograms = collect($rawDepartments)
-            ->flatMap(fn($deptString) => explode(';', $deptString))
+            ->flatMap(fn ($deptString) => explode(';', $deptString))
             ->flatMap(function ($entry) {
                 $parts = explode(':', $entry);
                 if (count($parts) < 2) return [];
@@ -81,10 +81,10 @@ class AnnouncementService
                 $programString = trim($parts[1]);
 
                 return collect(explode(',', $programString))
-                    ->map(fn($program) => ['department' => $department, 'program' => trim($program)]);
+                    ->map(fn ($program) => ['department' => $department, 'program' => trim($program)]);
             })
             ->groupBy('department')
-            ->map(fn($group) => $group->pluck('program')->unique()->values())
+            ->map(fn ($group) => $group->pluck('program')->unique()->values())
             ->toArray();
 
         return compact('searchDepartments', 'searchPrograms');
@@ -97,7 +97,7 @@ class AnnouncementService
     {
         $departments = Department::pluck('code')->toArray();
 
-        $departmentPrograms = Department::with('programs')->get()->mapWithKeys(fn($department) => [
+        $departmentPrograms = Department::with('programs')->get()->mapWithKeys(fn ($department) => [
             $department->code => $department->programs->pluck('code')->toArray()
         ])->toArray();
 
@@ -121,7 +121,7 @@ class AnnouncementService
                 'size'      => $file->getSize(),
             ];
         } else {
-            $content = json_decode($data['content'], true);
+            $content = $data['content'];
             if (!$content || !isset($content['title']) || !isset($content['body'])) {
                 throw new \Exception('Invalid content format.');
             }

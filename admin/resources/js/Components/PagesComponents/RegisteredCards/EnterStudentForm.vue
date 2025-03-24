@@ -1,25 +1,30 @@
 <template>
-    <div>
-        <div class="py-2">
-            <input type="text" class="input input-bordered dark:text-white w-full mb-2" v-model="studentID"
-                placeholder="Student ID" @keydown.enter="handleRegister" />
-            <div v-if="nfcStatus" class="mt-2">
-                <span>{{ nfcStatus }}</span>
+    <div ref="container" tabindex="0" class="max-w-5xl mx-auto px-4 py-6" @keydown.enter="handleEnter">
+        <form ref="form" @submit.prevent="handleRegister">
+            <div>
+                <input type="text" class="input input-bordered dark:text-white w-full mb-2" v-model="studentID"
+                    placeholder="Student ID" required />
+                <div v-if="nfcStatus" class="mt-2">
+                    <span>{{ nfcStatus }}</span>
+                </div>
             </div>
-        </div>
-        <div class="modal-action">
-            <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
-            <button class="btn btn-primary dark:text-white" @click="handleRegister" :disabled="isLoading">
-                Register
-            </button>
-        </div>
+            <div class="modal-action">
+                <button type="button" class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
+                <button type="submit"
+                    class="btn btn-success text-white hover:bg-[#20714c] dark:bg-green-700 dark:hover:bg-green-600"
+                    :disabled="isLoading">
+                    <span v-if="isLoading" class="loading loading-spinner loading-sm"></span>
+                    <span v-else>Register</span>
+                </button>
+            </div>
+        </form>
     </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from 'vue'
+import { defineProps, defineEmits, computed, ref, onMounted } from 'vue'
 
-// Define any props you might want to pass from the parent
+// Define props passed from the parent component
 const props = defineProps({
     modelValue: {
         type: String,
@@ -35,11 +40,27 @@ const props = defineProps({
     }
 })
 
+// References for container and form elements
+const container = ref(null)
+const form = ref(null)
 
-// Define events including update:modelValue for v-model support
+onMounted(() => {
+    if (container.value) {
+        container.value.focus()
+    }
+})
+
+// Handle Enter key press globally within the form
+function handleEnter(event) {
+    if (event.target.tagName !== 'TEXTAREA') {
+        return
+    }
+}
+
+// Define events for v-model and component actions
 const emit = defineEmits(['update:modelValue', 'cancel-registration', 'register-student'])
 
-// Use a computed property for two-way binding on studentID
+// Two-way binding for studentID
 const studentID = computed({
     get: () => props.modelValue,
     set: (value) => {
@@ -47,7 +68,7 @@ const studentID = computed({
     }
 })
 
-// Methods to handle button clicks and emit events
+// Methods for cancel and register actions
 function handleCancel() {
     emit('cancel-registration')
 }

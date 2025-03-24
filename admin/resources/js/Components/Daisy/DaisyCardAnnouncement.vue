@@ -10,12 +10,14 @@
                 <!-- Flex container with overflow handling -->
                 <div>
                     <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
-                        <h3 class="font-semibold text-white whitespace-normal break-words text-center text-2xl">
+                        <h3
+                            class="uppercase font-semibold text-white whitespace-normal break-words text-center text-2xl">
                             {{ announcement.content.title }}
                         </h3>
+
                     </div>
                     <div class="card-body m-5 px-4 py-2">
-                        <p class="text-white whitespace-normal break-words text-justify">
+                        <p class="text-white whitespace-pre-line break-words text-justify">
                             {{ announcement.content.body }}
                         </p>
                     </div>

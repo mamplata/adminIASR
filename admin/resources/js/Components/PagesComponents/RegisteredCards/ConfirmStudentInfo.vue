@@ -51,21 +51,20 @@
             </div>
         </section>
 
-        <!-- Action Buttons -->
-        <footer class="mt-6 flex justify-end space-x-2">
+        <!-- Action Buttons with keyup.enter on a focusable footer -->
+        <footer class="mt-6 flex justify-end space-x-2" tabindex="0" @keyup.enter="handleConfirm">
             <button class="mr-4 hover:underline" @click="handleCancel">Cancel</button>
             <button v-if="isEnrolled" class="btn btn-primary" @click="handleConfirm">
                 {{ renew ? 'Renew' : (cardExists ? 'Replace' : 'Validate') }}
             </button>
         </footer>
     </div>
-
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
-// Define props to receive studentID, modalStudentInfo, cardExists, and nfcStatus from parent
+// Define props to receive studentID, modalStudentInfo, cardExists, nfcStatus, etc. from parent
 const props = defineProps({
     studentID: {
         type: String,

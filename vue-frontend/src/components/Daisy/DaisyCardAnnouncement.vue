@@ -4,10 +4,9 @@
         <div v-if="announcement.type === 'text'" :class="[
             'card',
             isThumb
-                ? 'border-2 border-black shadow-sm rounded-none'
-                : 'border-8 border-black shadow-md rounded-md',
-            'relative w-full h-full',
-            'sm:border-4 sm:rounded-lg'
+                ? 'shadow-sm rounded-none border-2 border-black'
+                : 'shadow-md rounded-md border-8 border-black',
+            'w-full h-full flex justify-center items-center m-0 p-0 relative'
         ]" :style="{
             backgroundImage: `url(${pncBg})`,
             backgroundSize: 'cover',
@@ -18,7 +17,7 @@
             <div class="absolute inset-0 p-2 flex flex-col">
                 <!-- Title at the top -->
                 <h3 :class="[
-                    'font-semibold text-white text-center',
+                    'uppercase font-semibold text-white text-center',
                     isThumb ? '' : 'whitespace-normal break-words'
                 ]" :style="{
                     fontSize: isThumb ? 'calc(1rem + 0.4vh)' : 'calc(1.2rem + 0.6vh)'
@@ -26,12 +25,13 @@
                     {{ announcement.content.title }}
                 </h3>
                 <!-- Scroll container for body text -->
-                <div class="scroll-container flex-1 items-center relative overflow-hidden mt-2">
-                    <div ref="scrollContent" class="scroll-content absolute w-full"
-                        :style="{ animation: computedAnimation }">
+                <div ref="scrollContainer" class="scroll-container flex-1 items-center relative overflow-hidden mt-2">
+                    <div ref="scrollContent" class="scroll-content absolute w-full" :style="{
+                        animation: computedAnimation,
+                        '--final-transform': finalTransform
+                    }">
                         <p :class="[
-                            isThumb ? 'text-xs' : 'whitespace-normal break-words text-center',
-                            'text-white leading-relaxed'
+                            isThumb ? 'text-xs text-white' : 'text-white whitespace-pre-line break-words text-justify leading-relaxed'
                         ]" :style="{
                             fontSize: isThumb ? 'calc(0.6rem + 0.4vh)' : 'calc(0.9rem + 0.8vh)'
                         }">
@@ -62,45 +62,93 @@ import pncBg from '../../assets/img/pnc-bg.jpg';
 import pncLogo from '../../assets/img/pnc-logo-1.png';
 const apiUrl = import.meta.env.VITE_API_URL;
 
+// We'll need to emit an event to notify the parent when scrolling completes.
+const emit = defineEmits(["scrollFinished", "scrollNeeded"]);
+
 const props = defineProps({
     announcement: { type: Object, required: true },
     isThumb: { type: Boolean, default: false },
     active: { type: Boolean, default: false }
 });
 
+const scrollContainer = ref(null);
 const scrollContent = ref(null);
-// This ref will indicate whether the text overflows its container.
 const needsMarquee = ref(false);
 
-// Function to check if the text content overflows its container.
+// Check whether the text overflows its container.
 function checkOverflow() {
-    if (scrollContent.value) {
-        const container = scrollContent.value.parentElement; // the .scroll-container element
-        if (container) {
-            // If the scrollHeight of the content is greater than the container's height, it overflows.
-            needsMarquee.value = scrollContent.value.scrollHeight > container.clientHeight;
-        }
+    if (scrollContainer.value && scrollContent.value) {
+        needsMarquee.value =
+            scrollContent.value.scrollHeight > scrollContainer.value.clientHeight;
     }
 }
 
 onMounted(() => {
-    // Use nextTick to ensure the DOM is rendered before measuring.
     nextTick(() => {
         checkOverflow();
+        // Emit the status after measuring.
+        emit("scrollNeeded", needsMarquee.value);
     });
     window.addEventListener("resize", checkOverflow);
+    if (scrollContent.value) {
+        scrollContent.value.addEventListener("animationend", onAnimationEnd);
+    }
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener("resize", checkOverflow);
+    if (scrollContent.value) {
+        scrollContent.value.removeEventListener("animationend", onAnimationEnd);
+    }
 });
 
-// Compute the animation style: only apply marquee if the slide is active and the text overflows.
-const computedAnimation = computed(() => {
-    return (props.active && needsMarquee.value)
-        ? 'marquee 50s linear infinite'
-        : 'none';
+// Compute the animation duration based on the amount of overflow.
+// Adjust the multiplier (here, 20 ms per pixel) to control speed.
+const animationDuration = computed(() => {
+    if (props.active && needsMarquee.value && scrollContainer.value && scrollContent.value) {
+        const containerHeight = scrollContainer.value.clientHeight;
+        const contentHeight = scrollContent.value.scrollHeight;
+        const overflowHeight = contentHeight - containerHeight;
+        return overflowHeight * 50;
+    }
+    return 0;
 });
+
+const finalTransform = computed(() => {
+    if (scrollContent.value && scrollContainer.value && needsMarquee.value) {
+        const containerHeight = scrollContainer.value.clientHeight;
+        const contentHeight = scrollContent.value.scrollHeight;
+        const overflowHeight = contentHeight - containerHeight;
+        // Calculate the percentage of the total height this overflow represents.
+        const percent = (overflowHeight / contentHeight) * 100;
+        return `translateY(-${percent}%)`;
+    }
+    return 'translateY(0%)';
+});
+
+
+// Compute the CSS animation style.
+// If the slide is active and the text overflows, run a single iteration (no "infinite").
+// Otherwise, no animation.
+const computedAnimation = computed(() => {
+    if (props.active && needsMarquee.value && animationDuration.value > 0) {
+        return `marquee ${animationDuration.value}ms linear forwards`;
+    }
+    return 'none';
+});
+
+// Listen for the animation end event and notify the parent.
+function onAnimationEnd() {
+    if (needsMarquee.value) {
+        // For long text slides, wait 3 seconds before emitting.
+        setTimeout(() => {
+            emit("scrollFinished");
+        }, 3000);
+    } else {
+        // For short text slides, emit immediately.
+        emit("scrollFinished");
+    }
+}
 </script>
 
 <style scoped>
@@ -119,7 +167,7 @@ const computedAnimation = computed(() => {
     }
 
     100% {
-        transform: translateY(-100%);
+        transform: var(--final-transform, translateY(0%));
     }
 }
 

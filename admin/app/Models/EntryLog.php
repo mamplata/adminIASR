@@ -14,7 +14,6 @@ class EntryLog extends Model
         'uid',
         'student_id',
         'time_type',
-        'timestamp',
         'status',
         'failure_reason',
     ];

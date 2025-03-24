@@ -1,12 +1,12 @@
 <template>
     <div class="relative h-full texture-bg">
-        <!-- Header positioned in the top left corner -->
-        <header class="absolute top-0 left-0 m-4">
-            <img :src="ITAPLOGO" alt="iASR Logo" class="w-48" />
+        <!-- Header positioned in the top left corner with higher z-index -->
+        <header class="absolute top-0 left-0 m-4 z-50">
+            <img :src="ITAPLOGO" alt="iASR Logo" class="w-32" />
         </header>
 
-        <!-- Main content container -->
-        <div class="flex flex-col items-center justify-center h-full mx-10">
+        <!-- Main content container with adjusted top padding -->
+        <div class="flex flex-col items-center justify-center h-full mx-10 pt-10">
             <!-- Single transition wrapping different states with keyed container -->
             <transition name="fade" mode="out-in">
                 <div :key="isLoading ? 'loading' : (scannedStudent || nfcError) ? 'card' : 'prompt'">
@@ -19,32 +19,26 @@
                     </template>
 
                     <template v-else-if="scannedStudent || nfcError">
-                        <!-- Error State -->
+                        <!-- Display Student or Error Cards -->
                         <template v-if="nfcError">
-                            <!-- Error Card: Unauthorized Access with 3D effect -->
+                            <!-- Error Card: Unauthorized Access -->
                             <div v-if="nfcError == 'Unauthorized access.'"
-                                class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center h-64">
-                                <!-- Icon Section -->
+                                class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center h-56">
                                 <figure class="z-10 flex-shrink-0 px-4">
                                     <i class="fas fa-exclamation-triangle ml-2 text-4xl"></i>
                                 </figure>
-                                <!-- Message Section -->
                                 <div class="card-body z-10">
                                     <h2 class="card-title text-2xl">Unauthorized Access</h2>
-                                    <p class="text-lg">
-                                        You do not have permission to access this school.
-                                    </p>
+                                    <p class="text-lg">You do not have permission to access this school.</p>
                                 </div>
                             </div>
 
-                            <!-- Error Card: Card Activation Expired with 3D effect -->
+                            <!-- Error Card: Card Activation Expired -->
                             <div v-if="nfcError == 'Card is not activated'"
-                                class="card card-side bg-warning text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-64">
-                                <!-- Icon Section -->
+                                class="card card-side bg-warning text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-56">
                                 <figure class="z-10 flex-shrink-0 px-4">
                                     <i class="fas fa-info-circle ml-2 text-5xl"></i>
                                 </figure>
-                                <!-- Message Section -->
                                 <div class="card-body z-10">
                                     <h2 class="card-title text-2xl">Card Activation Expired</h2>
                                     <p class="text-lg">
@@ -54,17 +48,14 @@
                                 </div>
                             </div>
                         </template>
-
                         <template v-else>
                             <!-- Student Card Display -->
                             <div
                                 class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
-                                <!-- Image Section -->
                                 <figure class="z-10">
                                     <img v-if="scannedStudent.image" :src="scannedStudent.image" alt="Student Photo"
                                         class="w-48 md:w-48 object-cover" />
                                 </figure>
-                                <!-- Details Section -->
                                 <div class="card-body z-10">
                                     <h2 class="card-title">{{ scannedStudent.fName }} {{ scannedStudent.lName }}</h2>
                                     <p class="text-sm">Program: {{ scannedStudent.program }}</p>
@@ -74,28 +65,23 @@
                                 </div>
                             </div>
 
-                            <!-- Weekly Schedule Card with matching 3D effect -->
+                            <!-- Weekly Schedule Card -->
                             <div
-                                class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d mt-8">
+                                class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d mt-2">
                                 <div class="card-body">
-                                    <!-- Header with badge and current date -->
                                     <span class="badge badge-xs badge-primary">Today</span>
                                     <div class="flex justify-between">
                                         <h2 class="text-3xl font-bold">Schedule</h2>
                                         <span class="text-xl">
-                                            {{ new Date().toLocaleDateString('en-US', {
-                                                month: 'long', day: 'numeric',
-                                                year: 'numeric'
-                                            }) }}
+                                            {{ new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) }}
                                         </span>
                                     </div>
-                                    <!-- Schedule Items: only show items for today -->
                                     <ul class="mt-6 flex flex-col gap-2 text-xs" v-if="todaySchedule.length">
                                         <li v-for="item in todaySchedule" :key="item.id" class="flex items-center">
                                             <i class="fas fa-check-circle text-green-500 me-2"></i>
                                             <span>
-                                                {{ item.courseCode }}: {{ item.courseDescription }} |
-                                                {{ item.time }} | {{ item.room }} | Section {{ item.section }}
+                                                {{ item.courseCode }}: {{ item.courseDescription }} | {{ item.time }} |
+                                                {{ item.room }} | Section {{ item.section }}
                                             </span>
                                         </li>
                                     </ul>
@@ -104,11 +90,16 @@
                             </div>
                         </template>
                     </template>
+
                     <template v-else>
-                        <!-- "Tap your card" prompt -->
-                        <div class="text-center mt-12">
-                            <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto animate-zoom-in-out" />
-                            <h1 class="text-4xl font-bold text-green-900 mt-4">Tap your card</h1>
+                        <!-- "Tap your card" prompt or loading state for scanner status -->
+                        <div class="text-center">
+                            <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto"
+                                :class="{ 'animate-zoom-in-out': !scannerStatusLoading && isScanEnabled }" />
+                            <h1 class="text-4xl font-bold mt-4"
+                                :class="{ 'text-green-900': !scannerStatusLoading && isScanEnabled, 'text-gray-500': !scannerStatusLoading && !isScanEnabled }">
+                                {{ scannerStatusLoading ? 'Checking scanner status...' : (isScanEnabled ? 'Tap your card' : 'Scanner Disabled') }}
+                            </h1>
                         </div>
                     </template>
                 </div>
@@ -132,26 +123,39 @@ const isLoading = ref(false);
 const nfcData = ref(null);
 const nfcError = ref('');
 
-// Accept deviceFingerprint as a prop (if needed for display or other logic)
+// Reactive property to track the Time In scanner status
+const timeInScanner = ref(null);
+// New reactive property to handle waiting state for scanner status
+const scannerStatusLoading = ref(true);
+// Reactive property for socket connection status
+const socketConnected = ref(false);
+
 const props = defineProps({
     deviceFingerprint: String
 });
-
-// Define the custom event to emit the scanned student data to the parent
 const emit = defineEmits(['scannedStudent', 'loading']);
 
 let socket = null;
 
-/**
- * Computed property to return today's schedule.
- * Since processScannedCard filters the schedule, we simply return schedule.value.
- */
 const todaySchedule = computed(() => schedule.value);
 
-/**
- * Initiates the NFC card reading process.
- */
+// Computed property to check if scanning is enabled (only after socket is connected and scanner status is loaded)
+const isScanEnabled = computed(() => {
+    if (!socketConnected.value || scannerStatusLoading.value) return false;
+    return timeInScanner.value && timeInScanner.value.online;
+});
+
 function readNfcCard() {
+    // Wait until scanner status loading is complete and socket is connected
+    if (scannerStatusLoading.value || !socketConnected.value) {
+        console.log("Waiting for scanner and socket connection...");
+        setTimeout(readNfcCard, 500);
+        return;
+    }
+    if (!isScanEnabled.value) {
+        console.log("Time In scanner is not available. Scanning disabled.");
+        return;
+    }
     if (isReadingNfc.value) return;
     isReadingNfc.value = true;
     nfcData.value = null;
@@ -165,28 +169,37 @@ function readNfcCard() {
 }
 
 async function processScannedCard(card) {
-    // Show spinner while fetching data and notify the parent
     isLoading.value = true;
     emit('loading', true);
+    let studentData; // Declare here so it’s accessible in the catch block
     try {
         const response = await HTTP.post(
             '/api/card/scan',
             { uid: card.uid, data: card.data },
             { withCredentials: true }
         );
-        const studentData = response.data.student;
+        studentData = response.data.student;
+
+        // Log a successful entry
+        try {
+            await HTTP.post('/api/entry-logs', {
+                device_id: props.deviceFingerprint,
+                uid: card.uid,
+                student_id: studentData.studentId.toString(),
+                time_type: "IN",
+                status: 'Success',
+                failure_reason: null
+            });
+        } catch (logError) {
+            console.error('Failed to log entry:', logError);
+        }
+
         const scheduleResponse = await HTTP.get(`/api/fetch-schedule/${studentData.studentId}`);
-        console.log(scheduleResponse);
         if (scheduleResponse.data.schedule) {
-            // Normalize the schedule data to always be an array.
             let allSchedules = Array.isArray(scheduleResponse.data.schedule)
                 ? scheduleResponse.data.schedule
                 : [scheduleResponse.data.schedule];
-
-            // Get today's day name (for example, "Friday")
             const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-            console.log(todayName);
-            // Filter the schedule to only include items for today
             const todaySchedules = allSchedules.filter(item => item.day.includes(todayName));
             if (todaySchedules.length > 0) {
                 schedule.value = todaySchedules;
@@ -200,7 +213,6 @@ async function processScannedCard(card) {
         }
         scannedStudent.value = studentData;
         emit('scannedStudent', scannedStudent.value);
-        // Data is ready so turn off the spinner and notify parent
         isLoading.value = false;
         emit('loading', false);
         setTimeout(() => {
@@ -210,6 +222,19 @@ async function processScannedCard(card) {
             readNfcCard();
         }, 3000);
     } catch (err) {
+        // Log a failure entry in case of error
+        try {
+            await HTTP.post('/api/entry-logs', {
+                device_id: props.deviceFingerprint,
+                uid: card.uid,
+                student_id: studentData ? studentData.studentId.toString() : '',
+                time_type: "IN",
+                status: 'Failure',
+                failure_reason: err.response?.data?.error || 'An error occurred during card scan.'
+            });
+        } catch (logError) {
+            console.error('Failed to log failure entry:', logError);
+        }
         isLoading.value = false;
         emit('loading', false);
         nfcError.value = err.response?.data?.error || 'An error occurred during card scan.';
@@ -225,14 +250,27 @@ async function processScannedCard(card) {
     }
 }
 
-/**
- * Sets up socket listeners to handle NFC scan events.
- */
 function setupSocketListeners() {
     if (!socket) return;
 
     socket.on('connect', () => {
         console.log("Socket connected");
+        socketConnected.value = true;
+    });
+
+    // Listen for the scanner status events (Time In)
+    socket.on('scannerDetected', (data) => {
+        if (data.assigned && data.role === "Time In") {
+            timeInScanner.value = data;
+            scannerStatusLoading.value = false;
+        }
+    });
+
+    socket.on('scannerAssigned', (data) => {
+        if (data.role === "Time In") {
+            timeInScanner.value = { ...data, online: true, role: "Time In" };
+            scannerStatusLoading.value = false;
+        }
     });
 
     socket.on('cardRead', (data) => {
@@ -260,7 +298,11 @@ onMounted(() => {
         return;
     }
     setupSocketListeners();
-    readNfcCard();
+    // Allow some time for scanner status and socket connection to initialize
+    setTimeout(() => {
+        scannerStatusLoading.value = false;
+        readNfcCard();
+    }, 3000);
 });
 </script>
 
@@ -271,7 +313,6 @@ onMounted(() => {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='%23198754' fill-opacity='0.35'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* Fade transition CSS */
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.3s ease;
@@ -286,6 +327,4 @@ onMounted(() => {
 .fade-leave-from {
     opacity: 1;
 }
-
-/* Additional component-specific styles */
 </style>
