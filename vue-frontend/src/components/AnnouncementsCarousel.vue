@@ -30,6 +30,7 @@
               <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="announcement.id || index"
                 class="w-full h-full">
                 <DaisyCardAnnouncement :active="index === activeIndex" :announcement="announcement" :isThumb="false"
+                  @scrollFinished="handleScrollFinished" @scrollNeeded="updateScrollNeeded(index, $event)"
                   class="w-full h-full" />
               </SwiperSlide>
             </Swiper>
@@ -89,8 +90,14 @@ const loading = ref(true);
 const showPortStatusModal = ref(false);
 const thumbsSwiper = ref(null);
 const overlayOpacity = ref(1);
-const mainSwiper = ref(null);
 const activeIndex = ref(0);
+
+// This object will store for each slide index whether the text needs scrolling.
+const scrollNeededStatus = ref({});
+
+function updateScrollNeeded(index, needed) {
+  scrollNeededStatus.value[index] = needed;
+}
 
 const filteredAnnouncements = computed(() => {
   return announcements.value.filter(announcement => {
@@ -146,8 +153,20 @@ function closePortStatusModal() {
   showPortStatusModal.value = false;
 }
 
+let swiperInstance = null;
+
 function onMainSwiper(swiper) {
-  // If only one announcement, reset immediately using the provided instance
+  swiperInstance = swiper;
+
+  // Delay the check slightly to allow scrollNeededStatus to update
+  setTimeout(() => {
+    const firstAnnouncement = filteredAnnouncements.value[0];
+    const needsScroll = scrollNeededStatus.value[0];
+    if (firstAnnouncement && firstAnnouncement.type === 'text' && needsScroll) {
+      swiper.autoplay.stop();
+    }
+  }, 500); // 100ms delay (adjust as needed)
+
   if (filteredAnnouncements.value.length === 1) {
     setTimeout(() => {
       swiper.autoplay.stop();
@@ -156,6 +175,7 @@ function onMainSwiper(swiper) {
     }, 3000);
   }
 }
+
 
 // Watch filteredAnnouncements to handle the case where there is only one announcement.
 watch(filteredAnnouncements, (newVal) => {
@@ -171,13 +191,30 @@ function onThumbsSwiper(swiper) {
   thumbsSwiper.value = swiper;
 }
 
-function onSlideChangeTransitionStart() {
+function onSlideChangeTransitionStart(swiper) {
   overlayOpacity.value = 1;
+
+  // Check if the current slide is text and needs scrolling.
+  const currentAnnouncement = filteredAnnouncements.value[activeIndex.value];
+  const needsScroll = scrollNeededStatus.value[activeIndex.value];
+
+  if (currentAnnouncement && currentAnnouncement.type === 'text' && needsScroll) {
+    swiper.autoplay.stop();
+  }
 }
 
 function onSlideChangeTransitionEnd(swiper) {
   overlayOpacity.value = 0;
   activeIndex.value = swiper.activeIndex;
+
+  const currentAnnouncement = filteredAnnouncements.value[activeIndex.value];
+  const needsScroll = scrollNeededStatus.value[activeIndex.value];
+
+
+  if (!(currentAnnouncement && currentAnnouncement.type === 'text' && needsScroll)) {
+    // For short text slides or non-text slides, resume autoplay.
+    swiper.autoplay.start();
+  }
 
   if (
     filteredAnnouncements.value.length > 1 &&
@@ -221,6 +258,14 @@ watch(
 onMounted(async () => {
   await fetchAnnouncements();
 });
+
+function handleScrollFinished() {
+  if (swiperInstance && typeof swiperInstance.slideNext === "function") {
+    swiperInstance.slideNext();
+  }
+
+}
+
 </script>
 
 <style scoped>
@@ -235,12 +280,12 @@ onMounted(async () => {
   height: 100%;
 }
 
-.mySwiperThumbs ::v-deep .swiper-slide {
+.mySwiperThumbs :deep(.swiper-slide) {
   opacity: 0.5;
   transition: opacity 0.3s ease-in-out;
 }
 
-.mySwiperThumbs ::v-deep .swiper-slide-thumb-active {
+.mySwiperThumbs :deep(.swiper-slide-thumb-active) {
   opacity: 1 !important;
 }
 
