@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-5xl mx-auto px-4 py-6">
-        <form @submit.prevent="onSubmit">
+        <form @submit.prevent="onSubmit" @keydown.enter="handleEnter">
             <div class="grid grid-cols-2 gap-8">
                 <!-- Left Column -->
                 <div>
@@ -101,7 +101,7 @@
                                 <input type="checkbox" :value="dept" v-model="selectedDepartments" :id="'dept-' + dept"
                                     class="ml-3 form-checkbox h-4 w-4 text-green-600" />
                                 <label :for="'dept-' + dept" class="ml-2 text-gray-900 dark:text-white">{{ dept
-                                    }}</label>
+                                }}</label>
                             </div>
                         </div>
                         <div v-if="announcementForm.errors.departments"
@@ -286,6 +286,14 @@ function parseDepartmentString(deptString) {
             }
         }
     })
+}
+
+// Note when the user pressed down the enter it will submit the form, without text in the fields
+function handleEnter(event) {
+    if (event.target.tagName !== 'TEXTAREA') {
+        event.preventDefault(); // Prevent unintended form submission inside inputs
+        onSubmit(); // Call the form submission function
+    }
 }
 
 // Watch the announcementForm.departments property to trigger parsing whenever its value changes.

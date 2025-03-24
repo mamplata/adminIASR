@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="emitSave">
+    <form @submit.prevent="emitSave" @keydown.enter="handleEnter">
         <!-- Name Field -->
         <label class="label text-gray-700 dark:text-gray-300">Name</label>
         <input v-model="deviceForm.name" type="text"
@@ -63,4 +63,12 @@ onMounted(() => {
         props.deviceForm.status = 'inactive'
     }
 })
+
+// Handle Enter key press globally within the form
+function handleEnter(event) {
+    if (event.target.tagName !== 'TEXTAREA') {
+        event.preventDefault(); // Prevent unintended line breaks
+        emitSave();
+    }
+}
 </script>
