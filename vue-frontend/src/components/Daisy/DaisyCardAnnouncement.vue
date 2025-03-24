@@ -32,7 +32,7 @@
                         '--final-transform': finalTransform
                     }">
                         <p :class="[
-                            isThumb ? 'text-xs' : 'text-white whitespace-pre-line break-words text-justify leading-relaxed'
+                            isThumb ? 'text-xs text-white' : 'text-white whitespace-pre-line break-words text-justify leading-relaxed'
                         ]" :style="{
                             fontSize: isThumb ? 'calc(0.6rem + 0.4vh)' : 'calc(0.9rem + 0.8vh)'
                         }">

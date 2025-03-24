@@ -33,7 +33,6 @@ class EntryLogController extends Controller
             'uid' => 'required|string',
             'student_id' => 'required|string',
             'time_type' => 'required|in:IN,OUT',
-            'timestamp' => 'required|date',
             'status' => 'required|in:Success,Failure',
             'failure_reason' => 'nullable|string',
         ]);
