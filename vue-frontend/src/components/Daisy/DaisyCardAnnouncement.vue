@@ -18,7 +18,7 @@
             <div class="absolute inset-0 p-2 flex flex-col">
                 <!-- Title at the top -->
                 <h3 :class="[
-                    'font-semibold text-white text-center',
+                    'uppercase font-semibold text-white text-center',
                     isThumb ? '' : 'whitespace-normal break-words'
                 ]" :style="{
                     fontSize: isThumb ? 'calc(1rem + 0.4vh)' : 'calc(1.2rem + 0.6vh)'
@@ -32,8 +32,7 @@
                         '--final-transform': finalTransform
                     }">
                         <p :class="[
-                            isThumb ? 'text-xs' : 'whitespace-normal break-words text-center',
-                            'text-white leading-relaxed'
+                            isThumb ? 'text-xs' : 'text-white whitespace-pre-line break-words text-justify leading-relaxed'
                         ]" :style="{
                             fontSize: isThumb ? 'calc(0.6rem + 0.4vh)' : 'calc(0.9rem + 0.8vh)'
                         }">
