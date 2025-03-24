@@ -4,10 +4,9 @@
         <div v-if="announcement.type === 'text'" :class="[
             'card',
             isThumb
-                ? 'border-2 border-black shadow-sm rounded-none'
-                : 'border-8 border-black shadow-md rounded-md',
-            'relative w-full h-full',
-            'sm:border-4 sm:rounded-lg'
+                ? 'shadow-sm rounded-none border-2 border-black'
+                : 'shadow-md rounded-md border-8 border-black',
+            'w-full h-full flex justify-center items-center m-0 p-0 relative'
         ]" :style="{
             backgroundImage: `url(${pncBg})`,
             backgroundSize: 'cover',

@@ -17,7 +17,7 @@
         <!-- Right Section: AnnouncementsCarousel with 8/12 width -->
         <div class="w-full lg:w-8/12 relative">
           <AnnouncementsCarousel v-model:selectedDepartment="selectedDepartment" :deviceName="deviceName"
-            :loading="daisyLoading" :key="departmentKey" />
+            :loading="daisyLoading" :key="departmentKey" @filterMatch="handleFilterMatch" />
         </div>
       </div>
 
@@ -80,14 +80,22 @@ function handleRegistered(payload) {
   isRegistered.value = true;
 }
 
+let match;
+
 function handleScannedStudent(student) {
   if (!student || !student.department) return;
   if (selectedDepartment.value !== student.department + ": " + student.program) {
     selectedDepartment.value = student.department + ": " + student.program;
     console.log(selectedDepartment.value);
+    // Only force a remount if the new filter actually yields results.
+    if (match) {
+      departmentKey.value = Date.now();
+    }
   }
-  // Always update the key to force a remount even if the department is the same.
-  departmentKey.value = Date.now();
+}
+
+function handleFilterMatch(match) {
+  match = match;
 }
 
 // This handler will receive true/false from DaisyTimeIn when it starts/finishes loading
