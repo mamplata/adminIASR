@@ -1,6 +1,6 @@
 <template>
-    <div class="max-w-5xl mx-auto px-4 py-6">
-        <form @submit.prevent="onSubmit" @keydown.enter="handleEnter">
+    <div ref="container" tabindex="0" class="max-w-5xl mx-auto px-4 py-6" @keydown.enter="handleEnter">
+        <form ref="form" @submit.prevent="onSubmit">
             <div class="grid grid-cols-2 gap-8">
                 <!-- Left Column -->
                 <div>
@@ -53,16 +53,19 @@
                         <input v-model="extraContent.title" type="text"
                             class="input input-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                             required />
-                        <div v-if="announcementForm.errors.title" class="text-sm mb-2 text-red-500 dark:text-white">
-                            {{ announcementForm.errors.title }}
+                        <div v-if="announcementForm.errors['content.title']"
+                            class="text-sm mb-2 text-red-500 dark:text-white">
+                            {{ announcementForm.errors['content.title'] }}
                         </div>
+
                         <!-- Text Announcement: Body -->
                         <label class="label text-gray-900 dark:text-white">Body</label>
                         <textarea rows="10" v-model="extraContent.body"
                             class="textarea textarea-bordered w-full mb-2 bg-white text-gray-900 border-gray-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:border-blue-400 dark:focus:ring-blue-500"
                             required></textarea>
-                        <div v-if="announcementForm.errors.body" class="text-sm mb-2 text-red-500 dark:text-white">
-                            {{ announcementForm.errors.body }}
+                        <div v-if="announcementForm.errors['content.body']"
+                            class="text-sm mb-2 text-red-500 dark:text-white">
+                            {{ announcementForm.errors['content.body'] }}
                         </div>
                     </div>
 
@@ -70,8 +73,8 @@
                         <!-- Image Announcement -->
                         <label class="label text-gray-900 dark:text-white">{{ uploadImage }}</label>
                         <div class="relative flex flex-col items-center mb-2">
-                            <input type="file" accept="image/*" @change="onImageUpload" class="hidden" id="fileInput"
-                                :required="isFileRequired" />
+                            <input name="fileInput" type="file" accept="image/*" @change="onImageUpload"
+                                class="visually-hidden" id="fileInput" :required="isFileRequired" />
                             <label for="fileInput"
                                 class="cursor-pointer px-4 py-2 w-full border border-gray-300 rounded-md text-center bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-600">
                                 {{ fileName || 'Choose File' }}
@@ -141,7 +144,7 @@
 
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
@@ -157,6 +160,16 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['cancel', 'save', 'image-upload'])
+
+// References for the container and form
+const container = ref(null)
+const form = ref(null)
+
+onMounted(() => {
+    if (container.value) {
+        container.value.focus()
+    }
+})
 
 // Array of selected department names.
 const selectedDepartments = ref([])
@@ -288,12 +301,9 @@ function parseDepartmentString(deptString) {
     })
 }
 
-// Note when the user pressed down the enter it will submit the form, without text in the fields
 function handleEnter(event) {
-    if (event.target.tagName !== 'TEXTAREA') {
-        event.preventDefault(); // Prevent unintended form submission inside inputs
-        onSubmit(); // Call the form submission function
-    }
+    // Allow Enter in a textarea (for newlines) and any other specific exceptions
+    if (event.target.tagName === 'TEXTAREA') return
 }
 
 // Watch the announcementForm.departments property to trigger parsing whenever its value changes.
@@ -303,3 +313,17 @@ watch(() => props.announcementForm.departments, (newVal) => {
     }
 })
 </script>
+
+<style scoped>
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+</style>

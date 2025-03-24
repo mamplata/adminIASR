@@ -139,6 +139,7 @@ onMounted(() => {
             nfcStatus.value = "❌ " + data.message;
             await new Promise((resolve) => setTimeout(resolve, 2000));
             modalRef2.value.closeModal();
+            window.removeEventListener("keyup", handleGlobalEnter);
             modalRef1.value.showModal();
             isModal2Open.value = false;
             registrationSuccess.value = false;
@@ -183,6 +184,7 @@ onMounted(() => {
                 isEnrolled.value = checkResponse.data.isEnrolled;
                 nfcStatus.value = checkResponse.data.message;
                 modalRef2.value.showModal();
+                window.addEventListener("keyup", handleGlobalEnter);
             } else {
                 cardExists.value = false;
                 modalRef1.value.showModal(); // Card not found modal
@@ -231,8 +233,6 @@ const processStudentData = async (studentData) => {
     const year = studentData.last_enrolled_at.match(/\d{4}/)[0].slice(2);
     semester.value = semesterNumber + year;
 
-    console.log(semester.value);
-
     // For cases where card is not pre-registered,
     // you may optionally re-check using studentID if needed.
     try {
@@ -252,17 +252,14 @@ const processStudentData = async (studentData) => {
 
     modalRef1.value.closeModal();
     modalRef2.value.showModal();
+    window.addEventListener("keyup", handleGlobalEnter);
     nfcStatus.value = "";
     nfcError.value = "";
 };
 
 // Called when the student clicks "Register" after entering their Student ID manually.
 const registerStudent = async () => {
-    if (!studentID.value) {
-        alert("Please enter a Student ID first.");
-        return;
-    }
-
+    isLoading.value = true;
     try {
         // Step 1: Check student data (handles local & external fetch automatically)
         const checkStudentResponse = await axios.get(route("student-infos.check"), {
@@ -306,13 +303,20 @@ const registerStudent = async () => {
             await processStudentData(modalStudentInfo.value);
         }
     } catch (error) {
-        console.error("An unexpected error occurred:", error);
         nfcStatus.value =
             "❌ " +
-            (error.response?.data?.error || "An unexpected error occurred.");
+            (error.response?.data?.error || error.response?.data?.message || "An unexpected error occurred.");
+    } finally {
+        isLoading.value = false; // Stop spinner regardless of outcome
     }
+
 };
 
+function handleGlobalEnter(event) {
+    if (event.key === "Enter") {
+        confirmRegistration();
+    }
+}
 
 
 // Called when the user confirms registration in the Confirmation modal.
@@ -320,6 +324,7 @@ const registerStudent = async () => {
 // and then saves the card info using useForm.
 const confirmRegistration = async () => {
     modalRef2.value.closeModal();
+    window.removeEventListener("keyup", handleGlobalEnter);
 
     let studentInfo = {
         studentID: studentID.value,
@@ -350,6 +355,7 @@ const cancelRegistration = () => {
     modalRef.value.closeModal();
     modalRef1.value.closeModal();
     modalRef2.value.closeModal();
+    window.removeEventListener("keyup", handleGlobalEnter);
     socket.emit("cancelScan"); // Tell the server to stop scanning
 };
 

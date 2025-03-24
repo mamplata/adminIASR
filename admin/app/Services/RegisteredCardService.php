@@ -21,7 +21,7 @@ class RegisteredCardService
 
         return $query->paginate(5)
             ->appends(['search' => $request->input('search')])
-            ->through(fn($card) => [
+            ->through(fn ($card) => [
                 'id'        => $card->id,
                 'studentId' => $card->studentId,
                 'uid'       => $card->uid,
