@@ -89,7 +89,6 @@ export const useAnnouncementStore = defineStore("announcement", {
             // Reset to GENERAL if the selected department is not GENERAL
             timeInStore.selectedDepartment = "GENERAL";
           }
-
           this.mainSwiper.slideNext();
         }, 3000);
       }
