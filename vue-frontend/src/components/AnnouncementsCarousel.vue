@@ -7,7 +7,7 @@
     <!-- Header -->
     <header class="w-full px-6 h-24 flex items-center relative" :style="{ backgroundColor: '#198754' }">
       <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
-      <button @click="openPortStatusModal"
+      <button @click="scannerPortStore.openPortStatusModal()"
         class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
         <i class="fas fa-info-circle text-2xl"></i>
       </button>
@@ -17,24 +17,25 @@
     <main class="w-full flex flex-col" style="height: calc(100vh - 6rem);">
       <!-- Main Slider Container -->
       <div class="main-slider-container w-full relative" style="height: calc(100% - 10rem);">
-        <div v-if="loading" class="w-full h-full flex items-center justify-center">
+        <div v-if="announcementStore.loading" class="w-full h-full flex items-center justify-center">
           <p class="text-white text-2xl text-center">Loading announcements...</p>
         </div>
-        <div v-else-if="filteredAnnouncements.length > 0" class="relative w-full h-full">
+        <div v-else-if="announcementStore.filteredAnnouncements.length > 0" class="relative w-full h-full">
           <Swiper ref="mainSwiper" :modules="[Autoplay, Thumbs, EffectFade]" effect="fade"
             :fadeEffect="{ crossFade: true }" :speed="3000" :slidesPerView="1"
-            :autoplay="{ delay: 3000, disableOnInteraction: false }" :loop="filteredAnnouncements.length > 1"
-            :thumbs="{ swiper: thumbsSwiper }" @swiper="onMainSwiper"
-            @slideChangeTransitionStart="onSlideChangeTransitionStart"
-            @slideChangeTransitionEnd="onSlideChangeTransitionEnd" class="mySwiper">
-            <SwiperSlide v-for="(announcement, index) in filteredAnnouncements" :key="announcement.id || index"
-              class="w-full h-full">
-              <DaisyCardAnnouncement :active="index === activeIndex" :announcement="announcement" :isThumb="false"
-                @scrollFinished="handleScrollFinished" @scrollNeeded="updateScrollNeeded(index, $event)"
-                class="w-full h-full" />
+            :autoplay="{ delay: 3000, disableOnInteraction: false }"
+            :loop="announcementStore.filteredAnnouncements.length > 1"
+            :thumbs="{ swiper: announcementStore.thumbsSwiper }" @swiper="announcementStore.setMainSwiper"
+            @slideChangeTransitionStart="announcementStore.onSlideChangeTransitionStart"
+            @slideChangeTransitionEnd="announcementStore.onSlideChangeTransitionEnd" class="mySwiper">
+            <SwiperSlide v-for="(announcement, index) in announcementStore.filteredAnnouncements"
+              :key="announcement.id || index" class="w-full h-full">
+              <DaisyCardAnnouncement :index="index" :active="index === announcementStore.activeIndex"
+                :announcement="announcement" :isThumb="false" @scrollFinished="announcementStore.handleScrollFinished"
+                @scrollNeeded="announcementStore.updateScrollNeeded(index, $event)" class="w-full h-full" />
             </SwiperSlide>
           </Swiper>
-          <div class="black-overlay" :style="{ opacity: overlayOpacity }"></div>
+          <div class="black-overlay" :style="{ opacity: announcementStore.overlayOpacity }"></div>
         </div>
         <div v-else class="w-full h-full flex items-center justify-center">
           <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
@@ -45,27 +46,28 @@
 
       <!-- Thumbs Slider Container -->
       <div class="thumb-slider-container w-full" style="height: 10rem;"
-        v-if="!loading && filteredAnnouncements.length > 0">
-        <Swiper :modules="[Thumbs]" :slidesPerView="filteredAnnouncements.length < 3 ? filteredAnnouncements.length : 4"
-          :centeredSlides="filteredAnnouncements.length === 1"
-          :centerInsufficientSlides="filteredAnnouncements.length < 3" watchSlidesVisibility watchSlidesProgress
-          :onSwiper="onThumbsSwiper" class="mySwiperThumbs">
-          <SwiperSlide v-for="(announcement, index) in filteredAnnouncements"
+        v-if="!announcementStore.loading && announcementStore.filteredAnnouncements.length > 0">
+        <Swiper :modules="[Thumbs]"
+          :slidesPerView="announcementStore.filteredAnnouncements.length < 3 ? announcementStore.filteredAnnouncements.length : 4"
+          :centeredSlides="announcementStore.filteredAnnouncements.length === 1"
+          :centerInsufficientSlides="announcementStore.filteredAnnouncements.length < 3" watchSlidesVisibility
+          watchSlidesProgress @swiper="announcementStore.setThumbsSwiper" class="mySwiperThumbs">
+          <SwiperSlide v-for="(announcement, index) in announcementStore.filteredAnnouncements"
             :key="'thumb-' + (announcement.id || index)" class="thumb">
-            <DaisyCardAnnouncement :announcement="announcement" :isThumb="true" />
+            <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="true" />
           </SwiperSlide>
         </Swiper>
       </div>
     </main>
 
+    <!-- Modal Components -->
     <ScannerAssignment />
-    <PortStatus v-show="showPortStatusModal" :deviceName="deviceName" @close="closePortStatusModal" />
+    <PortStatus v-if="scannerPortStore.isPortStatusModalOpen" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
-import HTTP from "@/http";
+import { onMounted, watch, ref } from "vue";
 import bgAnnouncement from "@/assets/img/bgAnnounce.png";
 import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue";
 import PortStatus from "@/components/PortStatus.vue";
@@ -75,8 +77,12 @@ import "swiper/css/thumbs";
 import "swiper/css/effect-fade";
 import { Autoplay, Thumbs, EffectFade } from "swiper/modules";
 import ScannerAssignment from "./ScannerAssignment.vue";
+import { useScannerPortStore } from "@/stores/scannerPortStore";
+import { useAnnouncementStore } from "@/stores/announcementStore";
 
-// Define the events that can be emitted to the parent.
+const scannerPortStore = useScannerPortStore();
+const announcementStore = useAnnouncementStore();
+
 const emit = defineEmits(["update:selectedDepartment", "filterMatch"]);
 
 const props = defineProps({
@@ -84,206 +90,21 @@ const props = defineProps({
   selectedDepartment: { type: String, default: "GENERAL" },
 });
 
-const announcements = ref([]);
-const loading = ref(true);
-const showPortStatusModal = ref(false);
-const thumbsSwiper = ref(null);
-const overlayOpacity = ref(1);
-const activeIndex = ref(0);
-
-// This object will store for each slide index whether the text needs scrolling.
-const scrollNeededStatus = ref({});
-
-function updateScrollNeeded(index, needed) {
-  scrollNeededStatus.value[index] = needed;
-}
-
-const filteredAnnouncements = ref([]);
-
+// On mount, fetch announcements.
 onMounted(async () => {
-  await fetchAnnouncements();
-  // On mount, default to GENERAL announcements.
-  filteredAnnouncements.value = announcements.value.filter(announcement => {
-    return announcement.departments.trim() === "GENERAL";
-  });
+  await announcementStore.fetchAnnouncements();
 });
 
-watch(() => props.selectedDepartment, (newDept, oldDept) => {
-
-  // If "GENERAL" is scanned, update the filtered list to only general announcements.
-  if (newDept.trim() === "GENERAL") {
-    filteredAnnouncements.value = announcements.value.filter(announcement =>
-      announcement.departments.trim() === "GENERAL"
-    );
-    return;
-  }
-
-
-  // Otherwise, filter for the new department.
-  const newFiltered = announcements.value.filter(announcement => {
-    const announcementDepartments = announcement.departments.trim();
-    // Split groups by semicolon.
-    const groups = announcementDepartments
-      .split(";")
-      .map(group => group.trim())
-      .filter(Boolean);
-
-    // Expecting a format like "CCS: BSIT" for the scanned department.
-    const selectedParts = newDept.split(":").map(s => s.trim());
-    if (selectedParts.length !== 2) return false;
-    const [selectedDept, selectedProgram] = selectedParts;
-
-    // Check if any group matches.
-    return groups.some(group => {
-      if (group.includes(":")) {
-        const [dept, programsStr] = group.split(":");
-        const programs = programsStr.split(",").map(p => p.trim());
-        return dept.trim() === selectedDept && programs.includes(selectedProgram);
-      }
-
-
-      // Fallback for non-colon formatted groups.
-      return group === newDept;
-    });
-  });
-
-  // Only update if there is at least one match.
-  if (newFiltered.length > 0) {
-    emit("filterMatch", true);
-    filteredAnnouncements.value = newFiltered;
-  } else {
-    emit("filterMatch", false);
-  }
-});
-
-const fetchAnnouncements = async () => {
-  try {
-    const response = await HTTP.get("/api/announcements");
-    const fetchedAnnouncements = response.data.announcements || [];
-    announcements.value = fetchedAnnouncements;
-  } catch (error) {
-    console.error("Error fetching announcements:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-function openPortStatusModal() {
-  showPortStatusModal.value = true;
-}
-
-function closePortStatusModal() {
-  showPortStatusModal.value = false;
-}
-
-let swiperInstance = null;
-
-function onMainSwiper(swiper) {
-  swiperInstance = swiper;
-
-  // Delay the check slightly to allow scrollNeededStatus to update
-  setTimeout(() => {
-    const firstAnnouncement = filteredAnnouncements.value[0];
-    const needsScroll = scrollNeededStatus.value[0];
-    if (firstAnnouncement && firstAnnouncement.type === 'text' && needsScroll) {
-      swiper.autoplay.stop();
-    }
-  }, 500); // 100ms delay (adjust as needed)
-
-  if (filteredAnnouncements.value.length === 1) {
-    setTimeout(() => {
-      swiper.autoplay.stop();
-      swiper.slideToLoop(0, 300);
-      swiper.autoplay.start();
-    }, 3000);
-  }
-}
-
-
-// Watch filteredAnnouncements to handle the case where there is only one announcement.
-watch(filteredAnnouncements, (newVal) => {
-  if (newVal.length === 1) {
-    setTimeout(() => {
-      resetDepartment();
-    }, 3000);
-  }
-});
-
-
-function onThumbsSwiper(swiper) {
-  thumbsSwiper.value = swiper;
-}
-
-function onSlideChangeTransitionStart(swiper) {
-  overlayOpacity.value = 1;
-
-  // Check if the current slide is text and needs scrolling.
-  const currentAnnouncement = filteredAnnouncements.value[activeIndex.value];
-  const needsScroll = scrollNeededStatus.value[activeIndex.value];
-
-  if (currentAnnouncement && currentAnnouncement.type === 'text' && needsScroll) {
-    swiper.autoplay.stop();
-  }
-}
-
-function onSlideChangeTransitionEnd(swiper) {
-  overlayOpacity.value = 0;
-  activeIndex.value = swiper.activeIndex;
-
-  const currentAnnouncement = filteredAnnouncements.value[activeIndex.value];
-  const needsScroll = scrollNeededStatus.value[activeIndex.value];
-
-
-  if (!(currentAnnouncement && currentAnnouncement.type === 'text' && needsScroll)) {
-    // For short text slides or non-text slides, resume autoplay.
-    swiper.autoplay.start();
-  }
-
-  if (
-    filteredAnnouncements.value.length > 1 &&
-    swiper.activeIndex === filteredAnnouncements.value.length - 1
-  ) {
-    setTimeout(() => {
-      // Stop autoplay to prevent interference
-      swiper.autoplay.stop();
-      // Use a non-zero duration for a visible transition
-      swiper.slideToLoop(0, 300);
-      // Restart autoplay if needed
-      swiper.autoplay.start();
-      resetDepartment();
-    }, 1000);
-  }
-}
-
-// Define resetDepartment to emit the event to the parent.
-function resetDepartment() {
-  console.log(true);
-  emit("update:selectedDepartment", "GENERAL");
-}
-
+// Watch for changes in selectedDepartment to filter announcements.
 watch(
-  () => props.active,
-  (newVal) => {
-    if (newVal && props.announcement.type === 'text' && scrollContent.value) {
-      // Reset scroll position to top
-      scrollContent.value.scrollTop = 0;
-      // Remove the animation and force a reflow
-      scrollContent.value.style.animation = 'none';
-      void scrollContent.value.offsetWidth; // trigger reflow
-      // Reapply the animation
-      scrollContent.value.style.animation = 'marquee 10s linear infinite';
-      marqueeAnimation.value = 'marquee 20s linear infinite';
-    }
-  }
+  () => props.selectedDepartment,
+  (newDept) => {
+    announcementStore.filterAnnouncements(newDept);
+    // Emit filterMatch event if needed:
+    emit("filterMatch", announcementStore.filteredAnnouncements.length > 0);
+  },
+  { immediate: true }
 );
-
-function handleScrollFinished() {
-  if (swiperInstance && typeof swiperInstance.slideNext === "function") {
-    swiperInstance.slideNext();
-  }
-
-}
-
 </script>
 
 <style scoped>
@@ -306,7 +127,6 @@ function handleScrollFinished() {
 .mySwiperThumbs :deep(.swiper-slide-thumb-active) {
   opacity: 1 !important;
 }
-
 
 .black-overlay {
   position: absolute;

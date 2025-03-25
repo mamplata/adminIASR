@@ -1,3 +1,4 @@
+<!-- DeviceRegistration.vue -->
 <template>
     <div class="flex items-center justify-center h-screen">
         <div class="card w-full max-w-md bg-base-200 shadow-xl">
@@ -17,37 +18,17 @@
 
 <script setup>
 import { ref } from 'vue';
-import HTTP from '@/http';
-import { initializeSocket } from '@/composables/socket';
+import { useDeviceStore } from '@/stores/deviceStore';
 
 const shortCode = ref('');
 const errorMessage = ref('');
-
-// Define an event emitter to notify the parent when registration is complete.
-const emit = defineEmits(['registered']);
+const deviceStore = useDeviceStore();
 
 async function registerDevice() {
     errorMessage.value = '';
-    try {
-        const response = await HTTP.post(
-            '/api/device/register',
-            { short_code: shortCode.value },
-            { withCredentials: true }
-        );
-        if (response.data && response.data.success) {
-            // Initialize the shared socket connection using the device fingerprint.
-            if (response.data.device_fingerprint) {
-                initializeSocket(response.data.device_fingerprint);
-            }
-            // Emit the device info to the parent component.
-            emit('registered', {
-                deviceName: response.data.device_name || '',
-                deviceFingerprint: response.data.device_fingerprint || '',
-            });
-        }
-    } catch (error) {
-        errorMessage.value =
-            error.response?.data?.message || 'An unexpected error occurred.';
+    const result = await deviceStore.registerDevice(shortCode.value);
+    if (!result.success) {
+        errorMessage.value = result.message;
     }
 }
 </script>

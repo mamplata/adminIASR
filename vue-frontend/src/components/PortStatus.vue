@@ -1,22 +1,23 @@
+<!-- PortStatus.vue -->
 <template>
     <div>
         <!-- Modal for port status only -->
         <div class="modal modal-open">
             <div class="modal-box">
                 <h3 class="font-bold text-lg">Port and Device Status</h3>
-                <p class="py-2"><strong>Device:</strong> {{ deviceName }}</p>
+                <p class="py-2"><strong>Device:</strong> {{ deviceStore.deviceName }}</p>
                 <div class="py-2">
                     <p>
                         <strong>Time In: </strong>
                         <span>
-                            <template v-if="timeInInfo">
-                                <template v-if="timeInInfo.online">
+                            <template v-if="scannerPortStore.timeInInfo">
+                                <template v-if="scannerPortStore.timeInInfo.online">
                                     <i class="fas fa-check text-green-500 mr-1"></i>
-                                    Online - Port {{ timeInInfo.portPath }}
+                                    Online - Port {{ scannerPortStore.timeInInfo.portPath }}
                                 </template>
                                 <template v-else>
                                     <i class="fas fa-times text-red-500 mr-1"></i>
-                                    Offline - Port {{ timeInInfo.portPath }}
+                                    Offline - Port {{ scannerPortStore.timeInInfo.portPath }}
                                 </template>
                             </template>
                             <template v-else>
@@ -28,14 +29,14 @@
                     <p>
                         <strong>Time Out: </strong>
                         <span>
-                            <template v-if="timeOutInfo">
-                                <template v-if="timeOutInfo.online">
+                            <template v-if="scannerPortStore.timeOutInfo">
+                                <template v-if="scannerPortStore.timeOutInfo.online">
                                     <i class="fas fa-check text-green-500 mr-1"></i>
-                                    Online - Port {{ timeOutInfo.portPath }}
+                                    Online - Port {{ scannerPortStore.timeOutInfo.portPath }}
                                 </template>
                                 <template v-else>
                                     <i class="fas fa-times text-red-500 mr-1"></i>
-                                    Offline - Port {{ timeOutInfo.portPath }}
+                                    Offline - Port {{ scannerPortStore.timeOutInfo.portPath }}
                                 </template>
                             </template>
                             <template v-else>
@@ -46,7 +47,7 @@
                     </p>
                 </div>
                 <div class="modal-action mt-4">
-                    <button @click="closeModal" class="btn">Close</button>
+                    <button @click="scannerPortStore.closePortStatusModal()" class="btn">Close</button>
                 </div>
             </div>
         </div>
@@ -54,49 +55,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { getSocket } from '@/composables/socket';
-const emit = defineEmits(['close']);
+import { onMounted } from "vue";
+import { useScannerPortStore } from "@/stores/scannerPortStore";
+import { useDeviceStore } from "@/stores/deviceStore";
 
-const timeInInfo = ref(null);
-const timeOutInfo = ref(null);
+const scannerPortStore = useScannerPortStore();
+const deviceStore = useDeviceStore();
 
-let socket = null;
-
-const props = defineProps({
-    deviceName: { type: String, required: true },
-});
-
+// Optionally initialize socket if not already done
 onMounted(() => {
-    socket = getSocket();
-    if (!socket) {
-        console.error('Socket connection is not initialized. Make sure to call initializeSocket() in a parent or registration component.');
-        return;
+    if (!scannerPortStore.socket) {
+        scannerPortStore.initializeSocket();
     }
-
-    socket.on("scannerDetected", (data) => {
-        if (data.assigned) {
-            if (data.role === "Time In") {
-                timeInInfo.value = data;
-            } else if (data.role === "Time Out") {
-                timeOutInfo.value = data;
-            }
-        }
-    });
-
-    socket.on("scannerAssigned", (data) => {
-        let updatedInfo;
-        if (data.role === "Time In") {
-            updatedInfo = { ...data, online: true, role: "Time In" };
-            timeInInfo.value = updatedInfo;
-        } else if (data.role === "Time Out") {
-            updatedInfo = { ...data, online: true, role: "Time Out" };
-            timeOutInfo.value = updatedInfo;
-        }
-    });
 });
-
-function closeModal() {
-    emit('close');
-}
 </script>

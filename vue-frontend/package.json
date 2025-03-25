@@ -12,6 +12,7 @@
     "@fontsource/nunito-sans": "^5.1.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "axios": "^1.7.9",
+    "pinia": "^3.0.1",
     "rebuild": "^0.1.2",
     "socket.io-client": "^4.8.1",
     "swiper": "^11.2.5",
