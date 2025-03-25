@@ -84,9 +84,13 @@ export const useAnnouncementStore = defineStore("announcement", {
       }, 500);
       if (this.filteredAnnouncements.length === 1) {
         setTimeout(() => {
-          swiper.autoplay.stop();
-          swiper.slideToLoop(0, 300);
-          swiper.autoplay.start();
+          const timeInStore = useTimeInStore();
+          if (timeInStore.selectedDepartment !== "GENERAL") {
+            // Reset to GENERAL if the selected department is not GENERAL
+            timeInStore.selectedDepartment = "GENERAL";
+          }
+
+          this.mainSwiper.slideNext();
         }, 3000);
       }
     },
@@ -128,7 +132,6 @@ export const useAnnouncementStore = defineStore("announcement", {
             // Check if this is the last slide
             if (this.activeIndex === this.filteredAnnouncements.length - 1) {
               const timeInStore = useTimeInStore();
-              console.log(timeInStore.selectedDepartment);
               if (timeInStore.selectedDepartment !== "GENERAL") {
                 // Reset to GENERAL if the selected department is not GENERAL
                 timeInStore.selectedDepartment = "GENERAL";
