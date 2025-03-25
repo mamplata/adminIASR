@@ -109,15 +109,10 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useTimeInStore } from '@/stores/timeInStore';
-import { useDeviceStore } from '@/stores/deviceStore';
 import ITAPLOGO from '@/assets/img/ITAPLOGO.png';
 import logoRFID from '@/assets/img/logoRFID.png';
 
 const timeInStore = useTimeInStore();
-const deviceStore = useDeviceStore();
-
-// Get the device fingerprint directly from the deviceStore.
-timeInStore.deviceFingerprint = deviceStore.deviceFingerprint;
 
 // Expose the schedule from timeInStore as a computed property.
 const todaySchedule = computed(() => timeInStore.schedule);

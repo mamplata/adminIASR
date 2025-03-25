@@ -4,10 +4,12 @@ import HTTP from "@/http";
 import { getSocket } from "@/composables/socket";
 import { watch } from "vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
+import { useDeviceStore } from "@/stores/deviceStore";
 
 export const useTimeInStore = defineStore("timeIn", {
   state: () => ({
     scannedStudent: null,
+    selectedDepartment: "GENERAL",
     schedule: [],
     scheduleError: "",
     isReadingNfc: false,
@@ -32,6 +34,10 @@ export const useTimeInStore = defineStore("timeIn", {
       // Also, initialize scannerPortStore's socket and sync state.
       const scannerPortStore = useScannerPortStore();
       scannerPortStore.initializeSocket();
+      const deviceStore = useDeviceStore();
+
+      // Get the device fingerprint directly from the deviceStore.
+      this.deviceFingerprint = deviceStore.deviceFingerprint;
 
       // Set up a watcher to sync timeInScanner from scannerPortStore.
       watch(
@@ -104,6 +110,7 @@ export const useTimeInStore = defineStore("timeIn", {
           { withCredentials: true }
         );
         studentData = response.data.student;
+        this.selectedDepartment = `${studentData.department}: ${studentData.program}`;
 
         // Log a successful entry
         try {
