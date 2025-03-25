@@ -21,7 +21,7 @@
           <p class="text-white text-2xl text-center">Loading announcements...</p>
         </div>
         <div v-else-if="announcementStore.filteredAnnouncements.length > 0" class="relative w-full h-full">
-          <Swiper ref="mainSwiper" :modules="[Autoplay, Thumbs, EffectFade]" effect="fade"
+          <Swiper :key="swiperKey" ref="mainSwiper" :modules="[Autoplay, Thumbs, EffectFade]" effect="fade"
             :fadeEffect="{ crossFade: true }" :speed="3000" :slidesPerView="1"
             :autoplay="{ delay: 3000, disableOnInteraction: false }"
             :loop="announcementStore.filteredAnnouncements.length > 1"
@@ -30,9 +30,8 @@
             @slideChangeTransitionEnd="announcementStore.onSlideChangeTransitionEnd" class="mySwiper">
             <SwiperSlide v-for="(announcement, index) in announcementStore.filteredAnnouncements"
               :key="announcement.id || index" class="w-full h-full">
-              <DaisyCardAnnouncement :index="index" :active="index === announcementStore.activeIndex"
-                :announcement="announcement" :isThumb="false" @scrollFinished="announcementStore.handleScrollFinished"
-                @scrollNeeded="announcementStore.updateScrollNeeded(index, $event)" class="w-full h-full" />
+              <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="false"
+                class="w-full h-full" />
             </SwiperSlide>
           </Swiper>
           <div class="black-overlay" :style="{ opacity: announcementStore.overlayOpacity }"></div>
@@ -79,29 +78,27 @@ import { Autoplay, Thumbs, EffectFade } from "swiper/modules";
 import ScannerAssignment from "./ScannerAssignment.vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 import { useAnnouncementStore } from "@/stores/announcementStore";
+import { useTimeInStore } from "@/stores/timeInStore";
 
 const scannerPortStore = useScannerPortStore();
 const announcementStore = useAnnouncementStore();
+const timeInStore = useTimeInStore();
 
-const emit = defineEmits(["update:selectedDepartment", "filterMatch"]);
-
-const props = defineProps({
-  deviceName: { type: String, required: true },
-  selectedDepartment: { type: String, default: "GENERAL" },
-});
-
-// On mount, fetch announcements.
+// On mount, fetch announcements if not already done
 onMounted(async () => {
-  await announcementStore.fetchAnnouncements();
+  if (announcementStore.announcements.length === 0) {
+    await announcementStore.fetchAnnouncements();
+  }
 });
 
-// Watch for changes in selectedDepartment to filter announcements.
+const swiperKey = ref(Date.now());
+
 watch(
-  () => props.selectedDepartment,
+  () => timeInStore.selectedDepartment,
   (newDept) => {
     announcementStore.filterAnnouncements(newDept);
-    // Emit filterMatch event if needed:
-    emit("filterMatch", announcementStore.filteredAnnouncements.length > 0);
+    // Update the key to force re-render of the Swiper
+    swiperKey.value = Date.now();
   },
   { immediate: true }
 );

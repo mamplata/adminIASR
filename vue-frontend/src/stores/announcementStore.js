@@ -1,6 +1,7 @@
 // src/stores/announcementStore.js
 import { defineStore } from "pinia";
 import HTTP from "@/http";
+import { useTimeInStore } from "@/stores/timeInStore";
 
 export const useAnnouncementStore = defineStore("announcement", {
   state: () => ({
@@ -8,12 +9,10 @@ export const useAnnouncementStore = defineStore("announcement", {
     filteredAnnouncements: [],
     loading: true,
     error: null,
-    // New state for swiper handling
     mainSwiper: null,
     thumbsSwiper: null,
     activeIndex: 0,
     overlayOpacity: 1,
-    // Object to store for each slide whether scrolling is needed
     scrollNeededStatus: {},
   }),
   actions: {
@@ -34,6 +33,7 @@ export const useAnnouncementStore = defineStore("announcement", {
       }
     },
     filterAnnouncements(selectedDepartment) {
+      console.log("Selected department:", selectedDepartment);
       if (selectedDepartment.trim() === "GENERAL") {
         this.filteredAnnouncements = this.announcements.filter(
           (announcement) => announcement.departments.trim() === "GENERAL"
@@ -93,12 +93,21 @@ export const useAnnouncementStore = defineStore("announcement", {
     setThumbsSwiper(swiper) {
       this.thumbsSwiper = swiper;
     },
-    onSlideChangeTransitionStart() {
+    onSlideChangeTransitionStart(swiper) {
       this.overlayOpacity = 1;
+      const currentAnnouncement = this.filteredAnnouncements[this.activeIndex];
+      const needsScroll = this.scrollNeededStatus[this.activeIndex];
+      if (
+        currentAnnouncement &&
+        currentAnnouncement.type === "text" &&
+        needsScroll
+      ) {
+        swiper.autoplay.stop();
+      }
     },
     onSlideChangeTransitionEnd(swiper) {
       this.overlayOpacity = 0;
-      this.activeIndex = swiper.activeIndex;
+      this.activeIndex = swiper.realIndex;
       const currentAnnouncement = this.filteredAnnouncements[this.activeIndex];
       const needsScroll = this.scrollNeededStatus[this.activeIndex];
 
@@ -116,22 +125,18 @@ export const useAnnouncementStore = defineStore("announcement", {
             this.mainSwiper &&
             typeof this.mainSwiper.slideNext === "function"
           ) {
-            this.mainSwiper.slideNext();
+            // Check if this is the last slide
+            if (this.activeIndex === this.filteredAnnouncements.length - 1) {
+              const timeInStore = useTimeInStore();
+              console.log(timeInStore.selectedDepartment);
+              if (timeInStore.selectedDepartment !== "GENERAL") {
+                // Reset to GENERAL if the selected department is not GENERAL
+                timeInStore.selectedDepartment = "GENERAL";
+              }
+              this.mainSwiper.slideNext();
+            }
           }
         }, 3000); // adjust delay as needed
-      }
-
-      // Check if at the last slide and reset department.
-      if (
-        this.filteredAnnouncements.length > 1 &&
-        swiper.activeIndex === this.filteredAnnouncements.length - 1
-      ) {
-        setTimeout(() => {
-          swiper.autoplay.stop();
-          swiper.slideToLoop(0, 300);
-          swiper.autoplay.start();
-          this.resetDepartment();
-        }, 1000);
       }
     },
 
@@ -142,17 +147,7 @@ export const useAnnouncementStore = defineStore("announcement", {
       );
     },
     handleScrollFinished() {
-      const currentIndex = this.activeIndex;
-      const needsScroll = this.scrollNeededStatus[currentIndex];
-      if (needsScroll) {
-        // If the slide still needs to scroll, wait a bit more before proceeding.
-        setTimeout(() => {
-          this.handleScrollFinished();
-        }, 500); // adjust delay as needed
-      } else if (
-        this.mainSwiper &&
-        typeof this.mainSwiper.slideNext === "function"
-      ) {
+      if (this.mainSwiper && typeof this.mainSwiper.slideNext === "function") {
         this.mainSwiper.slideNext();
       }
     },
