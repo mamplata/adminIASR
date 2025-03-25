@@ -1,36 +1,36 @@
 <template>
     <dialog ref="modal" class="modal">
+        <!-- Modal box container -->
         <div class="modal-box bg-white dark:bg-gray-800 dark:text-white">
-            <!-- Card for text announcement -->
-            <div v-if="announcement.type === 'text'" class="card shadow-md mb-4 rounded-md"
-                :style="{ backgroundImage: 'url(' + pncBg + ')', backgroundSize: 'cover', position: 'relative' }">
-                <!-- Logo in the top-right corner -->
-                <img :src="pncLogo" alt="PNC Logo" class="absolute top-2 right-2 w-6 h-6" />
 
-                <!-- Flex container with overflow handling -->
-                <div>
-                    <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
+            <!-- 1) Text Announcement -->
+            <div v-if="announcement.type === 'text'" class="relative card">
+                <!-- The background image is now a regular <img> -->
+                <img :src="pncBg" class="w-full object-contain" alt="Announcement Template" />
+
+                <!-- Overlaid text content (absolute positioning) -->
+                <div class="absolute top-0 left-0 w-full p-4">
+                    <div class="card-header border-b border-gray-300 dark:border-gray-600">
                         <h3
-                            class="uppercase font-semibold text-white whitespace-normal break-words text-center text-2xl">
+                            class="uppercase font-semibold text-black whitespace-normal break-words text-center text-2xl">
                             {{ announcement.content.title }}
                         </h3>
-
                     </div>
-                    <div class="card-body m-5 px-4 py-2">
-                        <p class="text-white whitespace-pre-line break-words text-justify">
+                    <div class="card-body">
+                        <p class="text-black whitespace-pre-line break-words text-justify">
                             {{ announcement.content.body }}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Card for image announcement -->
+            <!-- 2) Image Announcement -->
             <div v-else-if="announcement.type === 'image'" class="card shadow-md mb-4">
                 <img :src="announcement.content.file_path" :alt="announcement.content.file_name"
                     class="rounded-md w-full object-cover" />
             </div>
 
-            <!-- Fallback card -->
+            <!-- 3) Fallback Card -->
             <div v-else class="card shadow-md mb-4">
                 <div class="card-body px-4 py-2">
                     <p class="text-gray-600 dark:text-gray-400">
@@ -45,25 +45,25 @@
             </div>
         </div>
     </dialog>
-
 </template>
 
 <script>
-import pncBg from '../../../assets/img/pnc-bg.jpg';
+import pncBg from '../../../assets/img/pncAnnouncement.png';
 import pncLogo from '../../../assets/img/pnc-logo.png';
 
 export default {
-    data() {
-        return {
-            pncBg,
-            pncLogo,
-        }
-    },
+    name: 'AnnouncementModal',
     props: {
         announcement: {
             type: Object,
             required: true
         }
+    },
+    data() {
+        return {
+            pncBg,
+            pncLogo,
+        };
     },
     mounted() {
         // Automatically show the modal when the component mounts
@@ -79,27 +79,42 @@ export default {
 </script>
 
 <style scoped>
+/* Dark backdrop when modal is open */
 .modal::backdrop {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.card-body {
-    height: auto;
-    /* Let the body grow based on content */
-    padding: 1rem;
-    /* Optionally adjust padding if needed */
+/* Let the modal expand up to 80% of the viewport height, scrolling if needed */
+.modal-box {
+    max-width: 40rem !important;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
+/* Positioning for the card, if needed */
+.card {
+    position: relative;
+}
+
+/* You can adjust margins/padding as desired */
+.card-header {
+    margin-top: 0;
+    /* or 50px, if you prefer spacing */
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+/* Ensure text wraps properly */
 .text-wrap {
     white-space: normal;
-    /* Allow text to wrap normally */
     overflow-wrap: break-word;
-    /* Break long words if needed */
     word-wrap: break-word;
-    /* Fallback for older browsers */
 }
 
-.modal-box {
-    max-width: 52rem !important;
+/* Modal action alignment */
+.modal-action {
+    margin: 0;
 }
 </style>

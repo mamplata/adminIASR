@@ -15,7 +15,7 @@
             <div class="absolute inset-0 p-2 flex flex-col">
                 <!-- Title at the top -->
                 <h3 :class="[
-                    'uppercase font-semibold text-white text-center',
+                    'uppercase font-semibold text-black text-center',
                     isThumb ? '' : 'whitespace-normal break-words'
                 ]" :style="{ fontSize: isThumb ? 'calc(1rem + 0.4vh)' : 'calc(1.2rem + 0.6vh)' }">
                     {{ announcement.content.title }}
@@ -27,7 +27,7 @@
                         '--scroll-distance': scrollDistance + 'px'
                     }">
                         <p :class="[
-                            isThumb ? 'text-xs text-white' : 'text-white whitespace-pre-line break-words text-justify leading-relaxed'
+                            isThumb ? 'text-xs text-black' : 'text-black whitespace-pre-line break-words text-justify leading-relaxed'
                         ]" :style="{ fontSize: isThumb ? 'calc(0.6rem + 0.4vh)' : 'calc(0.9rem + 0.8vh)' }">
                             {{ announcement.content.body }}
                         </p>
@@ -51,7 +51,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, onBeforeUnmount } from "vue";
 import { useAnnouncementStore } from "@/stores/announcementStore";
-import pncBg from "../../assets/img/pnc-bg.jpg";
+import pncBg from "../../assets/img/pncAnnouncement.png";
 import pncLogo from "../../assets/img/pnc-logo-1.png";
 const apiUrl = import.meta.env.VITE_API_URL;
 
