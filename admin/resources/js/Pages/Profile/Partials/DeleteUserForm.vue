@@ -80,7 +80,7 @@ const closeModal = () => {
 
                     <InputError :message="form.errors.password" class="mt-2" />
                     <!-- Display the error message if it exists -->
-                    <div v-if="deleteError" class="mt-4 text-red-600 dark:text-white">
+                    <div v-if="deleteError" class="mt-4 text-red-600 dark:text-red-500">
                         {{ deleteError }}
                     </div>
                 </div>

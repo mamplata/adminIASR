@@ -8,7 +8,7 @@
                 <img :src="pncLogo" alt="PNC Logo" class="absolute top-2 right-2 w-6 h-6" />
 
                 <!-- Flex container with overflow handling -->
-                <div class="">
+                <div>
                     <div class="m-5 card-header px-4 py-2 border-b border-gray-300 dark:border-gray-600">
                         <h3
                             class="uppercase font-semibold text-white whitespace-normal break-words text-center text-2xl">
