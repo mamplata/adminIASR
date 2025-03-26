@@ -13,11 +13,11 @@
                     <div class="card-header">
                         <h3
                             class="uppercase font-semibold text-white whitespace-normal break-words text-center text-2xl title">
-                            {{ announcement.content.title }}
+                            {{ truncatedTitle }}
                         </h3>
                     </div>
-                    <div class="card-body mt-4">
-                        <p class="text-black font-black text-xl whitespace-pre-line break-words text-justify px-8 ">
+                    <div class="card-body mt-10">
+                        <p class="text-black font-black text-xl whitespace-pre-line break-words text-justify px-10 ">
                             {{ announcement.content.body }}
                         </p>
                     </div>
@@ -74,13 +74,19 @@ export default {
             this.$refs.modal.close();
             this.$emit('close');
         }
+    },
+    computed: {
+        truncatedTitle() {
+            const title = this.announcement.content.title || "";
+            return title.length > 39 ? title.substring(0, 36) + "..." : title;
+        }
     }
 };
 </script>
 
 <style scoped>
 .title {
-    margin-top: 100px;
+    margin-top: 138px;
 }
 
 /* Dark backdrop when modal is open */
@@ -88,14 +94,12 @@ export default {
     background: rgba(0, 0, 0, 0.5);
 }
 
-/* Let the modal expand up to 80% of the viewport height, scrolling if needed */
 .modal-box {
-    max-width: 40rem !important;
+    max-width: 50rem !important;
     max-height: 80vh;
     overflow-y: auto;
 }
 
-/* Positioning for the card, if needed */
 .card {
     position: relative;
 }
@@ -106,7 +110,6 @@ export default {
     padding: 0 !important;
 }
 
-/* Ensure text wraps properly */
 .text-wrap {
     white-space: normal;
     overflow-wrap: break-word;
