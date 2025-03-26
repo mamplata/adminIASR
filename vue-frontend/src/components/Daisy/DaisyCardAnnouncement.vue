@@ -56,7 +56,7 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, onBeforeUnmount, watch } from "vue";
 import { useAnnouncementStore } from "@/stores/announcementStore";
-import pncBg from "../../assets/img/pnc-bg.jpg";
+import pncBg from "../../assets/img/pncAnnouncement.png";
 import pncLogo from "../../assets/img/pnc-logo-1.png";
 const apiUrl = import.meta.env.VITE_API_URL;
 
