@@ -84,7 +84,6 @@ function checkOverflow() {
     if (scrollContainer.value && scrollContent.value) {
         const containerHeight = getContainerHeight();
         const contentHeight = scrollContent.value.scrollHeight;
-        console.log(`Slide ${props.index}: containerHeight=${containerHeight}, contentHeight=${contentHeight}`);
         needsMarquee.value = contentHeight > containerHeight;
         announcementStore.updateScrollNeeded(props.index, needsMarquee.value);
     }

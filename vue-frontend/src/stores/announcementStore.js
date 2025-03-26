@@ -66,7 +66,7 @@ export const useAnnouncementStore = defineStore("announcement", {
       this.referenceHeight = 0; // Reset so the new slide can compute its own height
     },
     nextSlide() {
-      console.log(this.scrollNeededStatus);
+      // Check if there are more slides
       if (this.activeIndex < this.filteredAnnouncements.length - 1) {
         this.activeIndex++;
       } else {
