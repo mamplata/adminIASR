@@ -1,11 +1,7 @@
 <template>
-  <div class="w-full relative min-h-screen" :style="{
-    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.1)), url(${bgAnnouncement})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center'
-  }">
+  <div class="w-full relative min-h-screen overflow-hidden" :style="carouselStyle">
     <!-- Header -->
-    <header class="w-full px-6 h-24 flex items-center relative" :style="{ backgroundColor: '#198754' }">
+    <header class="w-full px-6 h-24 flex items-center relative" style="background-color: #198754">
       <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
       <button @click="scannerPortStore.openPortStatusModal()"
         class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
@@ -13,49 +9,38 @@
       </button>
     </header>
 
-    <!-- Main Content: Slider and Thumbnails -->
-    <main class="w-full flex flex-col" style="height: calc(100vh - 6rem);">
-      <!-- Main Slider Container -->
-      <div class="main-slider-container w-full relative" style="height: calc(100% - 10rem);">
-        <div v-if="announcementStore.loading" class="w-full h-full flex items-center justify-center">
-          <p class="text-white text-2xl text-center">Loading announcements...</p>
+    <!-- Main Content: Carousel and Thumbnails -->
+    <main class="w-full flex flex-col relative" :style="{ height: `calc(100vh - 6rem)` }">
+      <!-- Global Black Overlay -->
+      <div class="absolute inset-0 bg-black opacity-40 z-10 pointer-events-none"></div>
+
+      <!-- Carousel -->
+      <div v-if="announcementStore.loading" class="w-full flex-1 flex items-center justify-center relative z-20">
+        <p class="text-white text-2xl text-center">Loading announcements...</p>
+      </div>
+      <div v-else-if="announcementStore.filteredAnnouncements.length > 0" class="relative flex-1 z-20">
+        <div v-for="(announcement, index) in announcementStore.filteredAnnouncements" :key="announcement.id || index"
+          class="carousel-item relative w-full h-full"
+          :class="{ active: index === announcementStore.activeIndex, inactive: index !== announcementStore.activeIndex }">
+          <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="false" class="w-full h-full" />
         </div>
-        <div v-else-if="announcementStore.filteredAnnouncements.length > 0" class="relative w-full h-full">
-          <Swiper :key="swiperKey" ref="mainSwiper" :modules="[Autoplay, Thumbs, EffectFade]" effect="fade"
-            :fadeEffect="{ crossFade: true }" :speed="3000" :slidesPerView="1"
-            :autoplay="{ delay: 3000, disableOnInteraction: false }"
-            :loop="announcementStore.filteredAnnouncements.length > 1"
-            :thumbs="{ swiper: announcementStore.thumbsSwiper }" @swiper="announcementStore.setMainSwiper"
-            @slideChangeTransitionStart="announcementStore.onSlideChangeTransitionStart"
-            @slideChangeTransitionEnd="announcementStore.onSlideChangeTransitionEnd" class="mySwiper">
-            <SwiperSlide v-for="(announcement, index) in announcementStore.filteredAnnouncements"
-              :key="announcement.id || index" class="w-full h-full">
-              <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="false"
-                class="w-full h-full" />
-            </SwiperSlide>
-          </Swiper>
-          <div class="black-overlay" :style="{ opacity: announcementStore.overlayOpacity }"></div>
-        </div>
-        <div v-else class="w-full h-full flex items-center justify-center">
-          <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
-            <p class="text-gray-800 text-2xl text-center">No Announcements Available</p>
-          </div>
+      </div>
+      <div v-else class="w-full flex-1 flex items-center justify-center relative z-20">
+        <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
+          <p class="text-gray-800 text-2xl text-center">No Announcements Available</p>
         </div>
       </div>
 
-      <!-- Thumbs Slider Container -->
-      <div class="thumb-slider-container w-full" style="height: 10rem;"
-        v-if="!announcementStore.loading && announcementStore.filteredAnnouncements.length > 0">
-        <Swiper :modules="[Thumbs]"
-          :slidesPerView="announcementStore.filteredAnnouncements.length < 3 ? announcementStore.filteredAnnouncements.length : 4"
-          :centeredSlides="announcementStore.filteredAnnouncements.length === 1"
-          :centerInsufficientSlides="announcementStore.filteredAnnouncements.length < 3" watchSlidesVisibility
-          watchSlidesProgress @swiper="announcementStore.setThumbsSwiper" class="mySwiperThumbs">
-          <SwiperSlide v-for="(announcement, index) in announcementStore.filteredAnnouncements"
-            :key="'thumb-' + (announcement.id || index)" class="thumb">
-            <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="true" />
-          </SwiperSlide>
-        </Swiper>
+      <!-- Thumbnails Strip -->
+      <div v-if="!announcementStore.loading && announcementStore.filteredAnnouncements.length > 0"
+        class="thumbs mt-4 flex relative z-20">
+        <div v-for="(announcement, index) in announcementStore.filteredAnnouncements"
+          :key="'thumb-' + (announcement.id || index)" class="flex-1 cursor-pointer border-2" :class="{
+            'border-blue-500': index === announcementStore.activeIndex,
+            'border-gray-300': index !== announcementStore.activeIndex
+          }" @click="handleThumbnailClick(index)">
+          <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="true" thumbnailHeight="8rem" />
+        </div>
       </div>
     </main>
 
@@ -66,15 +51,10 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from "vue";
+import { onMounted, onBeforeUnmount, watch, computed } from "vue";
 import bgAnnouncement from "@/assets/img/bgAnnounce.png";
 import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue";
 import PortStatus from "@/components/PortStatus.vue";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import "swiper/css";
-import "swiper/css/thumbs";
-import "swiper/css/effect-fade";
-import { Autoplay, Thumbs, EffectFade } from "swiper/modules";
 import ScannerAssignment from "./ScannerAssignment.vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 import { useAnnouncementStore } from "@/stores/announcementStore";
@@ -84,55 +64,114 @@ const scannerPortStore = useScannerPortStore();
 const announcementStore = useAnnouncementStore();
 const timeInStore = useTimeInStore();
 
-// On mount, fetch announcements if not already done
+const carouselStyle = computed(() => ({
+  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.1)), url(${bgAnnouncement})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center"
+}));
+
+// Autoplay using centralized nextSlide from the store.
+let autoplayInterval = null;
+function startAutoplay() {
+  autoplayInterval = setInterval(() => {
+    const current = announcementStore.filteredAnnouncements[announcementStore.activeIndex];
+    const needsScroll = announcementStore.scrollNeededStatus[announcementStore.activeIndex];
+    // If it's a text announcement with scrolling, let the component's marquee finish.
+    if (current && current.type === "text" && needsScroll) {
+      // Do nothing; DaisyCardAnnouncement should trigger handleScrollFinished().
+    } else {
+      announcementStore.nextSlide();
+    }
+  }, 3000);
+}
+
+function stopAutoplay() {
+  if (autoplayInterval) clearInterval(autoplayInterval);
+}
+
 onMounted(async () => {
   if (announcementStore.announcements.length === 0) {
     await announcementStore.fetchAnnouncements();
   }
+  startAutoplay();
 });
 
-const swiperKey = ref(Date.now());
+onBeforeUnmount(() => {
+  stopAutoplay();
+});
 
+// When the department filter changes, reset announcements and active index.
 watch(
   () => timeInStore.selectedDepartment,
-  (newDept) => {
-    announcementStore.filterAnnouncements(newDept);
-    // Update the key to force re-render of the Swiper
-    swiperKey.value = Date.now();
+  async (newDept) => {
+    // First fetch the latest announcements from the server
+    await announcementStore.fetchAnnouncements();
+    // Then reset the active index (the fetch already filters based on newDept)
+    announcementStore.setActiveIndex(0);
   },
   { immediate: true }
 );
+
+import { nextTick } from "vue";
+
+function handleThumbnailClick(index) {
+  stopAutoplay(); // Stop the autoplay timer
+  announcementStore.setActiveIndex(index); // Change slide
+  nextTick(() => {
+    // Check if the current slide is text and needs scrolling
+    const current = announcementStore.filteredAnnouncements[announcementStore.activeIndex];
+    const needsScroll = announcementStore.scrollNeededStatus[announcementStore.activeIndex];
+    if (current && current.type === "text" && needsScroll) {
+      // Let the component's marquee finish (it will call handleScrollFinished)
+      // Do not restart autoplay here.
+    } else {
+      // If no marquee is needed, restart autoplay after a delay.
+      setTimeout(() => {
+        startAutoplay();
+      }, 5000);
+    }
+  });
+}
+
 </script>
 
 <style scoped>
-.mySwiper {
-  width: 100%;
-  height: 100%;
-  position: relative;
+.carousel {
+  height: calc(100% - 10rem);
+  margin: 0;
+  padding: 0;
 }
 
-.mySwiperThumbs {
-  width: 100%;
-  height: 100%;
+/* Slow fade transition for carousel items */
+.carousel-item {
+  transition: opacity 3s ease-in-out;
+  margin: 0;
+  padding: 0;
 }
 
-.mySwiperThumbs :deep(.swiper-slide) {
-  opacity: 0.5;
-  transition: opacity 0.3s ease-in-out;
-}
-
-.mySwiperThumbs :deep(.swiper-slide-thumb-active) {
-  opacity: 1 !important;
-}
-
-.black-overlay {
+.carousel-item.inactive {
+  opacity: 0;
+  pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  pointer-events: none;
-  transition: opacity 4s ease-in-out;
+}
+
+.carousel-item.active {
+  opacity: 1;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove margin/padding from thumbnails container */
+.thumbs {
+  margin: 0;
+  padding: 0;
+}
+
+.thumbs>div {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 </style>
