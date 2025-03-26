@@ -238,8 +238,10 @@ function getProgramOptions(dept) {
 }
 
 function onCancel() {
-    selectedDepartments.value = []
-    emit('cancel')
+    props.announcementForm.errors = {}; // Reset errors
+    selectedDepartments.value = []; // Reset selected departments
+    selectedDepartmentPrograms.value = {}; // Reset selected programs
+    emit('cancel');
 }
 
 function onSubmit() {
