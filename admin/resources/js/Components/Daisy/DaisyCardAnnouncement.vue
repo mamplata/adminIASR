@@ -10,14 +10,14 @@
 
                 <!-- Overlaid text content (absolute positioning) -->
                 <div class="absolute top-0 left-0 w-full p-4">
-                    <div class="card-header border-b border-gray-300 dark:border-gray-600">
+                    <div class="card-header">
                         <h3
-                            class="uppercase font-semibold text-black whitespace-normal break-words text-center text-2xl">
+                            class="uppercase font-semibold text-white whitespace-normal break-words text-center text-2xl title">
                             {{ announcement.content.title }}
                         </h3>
                     </div>
-                    <div class="card-body">
-                        <p class="text-black whitespace-pre-line break-words text-justify">
+                    <div class="card-body mt-4">
+                        <p class="text-black font-black text-xl whitespace-pre-line break-words text-justify px-8 ">
                             {{ announcement.content.body }}
                         </p>
                     </div>
@@ -41,7 +41,7 @@
 
             <!-- Modal action with button right-aligned -->
             <div class="modal-action flex justify-end">
-                <button @click="closeCard" class="btn btn-soft">Close</button>
+                <button @click="closeCard" class="btn btn-soft mt-6">Close</button>
             </div>
         </div>
     </dialog>
@@ -79,6 +79,10 @@ export default {
 </script>
 
 <style scoped>
+.title {
+    margin-top: 100px;
+}
+
 /* Dark backdrop when modal is open */
 .modal::backdrop {
     background: rgba(0, 0, 0, 0.5);
@@ -96,14 +100,10 @@ export default {
     position: relative;
 }
 
-/* You can adjust margins/padding as desired */
-.card-header {
-    margin-top: 0;
-    /* or 50px, if you prefer spacing */
-}
-
 .card-body {
-    padding: 1rem;
+    max-height: 115px;
+    overflow-y: auto;
+    padding: 0 !important;
 }
 
 /* Ensure text wraps properly */
