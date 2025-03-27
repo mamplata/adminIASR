@@ -11,11 +11,11 @@
       <!-- Main page view: display full layout if device is registered -->
       <div v-if="deviceStore.isRegistered" class="flex flex-col lg:flex-row h-screen w-full relative">
         <!-- Left Section: DaisyTimeIn with 4/12 width -->
-        <div class="w-full lg:w-4/12">
+        <div class="w-full lg:w-5/12">
           <DaisyTimeIn />
         </div>
         <!-- Right Section: AnnouncementsCarousel with 8/12 width -->
-        <div class="w-full lg:w-8/12 relative">
+        <div class="w-full lg:w-7/12 relative">
           <AnnouncementsCarousel />
         </div>
       </div>
@@ -34,12 +34,13 @@ import { useDeviceStore } from '@/stores/deviceStore';
 import AnnouncementsCarousel from "@/components/AnnouncementsCarousel.vue";
 import DaisyTimeIn from "@/components/DaisyTimeIn.vue";
 import DeviceRegistration from "@/components/DeviceRegistration.vue";
+import { timeOutScanner } from '@/composables/timeOutScanner';
 
 const deviceStore = useDeviceStore();
 
 onMounted(() => {
   deviceStore.checkRegistration();
+  // Initialize the Time Out scanner.
+  timeOutScanner();
 });
-
-
 </script>

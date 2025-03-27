@@ -30,7 +30,7 @@
                                     <p class="text-lg">You do not have permission to access this school.</p>
                                 </div>
                             </div>
-                            <div v-if="timeInStore.nfcError === 'Card is not activated'"
+                            <div v-else-if="timeInStore.nfcError === 'Card is not activated'"
                                 class="card card-side bg-warning text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-56">
                                 <figure class="z-10 flex-shrink-0 px-4">
                                     <i class="fas fa-info-circle ml-2 text-5xl"></i>
@@ -43,47 +43,66 @@
                                     </p>
                                 </div>
                             </div>
-                        </template>
-                        <template v-else>
-                            <!-- Student Card Display -->
-                            <div
-                                class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d flex flex-col md:flex-row">
-                                <figure class="z-10">
-                                    <img v-if="timeInStore.scannedStudent.image" :src="timeInStore.scannedStudent.image"
-                                        alt="Student Photo" class="w-48 md:w-48 object-cover" />
+                            <div v-else
+                                class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center h-56">
+                                <figure class="z-10 flex-shrink-0 px-4">
+                                    <i class="fas fa-exclamation-triangle ml-2 text-4xl"></i>
                                 </figure>
-                                <div class="card-body z-10">
-                                    <h2 class="card-title">{{ timeInStore.scannedStudent.fName }}
-                                        {{ timeInStore.scannedStudent.lName }}</h2>
-                                    <p class="text-sm">Program: {{ timeInStore.scannedStudent.program }}</p>
-                                    <p class="text-sm">Department: {{ timeInStore.scannedStudent.department }}</p>
-                                    <p class="text-sm">Year Level: {{ timeInStore.scannedStudent.yearLevel }}</p>
-                                    <p class="text-sm">Last Enrolled: {{ timeInStore.scannedStudent.last_enrolled_at }}
-                                    </p>
+                                <div class="card-body">
+                                    <h2 class="card-title text-2xl">Error</h2>
+                                    <p class="text-lg">Error, please try again</p>
                                 </div>
                             </div>
-
-                            <!-- Weekly Schedule Card -->
+                        </template>
+                        <template v-else>
                             <div
-                                class="card p-6 bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-3xl card-3d mt-2">
-                                <div class="card-body">
-                                    <span class="badge badge-xs badge-primary">Today</span>
-                                    <div class="flex justify-between">
-                                        <h2 class="text-3xl font-bold">Schedule</h2>
-                                        <span class="text-xl">
+                                class="bg-gradient-to-l from-slate-300 to-slate-100 text-slate-600 border border-slate-300 max-w-3xl mx-auto rounded-lg overflow-hidden shadow-2xl transform transition">
+                                <!-- Header Section with Solid Background Color #198754 -->
+                                <div class="bg-[#198754] p-6">
+                                    <div class="flex flex-col md:flex-row items-center">
+                                        <!-- Student Image -->
+                                        <div class="flex-shrink-0">
+                                            <img v-if="timeInStore.scannedStudent.image"
+                                                :src="timeInStore.scannedStudent.image" alt="Student Photo"
+                                                class="w-24 h-24 md:w-32 md:h-32 object-cover rounded-full border-4 border-white" />
+                                        </div>
+                                        <!-- Student Details -->
+                                        <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left text-white">
+                                            <h2 class="text-2xl font-bold">
+                                                {{ timeInStore.scannedStudent.fName }}
+                                                {{ timeInStore.scannedStudent.lName }}
+                                            </h2>
+                                            <p class="text-sm">Program: {{ timeInStore.scannedStudent.program }}</p>
+                                            <p class="text-sm">Department: {{ timeInStore.scannedStudent.department }}
+                                            </p>
+                                            <p class="text-sm">Year Level: {{ timeInStore.scannedStudent.yearLevel }}
+                                            </p>
+                                            <p class="text-sm">Last Enrolled:
+                                                {{ timeInStore.scannedStudent.last_enrolled_at }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Schedule Section -->
+                                <div class="bg-white p-6">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="badge badge-xs badge-primary">Today</span>
+                                        <span class="text-lg text-gray-700">
                                             {{ new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) }}
                                         </span>
                                     </div>
-                                    <ul class="mt-6 flex flex-col gap-2 text-xs" v-if="todaySchedule.length">
-                                        <li v-for="item in todaySchedule" :key="item.id" class="flex items-center">
-                                            <i class="fas fa-check-circle text-green-500 me-2"></i>
+                                    <h3 class="text-2xl font-semibold text-gray-800 mb-3">Schedule</h3>
+                                    <ul class="space-y-2" v-if="todaySchedule.length">
+                                        <li v-for="item in todaySchedule" :key="item.id"
+                                            class="flex items-center text-sm text-gray-700">
+                                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
                                             <span>
                                                 {{ item.courseCode }}: {{ item.courseDescription }} | {{ item.time }} |
                                                 {{ item.room }} | Section {{ item.section }}
                                             </span>
                                         </li>
                                     </ul>
-                                    <p v-else class="mt-6 text-center text-lg">{{ timeInStore.scheduleError }}</p>
+                                    <p v-else class="text-center text-gray-600">{{ timeInStore.scheduleError }}</p>
                                 </div>
                             </div>
                         </template>

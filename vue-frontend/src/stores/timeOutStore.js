@@ -1,4 +1,3 @@
-// src/stores/timeInStore.js
 import { defineStore } from "pinia";
 import HTTP from "@/http";
 import { getSocket } from "@/composables/socket";
@@ -6,21 +5,18 @@ import { watch } from "vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 import { useDeviceStore } from "@/stores/deviceStore";
 
-export const useTimeInStore = defineStore("timeIn", {
+export const useTimeOutStore = defineStore("timeOut", {
   state: () => ({
+    // Only keep the data needed for scanning and logging.
     scannedStudent: null,
-    selectedDepartment: "GENERAL",
-    schedule: [],
-    scheduleError: "",
     isReadingNfc: false,
     isLoading: false,
     nfcData: null,
     nfcError: "",
-    timeInScanner: null,
+    timeOutScanner: null,
     scannerStatusLoading: true,
     socketConnected: false,
     socket: null,
-    // It is useful to have the deviceFingerprint available if needed for API calls.
     deviceFingerprint: "",
   }),
   actions: {
@@ -31,21 +27,19 @@ export const useTimeInStore = defineStore("timeIn", {
         return;
       }
       this.setupSocketListeners();
-      // Also, initialize scannerPortStore's socket and sync state.
+
+      // Initialize the scanner port store and device store.
       const scannerPortStore = useScannerPortStore();
       scannerPortStore.initializeSocket();
       const deviceStore = useDeviceStore();
-
-      // Get the device fingerprint directly from the deviceStore.
       this.deviceFingerprint = deviceStore.deviceFingerprint;
 
-      // Set up a watcher to sync timeInScanner from scannerPortStore.
+      // Watch for changes in the Time Out scanner status.
       watch(
-        () => scannerPortStore.timeInInfo,
+        () => scannerPortStore.timeOutInfo,
         (newVal) => {
-          this.timeInScanner = newVal;
-          this.scannerStatusLoading = false; // assignment means loaded
-          // If a Time In scanner is assigned and online, trigger NFC reading.
+          this.timeOutScanner = newVal;
+          this.scannerStatusLoading = false;
           if (newVal && newVal.online) {
             this.readNfcCard();
           }
@@ -67,12 +61,11 @@ export const useTimeInStore = defineStore("timeIn", {
       });
 
       this.socket.on("readFailed", (data) => {
-        console.error("❌ NFC Read Failed:", data);
+        console.error("NFC Read Failed:", data);
         this.nfcError = data;
-
         this.isReadingNfc = false;
         this.scannedStudent = null;
-        this.schedule = [];
+        // Retry reading after a delay.
         setTimeout(() => {
           this.nfcError = "";
           this.readNfcCard();
@@ -80,23 +73,26 @@ export const useTimeInStore = defineStore("timeIn", {
       });
     },
     readNfcCard() {
-      // Wait until scanner status is loaded and socket is connected
+      // Wait until the scanner status is loaded and socket is connected.
       if (this.scannerStatusLoading || !this.socketConnected) {
         setTimeout(() => this.readNfcCard(), 500);
         return;
       }
-      // Ensure scanning is enabled
-      if (!(this.timeInScanner && this.timeInScanner.online)) {
-        console.log("Time In scanner is not available. Scanning disabled.");
+      // Ensure the Time Out scanner is available and online.
+      if (!(this.timeOutScanner && this.timeOutScanner.online)) {
+        console.log("Time Out scanner is not available. Scanning disabled.");
         return;
+      } else {
+        console.log("dasda");
       }
+      // Prevent multiple read attempts.
       if (this.isReadingNfc) return;
       this.isReadingNfc = true;
       this.nfcData = null;
-      console.log("📡 Requesting to read NFC card...");
+      console.log("Requesting to read NFC card for Time Out...");
       if (this.socket) {
+        // Only emit the readCard event.
         this.socket.emit("readCard");
-        this.socket.emit("getStoredAssignments");
       } else {
         console.error("Socket connection not established");
       }
@@ -105,71 +101,38 @@ export const useTimeInStore = defineStore("timeIn", {
       this.isLoading = true;
       let studentData = null;
       try {
+        // Scan and retrieve student information.
         const response = await HTTP.post(
           "/api/card/scan",
           { uid: card.uid, data: card.data },
           { withCredentials: true }
         );
         studentData = response.data.student;
+        this.scannedStudent = studentData;
 
-        // Log a successful entry
+        // Log a successful Time Out entry.
         try {
           await HTTP.post("/api/entry-logs", {
             device_id: this.deviceFingerprint,
             uid: card.uid,
             student_id: studentData.studentId.toString(),
-            time_type: "IN",
+            time_type: "OUT",
             status: "Success",
             failure_reason: null,
           });
         } catch (logError) {
           console.error("Failed to log entry:", logError);
         }
-
-        const scheduleResponse = await HTTP.get(
-          `/api/fetch-schedule/${studentData.studentId}`
-        );
-        if (
-          scheduleResponse.data.schedule &&
-          scheduleResponse.data.schedule.length > 0
-        ) {
-          const allSchedules = Array.isArray(scheduleResponse.data.schedule)
-            ? scheduleResponse.data.schedule
-            : [scheduleResponse.data.schedule];
-          const todayName = new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-          });
-          const todaySchedules = allSchedules.filter((item) =>
-            item.day.includes(todayName)
-          );
-          if (todaySchedules.length > 0) {
-            this.schedule = todaySchedules;
-          } else {
-            this.schedule = [];
-            this.scheduleError = "No schedule available for today.";
-          }
-        } else {
-          this.schedule = [];
-          this.scheduleError =
-            scheduleResponse.data.message || "No schedule available.";
-        }
-        this.scannedStudent = studentData;
-
-        // Now set the selected department after processing the schedule and student info
-        this.selectedDepartment = `${studentData.department}: ${studentData.program}`;
-
         this.isLoading = false;
+        // After a delay, clear the student info and restart NFC reading.
         setTimeout(() => {
           this.scannedStudent = null;
-          this.schedule = [];
-          this.scheduleError = "";
           this.readNfcCard();
         }, 5000);
       } catch (err) {
         const errorMessage =
           err.response?.data?.error || "An error occurred during card scan.";
-
-        // Log unauthorized access if error matches one of the unauthorized messages
+        // Log unauthorized access if applicable.
         if (
           errorMessage === "Unauthorized access." ||
           errorMessage === "Card is not activated"
@@ -178,20 +141,20 @@ export const useTimeInStore = defineStore("timeIn", {
             await HTTP.post("/api/unauthorized-logs", {
               device_id: this.deviceFingerprint,
               uid: card.uid,
-              time_type: "IN",
+              time_type: "OUT",
               reason: errorMessage,
             });
           } catch (unauthLogError) {
             console.error("Failed to log unauthorized access:", unauthLogError);
           }
         } else {
-          // Otherwise, log as a failure entry
+          // Log a failed entry.
           try {
             await HTTP.post("/api/entry-logs", {
               device_id: this.deviceFingerprint,
               uid: card.uid,
               student_id: studentData ? studentData.studentId.toString() : "",
-              time_type: "IN",
+              time_type: "OUT",
               status: "Failure",
               failure_reason: errorMessage,
             });
@@ -202,8 +165,7 @@ export const useTimeInStore = defineStore("timeIn", {
         this.isLoading = false;
         this.nfcError = errorMessage;
         this.scannedStudent = null;
-        this.schedule = [];
-        this.scheduleError = "";
+        // Retry reading after a delay.
         setTimeout(() => {
           this.nfcError = "";
           this.readNfcCard();

@@ -22,7 +22,29 @@ export const useAnnouncementStore = defineStore("announcement", {
         const response = await HTTP.get("/api/announcements");
         this.announcements = response.data.announcements || [];
         const currentDept = useTimeInStore().selectedDepartment;
-        this.filterAnnouncements(currentDept);
+
+        // Check if any announcement contains the selected department.
+        // Here we split the departments string on ';' and compare either directly (for "GENERAL")
+        // or parse groups with ":" if applicable.
+        const deptExists = this.announcements.some((announcement) => {
+          const announcementDepartments = announcement.departments.trim();
+          const groups = announcementDepartments
+            .split(";")
+            .map((group) => group.trim())
+            .filter(Boolean);
+          return groups.some((group) => {
+            // If the group contains a colon, split to get the department part.
+            if (group.includes(":")) {
+              const [dept] = group.split(":");
+              return dept.trim() === currentDept.split(":")[0].trim();
+            }
+            return group === currentDept;
+          });
+        });
+
+        if (deptExists) {
+          this.filterAnnouncements(currentDept);
+        }
       } catch (err) {
         this.error = err;
         console.error("Error fetching announcements:", err);

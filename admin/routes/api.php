@@ -5,6 +5,7 @@ use App\Http\Controllers\EntryLogController;
 use App\Http\Controllers\RegisteredCardController;
 use App\Http\Controllers\StudentInfoController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\UnauthorizedLogController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,9 @@ Route::middleware('device.check')->group(function () {
 
     //ENTRY LOGS
     Route::get('/entry-logs', [EntryLogController::class, 'store']);
+
+    //UNAUTHORIZED LOGS
+    Route::post('/unauthorized-logs', [UnauthorizedLogController::class, 'store']);
 });
 
 

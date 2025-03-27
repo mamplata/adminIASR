@@ -13,6 +13,6 @@ class UnauthorizedLog extends Model
         'device_id',
         'uid',
         'time_type',
-        'timestamp',
+        'reason',
     ];
 }

@@ -32,7 +32,7 @@ class UnauthorizedLogController extends Controller
             'device_id' => 'required|string',
             'uid' => 'required|string',
             'time_type' => 'required|in:IN,OUT',
-            'timestamp' => 'required|date',
+            'reason' => 'required|string',
         ]);
 
         $unauthorizedLog = UnauthorizedLog::create($request->all());

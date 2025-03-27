@@ -46,7 +46,7 @@
 
     <!-- Modal Components -->
     <ScannerAssignment />
-    <PortStatus v-if="scannerPortStore.isPortStatusModalOpen" />
+    <PortStatus v-show="scannerPortStore.isPortStatusModalOpen" />
   </div>
 </template>
 

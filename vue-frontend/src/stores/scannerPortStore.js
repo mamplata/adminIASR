@@ -23,14 +23,26 @@ export const useScannerPortStore = defineStore("scannerPort", {
       if (!this.socket) return;
 
       this.socket.on("scannerDetected", (data) => {
-        if (data.assigned) {
-          if (data.role === "Time In") {
-            this.timeInInfo = data;
-          } else if (data.role === "Time Out") {
-            this.timeOutInfo = data;
+        // If the scanner is not assigned, check if it was previously assigned and clear it
+        if (!data.assigned) {
+          if (this.timeInInfo && this.timeInInfo.uniqueKey === data.uniqueKey) {
+            this.timeInInfo = null;
           }
-        } else {
+          if (
+            this.timeOutInfo &&
+            this.timeOutInfo.uniqueKey === data.uniqueKey
+          ) {
+            this.timeOutInfo = null;
+          }
           this.newScannerInfo = data;
+          return;
+        }
+
+        // For assigned scanners, update the corresponding store value
+        if (data.role === "Time In") {
+          this.timeInInfo = data;
+        } else if (data.role === "Time Out") {
+          this.timeOutInfo = data;
         }
       });
 
@@ -49,6 +61,12 @@ export const useScannerPortStore = defineStore("scannerPort", {
           this.newScannerInfo.uniqueKey === data.uniqueKey
         ) {
           this.newScannerInfo = null;
+        }
+        if (this.timeInInfo && this.timeInInfo.uniqueKey === data.uniqueKey) {
+          this.timeInInfo = null;
+        }
+        if (this.timeOutInfo && this.timeOutInfo.uniqueKey === data.uniqueKey) {
+          this.timeOutInfo = null;
         }
       });
     },
