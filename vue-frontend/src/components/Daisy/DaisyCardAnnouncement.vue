@@ -2,25 +2,26 @@
     <div class="card-wrapper m-0 p-0 w-full h-full">
         <!-- Card for text announcement -->
         <div v-if="announcement.type === 'text'"
-            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md border-8 border-black', 'w-full h-full relative']"
+            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md', 'w-full h-full relative']"
             :style="isThumb
-                ? { height: thumbnailHeight, backgroundColor: 'black', backgroundImage: `url(${pncBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                : { backgroundColor: 'black', backgroundImage: `url(${pncBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }">
+                ? { height: thumbnailHeight, backgroundColor: 'black' }
+                : { backgroundColor: 'black' }">
+
+            <!-- Background image for text announcement -->
+            <img :src="pncBg" alt="Background" class="absolute inset-0 w-full h-full object-contain" />
 
             <!-- Main content: Full announcement card -->
             <template v-if="!isThumb">
-                <img v-if="!isThumb" :src="pncLogo" alt="PNC Logo"
-                    class="absolute top-2 right-2 w-6 h-6 sm:w-8 sm:h-8" />
                 <div class="absolute inset-0 p-2 flex flex-col">
-                    <h3 class="uppercase font-semibold text-white text-center whitespace-normal break-words"
-                        :style="{ fontSize: 'calc(1.2rem + 0.6vh)' }">
-                        {{ announcement.content.title }}
+                    <h3 class="uppercase font-semibold text-white text-center whitespace-normal break-words announce-title"
+                        :style="{ fontSize: 'calc(1.5rem + 0.6vh)' }">
+                        {{ truncatedTitle }}
                     </h3>
                     <div ref="scrollContainer"
                         class="scroll-container flex-1 items-center relative overflow-hidden mt-2">
                         <div ref="scrollContent" class="scroll-content absolute w-full"
                             :style="{ animation: computedAnimation, '--final-transform': finalTransform }">
-                            <p class="text-white whitespace-pre-line break-words text-justify leading-relaxed"
+                            <p class="text-black font-semibold whitespace-pre-line break-words text-justify announce-body leading-relaxed mt-3 px-40"
                                 :style="{ fontSize: 'calc(0.9rem + 0.8vh)' }">
                                 {{ announcement.content.body }}
                             </p>
@@ -29,7 +30,7 @@
                 </div>
             </template>
 
-            <!-- Thumbnail: Only show title with smaller font -->
+            <!-- Thumbnail: Only show title with smaller font
             <template v-else>
                 <div class="absolute inset-0 p-2 flex items-center justify-center">
                     <h3 class="uppercase font-semibold text-white text-center"
@@ -37,17 +38,16 @@
                         {{ announcement.content.title }}
                     </h3>
                 </div>
-            </template>
+            </template> -->
         </div>
 
         <!-- Card for image announcement -->
         <div v-else-if="announcement.type === 'image'"
-            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md border-8 border-black h-full flex items-center justify-center', 'w-full relative']"
+            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md h-full flex items-center justify-center', 'w-full relative']"
             :style="isThumb ? { height: thumbnailHeight, backgroundColor: 'black' } : { backgroundColor: 'black' }">
             <img :src="`${apiUrl}${announcement.content.file_path}`" :alt="announcement.content.file_name"
-                class="block w-full m-0 p-0" :class="isThumb
-                    ? 'h-full object-cover object-center'
-                    : 'h-96 object-fill object-center'" />
+                class="block m-0 p-0 object-contain object-center" :class="isThumb ? 'w-full h-full' : ''"
+                :style="!isThumb ? { maxHeight: '520px', width: 'auto' } : {}" />
         </div>
     </div>
 </template>
@@ -57,7 +57,6 @@
 import { ref, computed, onMounted, nextTick, onBeforeUnmount, watch } from "vue";
 import { useAnnouncementStore } from "@/stores/announcementStore";
 import pncBg from "../../assets/img/pncAnnouncement.png";
-import pncLogo from "../../assets/img/pnc-logo-1.png";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const announcementStore = useAnnouncementStore();
@@ -152,7 +151,7 @@ onBeforeUnmount(() => {
 const animationDuration = computed(() => {
     if (needsMarquee.value && scrollContainer.value && scrollContent.value) {
         const containerHeight = getContainerHeight();
-        const contentHeight = scrollContent.value.scrollHeight;
+        const contentHeight = scrollContent.value.scrollHeight + 165;
         const overflowHeight = contentHeight - containerHeight;
         return overflowHeight * 50;
     }
@@ -162,7 +161,7 @@ const animationDuration = computed(() => {
 const finalTransform = computed(() => {
     if (scrollContent.value && scrollContainer.value && needsMarquee.value) {
         const containerHeight = getContainerHeight();
-        const contentHeight = scrollContent.value.scrollHeight;
+        const contentHeight = scrollContent.value.scrollHeight + 165;
         const overflowHeight = contentHeight - containerHeight;
         const percent = (overflowHeight / contentHeight) * 100;
         return `translateY(-${percent}%)`;
@@ -175,6 +174,11 @@ const computedAnimation = computed(() => {
         return `marquee ${animationDuration.value}ms linear forwards`;
     }
     return "none";
+});
+
+const truncatedTitle = computed(() => {
+    const title = props.announcement.content.title || "";
+    return title.length > 41 ? title.substring(0, 38) + "..." : title;
 });
 </script>
 
@@ -205,5 +209,9 @@ const computedAnimation = computed(() => {
     will-change: transform;
     transform: translateZ(0);
     display: block;
+}
+
+.announce-title {
+    margin-top: 165px;
 }
 </style>

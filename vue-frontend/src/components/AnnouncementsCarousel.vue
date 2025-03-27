@@ -82,7 +82,7 @@ function startAutoplay() {
     } else {
       announcementStore.nextSlide();
     }
-  }, 3000);
+  }, 5000);
 }
 
 function stopAutoplay() {
