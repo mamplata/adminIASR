@@ -12,6 +12,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "execa": "^9.5.2",
     "express": "^4.21.2",
     "macaddress": "^0.5.3",
     "ndef": "^0.2.0",
