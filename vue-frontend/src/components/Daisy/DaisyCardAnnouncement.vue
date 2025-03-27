@@ -1,5 +1,5 @@
 <template>
-    <div class="card-wrapper m-0 p-0 w-full h-full">
+    <div class="card-wrapper m-0 p-0">
         <!-- Card for text announcement -->
         <div v-if="announcement.type === 'text'"
             :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md', 'w-full h-full relative']"
@@ -8,46 +8,38 @@
                 : { backgroundColor: 'black' }">
 
             <!-- Background image for text announcement -->
-            <img :src="pncBg" alt="Background" class="absolute inset-0 w-full h-full object-contain" />
+            <img :src="pncBg" alt="Background"
+                class="absolute inset-0 w-[calc(100vw + 100vh)] h-[calc(100vw + 100vh)] object-contain" />
 
             <!-- Main content: Full announcement card -->
             <template v-if="!isThumb">
-                <div class="absolute inset-0 p-2 flex flex-col">
+                <div class="absolute inset-0 flex flex-col">
                     <h3 class="uppercase font-semibold text-white text-center whitespace-normal break-words announce-title"
-                        :style="{ fontSize: 'calc(1.5rem + 0.6vh)' }">
+                        :style="{ fontSize: 'calc(1.3vw + 1.3vh)' }">
                         {{ truncatedTitle }}
                     </h3>
                     <div ref="scrollContainer"
-                        class="scroll-container flex-1 items-center relative overflow-hidden mt-2">
+                        class="scroll-container flex-1 items-center relative overflow-hidden mt-[2vh]">
                         <div ref="scrollContent" class="scroll-content absolute w-full"
                             :style="{ animation: computedAnimation, '--final-transform': finalTransform }">
-                            <p class="text-black font-semibold whitespace-pre-line break-words text-justify announce-body leading-relaxed mt-3 px-40"
-                                :style="{ fontSize: 'calc(0.9rem + 0.8vh)' }">
+                            <p class="text-black font-semibold whitespace-pre-line break-words text-justify leading-relaxed mt-[3vh] px-[6vw]"
+                                :style="{ fontSize: 'calc(1.2vw + 1.2vh)' }">
                                 {{ announcement.content.body }}
                             </p>
                         </div>
                     </div>
                 </div>
             </template>
-
-            <!-- Thumbnail: Only show title with smaller font
-            <template v-else>
-                <div class="absolute inset-0 p-2 flex items-center justify-center">
-                    <h3 class="uppercase font-semibold text-white text-center"
-                        :style="{ fontSize: 'calc(0.8rem + 0.4vh)' }">
-                        {{ announcement.content.title }}
-                    </h3>
-                </div>
-            </template> -->
         </div>
 
         <!-- Card for image announcement -->
         <div v-else-if="announcement.type === 'image'"
-            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md h-full flex items-center justify-center', 'w-full relative']"
+            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md h-[calc(100vw + 100vh)] flex items-center justify-center', 'w-[calc(100vw + 100vh)] relative']"
             :style="isThumb ? { height: thumbnailHeight, backgroundColor: 'black' } : { backgroundColor: 'black' }">
             <img :src="`${apiUrl}${announcement.content.file_path}`" :alt="announcement.content.file_name"
-                class="block m-0 p-0 object-contain object-center" :class="isThumb ? 'w-full h-full' : ''"
-                :style="!isThumb ? { maxHeight: '520px', width: 'auto' } : {}" />
+                class="block m-0 p-0 object-contain object-center"
+                :class="isThumb ? 'w-[calc(100vw + 100vh)] h-[calc(100vw + 100vh)]' : ''"
+                :style="!isThumb ? { width: '100vw', height: '100vh - 20vh' } : {}" />
         </div>
     </div>
 </template>
@@ -65,7 +57,7 @@ const props = defineProps({
     announcement: { type: Object, required: true },
     isThumb: { type: Boolean, default: false },
     index: { type: Number, required: true },
-    thumbnailHeight: { type: String, default: '6rem' }
+    thumbnailHeight: { type: String, default: 'calc(5vw + 5vh)' }
 });
 
 const scrollContainer = ref(null);
@@ -212,6 +204,6 @@ const truncatedTitle = computed(() => {
 }
 
 .announce-title {
-    margin-top: 165px;
+    margin-top: 24vh;
 }
 </style>

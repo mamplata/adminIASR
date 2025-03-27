@@ -1,45 +1,47 @@
 <template>
-  <div class="w-full relative min-h-screen overflow-hidden" :style="carouselStyle">
+  <div class="relative overflow-hidden" :style="carouselStyle">
     <!-- Header -->
-    <header class="w-full px-6 h-24 flex items-center relative" style="background-color: #198754">
-      <h1 class="text-white text-6xl font-bold mx-auto">Announcements</h1>
+    <header class="h-[calc(10vh)] flex items-center relative" style="background-color: #198754">
+      <h1 class="text-white text-[calc(2.3vw+2.3vh)] font-bold mx-auto">Announcements</h1>
       <button @click="scannerPortStore.openPortStatusModal()"
-        class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-3 rounded-full flex items-center justify-center">
-        <i class="fas fa-info-circle text-2xl"></i>
+        class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-[calc(0.5vw+0.5vh)] rounded-full flex items-center justify-center">
+        <i class="fas fa-info-circle text-[calc(1vw+1vh)]"></i>
       </button>
     </header>
 
     <!-- Main Content: Carousel and Thumbnails -->
-    <main class="w-full flex flex-col relative" :style="{ height: `calc(100vh - 6rem)` }">
+    <main class="flex flex-col relative" :style="{ height: `calc(100vh - 10vh)` }">
       <!-- Global Black Overlay -->
       <div class="absolute inset-0 bg-black opacity-40 z-10 pointer-events-none"></div>
 
       <!-- Carousel -->
-      <div v-if="announcementStore.loading" class="w-full flex-1 flex items-center justify-center relative z-20">
-        <p class="text-white text-2xl text-center">Loading announcements...</p>
+      <div v-if="announcementStore.loading" class="flex-1 flex items-center justify-center relative z-20">
+        <p class="text-white text-[calc(1.5vw+1.5vh)] text-center">Loading announcements...</p>
       </div>
       <div v-else-if="announcementStore.filteredAnnouncements.length > 0" class="relative flex-1 z-20">
         <div v-for="(announcement, index) in announcementStore.filteredAnnouncements" :key="announcement.id || index"
-          class="carousel-item relative w-full h-full"
+          class="carousel-item relative w-full h-full flex justify-center items-center"
           :class="{ active: index === announcementStore.activeIndex, inactive: index !== announcementStore.activeIndex }">
           <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="false" class="w-full h-full" />
         </div>
       </div>
       <div v-else class="w-full flex-1 flex items-center justify-center relative z-20">
-        <div class="w-full bg-white bg-opacity-90 rounded-lg shadow-lg p-10 mx-10">
-          <p class="text-gray-800 text-2xl text-center">No Announcements Available</p>
+        <div
+          class="w-full bg-white bg-opacity-90 rounded-[calc(1vw+1vh)] shadow-lg p-[calc(1vw+1vh)] mx-[calc(1vw+1vh)]">
+          <p class="text-gray-800 text-[calc(1.5vw+1.5vh)] text-center">No Announcements Available</p>
         </div>
       </div>
 
       <!-- Thumbnails Strip -->
       <div v-if="!announcementStore.loading && announcementStore.filteredAnnouncements.length > 0"
-        class="thumbs mt-4 flex relative z-20">
+        class="thumbs flex relative z-20">
         <div v-for="(announcement, index) in announcementStore.filteredAnnouncements"
           :key="'thumb-' + (announcement.id || index)" class="flex-1 cursor-pointer border-2" :class="{
             'border-blue-500': index === announcementStore.activeIndex,
             'border-gray-300': index !== announcementStore.activeIndex
           }" @click="handleThumbnailClick(index)">
-          <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="true" thumbnailHeight="8rem" />
+          <DaisyCardAnnouncement :index="index" :announcement="announcement" :isThumb="true"
+            thumbnailHeight="calc(5vw + 5vh)" />
         </div>
       </div>
     </main>
