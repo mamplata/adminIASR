@@ -9,7 +9,7 @@ import { useDeviceStore } from "@/stores/deviceStore";
 export const useTimeInStore = defineStore("timeIn", {
   state: () => ({
     scannedStudent: null,
-    selectedDepartment: "CCS: BSIT",
+    selectedDepartment: "GENERAL",
     schedule: [],
     scheduleError: "",
     isReadingNfc: false,
