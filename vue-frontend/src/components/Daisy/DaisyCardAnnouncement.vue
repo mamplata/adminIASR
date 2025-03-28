@@ -14,14 +14,14 @@
                 <div class="absolute inset-0 flex flex-col">
                     <!-- Responsive Title -->
                     <h3 class="text-container uppercase font-semibold text-white text-center whitespace-normal break-words"
-                        :style="{ fontSize: 'calc(1.3vw + 1.3vh)' }">
+                        :style="{ fontSize: 'calc(1dvw + 1.3dvh)', zIndex: 10 }">
                         {{ truncatedTitle }}
                     </h3>
                     <!-- Responsive Text Container -->
                     <div ref="scrollContainer" class="scroll-container flex-1 items-center overflow-hidden mt-[35dvh]">
                         <div ref="scrollContent" class="scroll-content absolute w-full"
                             :style="{ animation: computedAnimation, '--final-transform': finalTransform }">
-                            <p class="text-black font-semibold whitespace-pre-line break-words text-justify leading-relaxed mt-[3vh] px-[6vw]"
+                            <p class="text-black font-semibold whitespace-pre-line break-words text-justify leading-relaxed px-[6dvw]"
                                 :style="{ fontSize: 'calc(1.2vw + 1.2vh)' }">
                                 {{ announcement.content.body }}
                             </p>
