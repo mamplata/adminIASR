@@ -6,20 +6,19 @@
             :style="isThumb
                 ? { height: thumbnailHeight, backgroundColor: 'black' }
                 : { backgroundColor: 'black' }">
-
             <!-- Background image for text announcement -->
-            <img :src="pncBg" alt="Background"
-                class="absolute inset-0 w-[calc(100vw + 100vh)] h-[calc(100vw + 100vh)] object-contain" />
+            <img :src="pncBg" alt="Background" class="absolute inset-0 w-full h-full object-contain" />
 
             <!-- Main content: Full announcement card -->
             <template v-if="!isThumb">
                 <div class="absolute inset-0 flex flex-col">
-                    <h3 class="uppercase font-semibold text-white text-center whitespace-normal break-words announce-title"
+                    <!-- Responsive Title -->
+                    <h3 class="text-container uppercase font-semibold text-white text-center whitespace-normal break-words"
                         :style="{ fontSize: 'calc(1.3vw + 1.3vh)' }">
                         {{ truncatedTitle }}
                     </h3>
-                    <div ref="scrollContainer"
-                        class="scroll-container flex-1 items-center relative overflow-hidden mt-[2vh]">
+                    <!-- Responsive Text Container -->
+                    <div ref="scrollContainer" class="scroll-container flex-1 items-center overflow-hidden mt-[35dvh]">
                         <div ref="scrollContent" class="scroll-content absolute w-full"
                             :style="{ animation: computedAnimation, '--final-transform': finalTransform }">
                             <p class="text-black font-semibold whitespace-pre-line break-words text-justify leading-relaxed mt-[3vh] px-[6vw]"
@@ -32,13 +31,13 @@
             </template>
         </div>
 
+
         <!-- Card for image announcement -->
         <div v-else-if="announcement.type === 'image'"
-            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md h-[calc(100vw + 100vh)] flex items-center justify-center', 'w-[calc(100vw + 100vh)] relative']"
+            :class="[isThumb ? 'shadow-sm rounded-none border-2 border-black' : 'shadow-md rounded-md h-full flex items-center justify-center', 'w-full relative']"
             :style="isThumb ? { height: thumbnailHeight, backgroundColor: 'black' } : { backgroundColor: 'black' }">
             <img :src="`${apiUrl}${announcement.content.file_path}`" :alt="announcement.content.file_name"
-                class="block m-0 p-0 object-contain object-center"
-                :class="isThumb ? 'w-[calc(100vw + 100vh)] h-[calc(100vw + 100vh)]' : ''"
+                class="block m-0 p-0 object-contain object-center" :class="isThumb ? 'w-full h-full' : ''"
                 :style="!isThumb ? { width: '100vw', height: '100vh - 20vh' } : {}" />
         </div>
     </div>
@@ -203,7 +202,16 @@ const truncatedTitle = computed(() => {
     display: block;
 }
 
-.announce-title {
-    margin-top: 24vh;
+.text-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: -8.5dvw;
 }
 </style>
