@@ -1,111 +1,102 @@
-// utils/port.js
 const usb = require("usb");
-const fs = require("fs");
-const path = require("path");
 
-const dataFilePath = path.join(__dirname, "../scannerRoles.json");
+// In-memory assignments: keys are deviceFingerprint, values are assignment objects.
+const assignments = {};
 
-let lastConnected = new Set();
+function getAssignments(deviceFingerprint) {
+  return assignments[deviceFingerprint] || {};
+}
 
-// Reads the scanner roles directly from the JSON file every time.
-function getScannerRoles() {
-    try {
-        const data = fs.readFileSync(dataFilePath, "utf8");
-        return JSON.parse(data);
-    } catch (err) {
-        return {};
+function setAssignment(deviceFingerprint, uniqueKey, role) {
+  if (!assignments[deviceFingerprint]) {
+    assignments[deviceFingerprint] = {};
+  }
+  assignments[deviceFingerprint][uniqueKey] = role;
+}
+
+function removeAssignment(deviceFingerprint, uniqueKey) {
+  if (assignments[deviceFingerprint]) {
+    delete assignments[deviceFingerprint][uniqueKey];
+  }
+}
+
+function isNfcScanner(device) {
+  if (device.configDescriptor && device.configDescriptor.interfaces) {
+    for (const ifaceArr of device.configDescriptor.interfaces) {
+      for (const iface of ifaceArr) {
+        // bInterfaceClass 0x0B is sometimes used for smart card readers.
+        if (iface.bInterfaceClass === 0x0b) {
+          return true;
+        }
+      }
     }
+  }
+  return false;
 }
 
-// Writes the provided roles object directly to the JSON file.
-function saveScannerRoles(roles) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(roles, null, 2));
-}
-
-// Check if a device is an ACR122U scanner.
-function isAcr122u(device) {
-    return device.deviceDescriptor.idVendor === 0x072f && device.deviceDescriptor.idProduct === 0x2200;
-}
-
-// Checks whether a port is already assigned by always reading the latest roles.
-function isPortAssigned(portPath) {
-    const roles = getScannerRoles();
-    return Object.keys(roles).some((key) => {
-        const portIndex = key.lastIndexOf("-port");
-        if (portIndex !== -1) {
-            const assignedPort = key.substring(portIndex + 5);
-            return assignedPort === portPath;
-        }
-        return false;
-    });
-}
-
-// Extracts the port path from the unique key.
 function getPortFromUniqueKey(uniqueKey) {
-    const index = uniqueKey.lastIndexOf("-port");
-    return index !== -1 ? uniqueKey.substring(index + 5) : "Unknown";
+  const index = uniqueKey.lastIndexOf("-port");
+  return index !== -1 ? uniqueKey.substring(index + 5) : "Unknown";
 }
 
-// Checks for connected scanners and emits events with the latest data from disk.
-// This function now also emits events for assigned scanners that are offline.
-function checkScanners(socket, clientCookie) {
-    const currentConnected = new Set();
-    const roles = getScannerRoles();
+// Checks for connected scanners and emits events using the in-memory assignments.
+function checkScanners(socket, deviceFingerprint) {
+  const currentConnected = new Set();
+  const roles = getAssignments(deviceFingerprint);
 
-    // Process connected devices.
-    usb.getDeviceList().forEach((device) => {
-        if (isAcr122u(device)) {
-            const portPath = device.portNumbers ? device.portNumbers.join(".") : "Unknown";
-            const uniqueKey = `${clientCookie}-port${portPath}`;
-            currentConnected.add(uniqueKey);
+  usb.getDeviceList().forEach((device) => {
+    if (isNfcScanner(device)) {
+      const portPath = device.portNumbers
+        ? device.portNumbers.join(".")
+        : "Unknown";
+      const uniqueKey = `${deviceFingerprint}-port${portPath}`;
+      currentConnected.add(uniqueKey);
 
-            if (roles[uniqueKey]) {
-                socket.emit("scannerDetected", {
-                    uniqueKey,
-                    portPath,
-                    assigned: true,
-                    role: roles[uniqueKey],
-                    online: true,
-                });
-            } else {
-                socket.emit("scannerDetected", {
-                    uniqueKey,
-                    portPath,
-                    assigned: false,
-                    online: true,
-                });
-            }
+      if (roles[uniqueKey]) {
+        socket.to(deviceFingerprint).emit("scannerDetected", {
+          uniqueKey,
+          portPath,
+          assigned: true,
+          role: roles[uniqueKey],
+          online: true,
+        });
+      } else {
+        // Only emit unassigned if less than 2 roles are assigned.
+        if (Object.keys(roles).length < 2) {
+          socket.to(deviceFingerprint).emit("scannerDetected", {
+            uniqueKey,
+            portPath,
+            assigned: false,
+            online: true,
+          });
         }
-    });
+      }
+    }
+  });
 
-    // For each assigned scanner that is not currently connected, emit an event marking it as offline.
-    Object.keys(roles).forEach((uniqueKey) => {
-        if (!currentConnected.has(uniqueKey)) {
-            const portPath = getPortFromUniqueKey(uniqueKey);
-            socket.emit("scannerDetected", {
-                uniqueKey,
-                portPath,
-                assigned: true,
-                role: roles[uniqueKey],
-                online: false,
-            });
-        }
-    });
-
-    // Optionally, emit disconnect events for scanners that were previously connected but now not present.
-    lastConnected.forEach((deviceKey) => {
-        if (!currentConnected.has(deviceKey)) {
-            socket.emit("scannerDisconnected", { uniqueKey: deviceKey });
-            console.log(`🔴 Scanner Disconnected: ${deviceKey}`);
-        }
-    });
-    lastConnected = currentConnected;
+  // Emit events for scanners that are offline.
+  Object.keys(roles).forEach((uniqueKey) => {
+    if (
+      uniqueKey.startsWith(deviceFingerprint) &&
+      !currentConnected.has(uniqueKey)
+    ) {
+      const portPath = getPortFromUniqueKey(uniqueKey);
+      socket.to(deviceFingerprint).emit("scannerDetected", {
+        uniqueKey,
+        portPath,
+        assigned: true,
+        role: roles[uniqueKey],
+        online: false,
+      });
+    }
+  });
 }
 
 module.exports = {
-    checkScanners,
-    isPortAssigned,
-    getPortFromUniqueKey,
-    saveScannerRoles,
-    getScannerRoles,
+  getAssignments,
+  setAssignment,
+  removeAssignment,
+  isNfcScanner: isNfcScanner, // exporting the generic NFC scanner detection
+  getPortFromUniqueKey,
+  checkScanners,
 };

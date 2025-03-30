@@ -47,7 +47,6 @@
     </main>
 
     <!-- Modal Components -->
-    <ScannerAssignment />
     <PortStatus v-show="scannerPortStore.isPortStatusModalOpen" />
   </div>
 </template>
@@ -57,7 +56,6 @@ import { onMounted, onBeforeUnmount, watch, computed } from "vue";
 import bgAnnouncement from "@/assets/img/bgAnnounce.png";
 import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue";
 import PortStatus from "@/components/PortStatus.vue";
-import ScannerAssignment from "./ScannerAssignment.vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 import { useAnnouncementStore } from "@/stores/announcementStore";
 import { useTimeInStore } from "@/stores/timeInStore";

@@ -1,6 +1,5 @@
-<!-- ScannerAssignment.vue -->
 <template>
-    <div v-if="scannerPortStore.newScannerInfo && scannerPortStore.newScannerInfo.uniqueKey">
+    <div v-if="scannerPortStore.newScannerInfo && availableRole">
         <!-- Overlay -->
         <div class="fixed inset-0 z-[9998] bg-black opacity-50"></div>
 
@@ -11,12 +10,13 @@
             <p class="mb-2">
                 <strong>Port:</strong> {{ scannerPortStore.newScannerInfo.portPath }}
             </p>
-            <p class="mb-6">Please choose a role:</p>
+            <p class="mb-6">Select a role to assign:</p>
             <div class="flex gap-4">
-                <button @click="onAssignRole('Time In')" class="btn btn-success flex-1">
+                <!-- Only allow assignment if that role is not already set -->
+                <button v-if="!hasRole('Time In')" @click="onAssignRole('Time In')" class="btn btn-success flex-1">
                     Time In
                 </button>
-                <button @click="onAssignRole('Time Out')" class="btn btn-warning flex-1">
+                <button v-if="!hasRole('Time Out')" @click="onAssignRole('Time Out')" class="btn btn-warning flex-1">
                     Time Out
                 </button>
             </div>
@@ -25,23 +25,29 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 
 const scannerPortStore = useScannerPortStore();
 
-// Initialize socket listeners via the store on mount.
-onMounted(() => {
-    scannerPortStore.initializeSocket();
+// Only show the modal if at least one role is available.
+const availableRole = computed(() => {
+    return !scannerPortStore.timeInInfo || !scannerPortStore.timeOutInfo;
 });
+
+// Check if a given role is already assigned.
+function hasRole(role) {
+    return (role === "Time In" && scannerPortStore.timeInInfo) ||
+        (role === "Time Out" && scannerPortStore.timeOutInfo);
+}
 
 function onAssignRole(role) {
     if (scannerPortStore.newScannerInfo) {
         scannerPortStore.assignRole(scannerPortStore.newScannerInfo.uniqueKey, role);
     }
 }
-</script>
 
-<style scoped>
-/* Additional styles if needed */
-</style>
+onMounted(() => {
+    scannerPortStore.initializeSocket();
+});
+</script>

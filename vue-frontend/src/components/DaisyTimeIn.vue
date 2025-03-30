@@ -1,6 +1,6 @@
 <template>
     <div class="relative h-full texture-bg">
-        <!-- Header positioned in the top left corner -->
+        <!-- Header -->
         <header class="absolute top-0 left-0 m-4 z-50">
             <img :src="ITAPLOGO" alt="iASR Logo" class="w-32" />
         </header>
@@ -9,8 +9,8 @@
         <div class="flex flex-col items-center justify-center h-full mx-10 pt-10">
             <transition name="fade" mode="out-in">
                 <div
-                    :key="timeInStore.isLoading ? 'loading' : (timeInStore.scannedStudent || timeInStore.nfcError) ? 'card' : 'prompt'">
-                    <template v-if="timeInStore.isLoading">
+                    :key="timeScannerStore.isLoading ? 'loading' : (timeScannerStore.scannedStudent || timeScannerStore.nfcError) ? 'card' : 'prompt'">
+                    <template v-if="timeScannerStore.isLoading">
                         <!-- Loading Spinner -->
                         <div class="flex flex-col items-center justify-center mt-12">
                             <i class="fas fa-spinner fa-spin text-6xl text-green-700"></i>
@@ -18,9 +18,9 @@
                         </div>
                     </template>
 
-                    <template v-else-if="timeInStore.scannedStudent || timeInStore.nfcError">
-                        <template v-if="timeInStore.nfcError">
-                            <div v-if="timeInStore.nfcError === 'Unauthorized access.'"
+                    <template v-else-if="timeScannerStore.scannedStudent || timeScannerStore.nfcError">
+                        <template v-if="timeScannerStore.nfcError">
+                            <div v-if="timeScannerStore.nfcError === 'Unauthorized access.'"
                                 class="card card-side bg-error text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center h-56">
                                 <figure class="z-10 flex-shrink-0 px-4">
                                     <i class="fas fa-exclamation-triangle ml-2 text-4xl"></i>
@@ -30,7 +30,7 @@
                                     <p class="text-lg">You do not have permission to access this school.</p>
                                 </div>
                             </div>
-                            <div v-else-if="timeInStore.nfcError === 'Card is not activated'"
+                            <div v-else-if="timeScannerStore.nfcError === 'Card is not activated'"
                                 class="card card-side bg-warning text-white shadow-xl hover:shadow-2xl transition-shadow duration-300 relative overflow-hidden w-full max-w-md card-3d flex flex-col md:flex-row items-center justify-center my-4 h-56">
                                 <figure class="z-10 flex-shrink-0 px-4">
                                     <i class="fas fa-info-circle ml-2 text-5xl"></i>
@@ -62,27 +62,27 @@
                                     <div class="flex flex-col md:flex-row items-center">
                                         <!-- Student Image -->
                                         <div class="flex-shrink-0">
-                                            <img v-if="timeInStore.scannedStudent.image"
-                                                :src="timeInStore.scannedStudent.image" alt="Student Photo"
+                                            <img v-if="timeScannerStore.scannedStudent.image"
+                                                :src="timeScannerStore.scannedStudent.image" alt="Student Photo"
                                                 class="w-24 h-24 md:w-32 md:h-32 object-cover rounded-full border-4 border-white" />
                                         </div>
                                         <!-- Student Details -->
                                         <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left text-white">
                                             <h2 class="text-2xl font-bold">
-                                                {{ timeInStore.scannedStudent.fName }}
-                                                {{ timeInStore.scannedStudent.lName }}
+                                                {{ timeScannerStore.scannedStudent.fName }}
+                                                {{ timeScannerStore.scannedStudent.lName }}
                                             </h2>
-                                            <p class="text-sm">Program: {{ timeInStore.scannedStudent.program }}</p>
-                                            <p class="text-sm">Department: {{ timeInStore.scannedStudent.department }}
+                                            <p class="text-sm">Program: {{ timeScannerStore.scannedStudent.program }}
                                             </p>
-                                            <p class="text-sm">Year Level: {{ timeInStore.scannedStudent.yearLevel }}
-                                            </p>
+                                            <p class="text-sm">Department:
+                                                {{ timeScannerStore.scannedStudent.department }}</p>
+                                            <p class="text-sm">Year Level:
+                                                {{ timeScannerStore.scannedStudent.yearLevel }}</p>
                                             <p class="text-sm">Last Enrolled:
-                                                {{ timeInStore.scannedStudent.last_enrolled_at }}</p>
+                                                {{ timeScannerStore.scannedStudent.last_enrolled_at }}</p>
                                         </div>
                                     </div>
                                 </div>
-
                                 <!-- Schedule Section -->
                                 <div class="bg-white p-6">
                                     <div class="flex justify-between items-center mb-2">
@@ -102,20 +102,19 @@
                                             </span>
                                         </li>
                                     </ul>
-                                    <p v-else class="text-center text-gray-600">{{ timeInStore.scheduleError }}</p>
+                                    <p v-else class="text-center text-gray-600">{{ timeScannerStore.scheduleError }}</p>
                                 </div>
                             </div>
                         </template>
                     </template>
-
                     <template v-else>
                         <!-- "Tap your card" prompt or scanner status -->
                         <div class="text-center">
                             <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto"
-                                :class="{ 'animate-zoom-in-out': !timeInStore.scannerStatusLoading && isScanEnabled }" />
+                                :class="{ 'animate-zoom-in-out': !timeScannerStore.scannerStatusLoading && isScanEnabled }" />
                             <h1 class="text-4xl font-bold mt-4"
-                                :class="{ 'text-green-900': !timeInStore.scannerStatusLoading && isScanEnabled, 'text-gray-500': !timeInStore.scannerStatusLoading && !isScanEnabled }">
-                                {{ timeInStore.scannerStatusLoading ? 'Checking scanner status...' : (isScanEnabled ? 'Tap your card' : 'Scanner Disabled') }}
+                                :class="{ 'text-green-900': !timeScannerStore.scannerStatusLoading && isScanEnabled, 'text-gray-500': !timeScannerStore.scannerStatusLoading && !isScanEnabled }">
+                                {{ timeScannerStore.scannerStatusLoading ? 'Checking scanner status...' : (isScanEnabled ? 'Tap your card' : 'Scanner Disabled') }}
                             </h1>
                         </div>
                     </template>
@@ -127,29 +126,24 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import { useTimeInStore } from '@/stores/timeInStore';
+import { useTimeScannerStore } from '@/stores/timeScannerStore';
 import ITAPLOGO from '@/assets/img/ITAPLOGO.png';
 import logoRFID from '@/assets/img/logoRFID.png';
 
-const timeInStore = useTimeInStore();
+const timeScannerStore = useTimeScannerStore();
 
-// Expose the schedule from timeInStore as a computed property.
-const todaySchedule = computed(() => timeInStore.schedule);
+// Expose the schedule as a computed property.
+const todaySchedule = computed(() => timeScannerStore.schedule);
 
-// Compute if scanning is enabled based on socket connection and the online status of the Time In scanner.
+// Compute if scanning is enabled (using Time In scanner for UI purposes).
 const isScanEnabled = computed(() => {
-    if (!timeInStore.socketConnected || timeInStore.scannerStatusLoading) return false;
-    return timeInStore.timeInScanner && timeInStore.timeInScanner.online;
+    if (!timeScannerStore.socketConnected || timeScannerStore.scannerStatusLoading) return false;
+    return timeScannerStore.timeInScanner && timeScannerStore.timeInScanner.online;
 });
 
 onMounted(() => {
-    // Initialize the socket(s) and sync Time In scanner state via the watcher in timeInStore.
-    timeInStore.initializeSocket();
-    // After a delay (allowing state sync from scannerPortStore), trigger NFC read.
-    setTimeout(() => {
-        timeInStore.scannerStatusLoading = false;
-        timeInStore.readNfcCard();
-    }, 3000);
+    // Initialize the combined time scanner store.
+    timeScannerStore.initializeSocket();
 });
 </script>
 

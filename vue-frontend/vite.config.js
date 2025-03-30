@@ -8,4 +8,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"), // Ensure '@' points to 'src'
     },
   },
+  server: {
+    host: true,
+  },
 });

@@ -7,7 +7,6 @@ import { useDeviceStore } from "@/stores/deviceStore";
 
 export const useTimeOutStore = defineStore("timeOut", {
   state: () => ({
-    // Only keep the data needed for scanning and logging.
     scannedStudent: null,
     isReadingNfc: false,
     isLoading: false,
@@ -26,6 +25,7 @@ export const useTimeOutStore = defineStore("timeOut", {
         console.error("Socket connection is not initialized.");
         return;
       }
+      console.log("Socket connection is initialized.");
       this.setupSocketListeners();
 
       // Initialize the scanner port store and device store.
@@ -46,6 +46,12 @@ export const useTimeOutStore = defineStore("timeOut", {
         },
         { immediate: true }
       );
+
+      // Optionally, you can also trigger an independent timeout to start scanning.
+      setTimeout(() => {
+        console.log("Time Out store timeout triggered readNfcCard.");
+        this.readNfcCard();
+      }, 3000);
     },
     setupSocketListeners() {
       if (!this.socket) return;
@@ -55,7 +61,8 @@ export const useTimeOutStore = defineStore("timeOut", {
         this.socketConnected = true;
       });
 
-      this.socket.on("cardRead", (data) => {
+      this.socket.on("timeOutCardRead", (data) => {
+        console.log("timeOutCardRead", data);
         this.nfcData = data;
         this.processScannedCard(data);
       });
@@ -80,10 +87,11 @@ export const useTimeOutStore = defineStore("timeOut", {
       }
       // Ensure the Time Out scanner is available and online.
       if (!(this.timeOutScanner && this.timeOutScanner.online)) {
-        console.log("Time Out scanner is not available. Scanning disabled.");
+        console.log(
+          "Time Out scanner is not available. Scanning disabled. Retrying..."
+        );
+        setTimeout(() => this.readNfcCard(), 3000);
         return;
-      } else {
-        console.log("dasda");
       }
       // Prevent multiple read attempts.
       if (this.isReadingNfc) return;
@@ -165,7 +173,6 @@ export const useTimeOutStore = defineStore("timeOut", {
         this.isLoading = false;
         this.nfcError = errorMessage;
         this.scannedStudent = null;
-        // Retry reading after a delay.
         setTimeout(() => {
           this.nfcError = "";
           this.readNfcCard();

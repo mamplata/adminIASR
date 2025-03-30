@@ -6,9 +6,9 @@ export const useScannerPortStore = defineStore("scannerPort", {
   state: () => ({
     timeInInfo: null,
     timeOutInfo: null,
-    newScannerInfo: null,
+    unassignedScanners: [],
     socket: null,
-    isPortStatusModalOpen: false, // modal state
+    isPortStatusModalOpen: false,
   }),
   actions: {
     initializeSocket() {
@@ -18,31 +18,33 @@ export const useScannerPortStore = defineStore("scannerPort", {
         return;
       }
       this.setupSocketListeners();
+      // On socket init, sync assignments from localStorage if they exist.
+      const stored = localStorage.getItem("scannerAssignments");
+      if (stored) {
+        const assignments = JSON.parse(stored);
+        this.socket.emit("syncScannerAssignments", assignments);
+      }
     },
     setupSocketListeners() {
       if (!this.socket) return;
 
       this.socket.on("scannerDetected", (data) => {
-        // If the scanner is not assigned, check if it was previously assigned and clear it
         if (!data.assigned) {
-          if (this.timeInInfo && this.timeInInfo.uniqueKey === data.uniqueKey) {
-            this.timeInInfo = null;
+          const exists = this.unassignedScanners.find(
+            (scanner) => scanner.uniqueKey === data.uniqueKey
+          );
+          if (!exists) {
+            this.unassignedScanners.push(data);
           }
-          if (
-            this.timeOutInfo &&
-            this.timeOutInfo.uniqueKey === data.uniqueKey
-          ) {
-            this.timeOutInfo = null;
+        } else {
+          this.unassignedScanners = this.unassignedScanners.filter(
+            (scanner) => scanner.uniqueKey !== data.uniqueKey
+          );
+          if (data.role === "Time In") {
+            this.timeInInfo = data;
+          } else if (data.role === "Time Out") {
+            this.timeOutInfo = data;
           }
-          this.newScannerInfo = data;
-          return;
-        }
-
-        // For assigned scanners, update the corresponding store value
-        if (data.role === "Time In") {
-          this.timeInInfo = data;
-        } else if (data.role === "Time Out") {
-          this.timeOutInfo = data;
         }
       });
 
@@ -52,16 +54,28 @@ export const useScannerPortStore = defineStore("scannerPort", {
         } else if (data.role === "Time Out") {
           this.timeOutInfo = { ...data, online: true, role: "Time Out" };
         }
-        this.newScannerInfo = null;
+        this.unassignedScanners = this.unassignedScanners.filter(
+          (scanner) => scanner.uniqueKey !== data.uniqueKey
+        );
+      });
+
+      this.socket.on("scannerAssignmentError", (data) => {
+        console.error("Assignment Error:", data.message);
+      });
+
+      this.socket.on("scannerRemoved", (data) => {
+        if (this.timeInInfo && this.timeInInfo.uniqueKey === data.uniqueKey) {
+          this.timeInInfo = null;
+        }
+        if (this.timeOutInfo && this.timeOutInfo.uniqueKey === data.uniqueKey) {
+          this.timeOutInfo = null;
+        }
       });
 
       this.socket.on("scannerDisconnected", (data) => {
-        if (
-          this.newScannerInfo &&
-          this.newScannerInfo.uniqueKey === data.uniqueKey
-        ) {
-          this.newScannerInfo = null;
-        }
+        this.unassignedScanners = this.unassignedScanners.filter(
+          (scanner) => scanner.uniqueKey !== data.uniqueKey
+        );
         if (this.timeInInfo && this.timeInInfo.uniqueKey === data.uniqueKey) {
           this.timeInInfo = null;
         }
@@ -73,6 +87,11 @@ export const useScannerPortStore = defineStore("scannerPort", {
     assignRole(uniqueKey, role) {
       if (this.socket) {
         this.socket.emit("assignRole", { uniqueKey, role });
+      }
+    },
+    removeAssignment(uniqueKey) {
+      if (this.socket) {
+        this.socket.emit("removeAssignment", { uniqueKey });
       }
     },
     openPortStatusModal() {

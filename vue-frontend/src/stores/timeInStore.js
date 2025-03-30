@@ -61,7 +61,7 @@ export const useTimeInStore = defineStore("timeIn", {
         this.socketConnected = true;
       });
 
-      this.socket.on("cardRead", (data) => {
+      this.socket.on("timeInCardRead", (data) => {
         this.nfcData = data;
         this.processScannedCard(data);
       });

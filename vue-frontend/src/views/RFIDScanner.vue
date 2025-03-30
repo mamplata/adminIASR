@@ -34,13 +34,10 @@ import { useDeviceStore } from '@/stores/deviceStore';
 import AnnouncementsCarousel from "@/components/AnnouncementsCarousel.vue";
 import DaisyTimeIn from "@/components/DaisyTimeIn.vue";
 import DeviceRegistration from "@/components/DeviceRegistration.vue";
-import { timeOutScanner } from '@/composables/timeOutScanner';
 
 const deviceStore = useDeviceStore();
 
 onMounted(() => {
   deviceStore.checkRegistration();
-  // Initialize the Time Out scanner.
-  timeOutScanner();
 });
 </script>
