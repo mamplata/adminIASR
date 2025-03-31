@@ -7,6 +7,10 @@
             v-model:dateFrom="dateFrom" v-model:dateTo="dateTo" @search="fetchLogs(1)" @reset="resetSearch"
             :loading="loading" />
 
+        <div class="flex justify-end mb-4">
+            <DaisyExportModule :exportUrl="route('logs.entry-logs.export')" fileName="entry-logs" />
+        </div>
+
         <!-- DaisyTable Component for displaying logs -->
         <DaisyTable :data="entryLogs.data" :currentPage="entryLogs.current_page" :lastPage="entryLogs.last_page"
             @change-page="fetchLogs" />
@@ -18,14 +22,13 @@ import { ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import EntryLogFilterPanel from './EntryLogFilterPanel.vue';
 import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
+import DaisyExportModule from '@/Components/Daisy/DaisyExportModule.vue';
 
 const { props: page } = usePage();
 
 const props = defineProps({
     entryLogs: Object,
 });
-
-console.log(page);
 
 // Initialize filter states using page props.
 const search = ref(page.search || '');

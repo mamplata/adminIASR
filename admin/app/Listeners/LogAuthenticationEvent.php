@@ -26,6 +26,7 @@ class LogAuthenticationEvent
     {
         AuditLog::create([
             'admin_id' => $user->id,
+            'admin_name' => $user->name,
             'action' => $action,
             'type' => 'User',
             'type_id' => $user->id,

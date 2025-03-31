@@ -67,14 +67,6 @@ class EntryLogController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -94,34 +86,28 @@ class EntryLogController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Export all entry logs.
      */
-    public function show(EntryLog $entryLog)
+    public function export()
     {
-        //
-    }
+        $entryLogs = EntryLog::orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($entryLog) {
+                return [
+                    'id'             => $entryLog->id,
+                    'device_id'      => $entryLog->device_id,
+                    'student_id'     => $entryLog->student_id,
+                    'uid'            => $entryLog->uid,
+                    'time_type'      => $entryLog->time_type,
+                    'status'         => $entryLog->status,
+                    'failure_reason' => $entryLog->failure_reason ?? 'N/A',
+                    'timestamp'      => $entryLog->created_at->format('l, F j, Y, g:i A'),
+                ];
+            });
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(EntryLog $entryLog)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, EntryLog $entryLog)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(EntryLog $entryLog)
-    {
-        //
+        // Return the data as JSON.
+        return response()->json([
+            'entryLogs' => $entryLogs,
+        ]);
     }
 }

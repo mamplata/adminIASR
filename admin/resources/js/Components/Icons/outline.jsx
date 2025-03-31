@@ -251,3 +251,88 @@ export const EmptyCircleIcon = defineComponent({
         )
     },
 })
+
+export const EntryIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Door Outline */}
+                <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                {/* Entry Arrow */}
+                <polyline
+                    points="10 8 15 12 10 16"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
+        )
+    },
+})
+
+export const UnauthorizedIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                {/* Lock Body */}
+                <rect
+                    x="6"
+                    y="11"
+                    width="12"
+                    height="10"
+                    rx="2"
+                    ry="2"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                {/* Lock Shackle */}
+                <path
+                    d="M16 11V7a4 4 0 0 0-8 0v4"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+                {/* Diagonal Slash */}
+                <line
+                    x1="3"
+                    y1="3"
+                    x2="21"
+                    y2="21"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
+        )
+    },
+})
+
