@@ -7,6 +7,7 @@
             v-model:searchDetails="searchDetails" :actions="actions" :types="types" :admins="admins"
             @search="fetchLogs(1)" @reset="resetSearch" :loading="loading" />
 
+        <DaisyExportModule :data="auditLogs.data" fileName="audit-logs" />
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
             @change-page="fetchLogs" :excludedColumns="['type_id']">
             <template #cell-details="{ row }">
@@ -25,6 +26,7 @@ import { ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import AuditLogFilterPanel from './AuditLogFilterPanel.vue';
 import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
+import DaisyExportModule from '@/Components/Daisy/DaisyExportModule.vue';
 
 const { props: page } = usePage();
 

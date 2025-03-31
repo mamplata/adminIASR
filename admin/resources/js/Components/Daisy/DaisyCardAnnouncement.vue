@@ -6,7 +6,8 @@
             <!-- 1) Text Announcement -->
             <div v-if="announcement.type === 'text'" class="relative card">
                 <!-- The background image is now a regular <img> -->
-                <img :src="pncBg" class="w-full object-contain" alt="Announcement Template" />
+                <img :src="pncBg" class="w-full object-contain" alt="Announcement Template"
+                    :style="{ maxHeight: '520px' }" />
 
                 <!-- Overlaid text content (absolute positioning) -->
                 <div class="absolute top-0 left-0 w-full p-4">
@@ -27,7 +28,7 @@
             <!-- 2) Image Announcement -->
             <div v-else-if="announcement.type === 'image'" class="card shadow-md mb-4">
                 <img :src="announcement.content.file_path" :alt="announcement.content.file_name"
-                    class="rounded-md w-full object-cover" />
+                    class="rounded-md w-full object-contain" :style="{ maxHeight: '520px' }" />
             </div>
 
             <!-- 3) Fallback Card -->
