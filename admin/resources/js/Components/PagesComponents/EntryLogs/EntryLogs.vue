@@ -8,7 +8,7 @@
             :loading="loading" />
 
         <div class="flex justify-end mb-4">
-            <DaisyExportModule :data="entryLogs.data" fileName="entry-logs" />
+            <DaisyExportModule :exportUrl="route('logs.entry-logs.export')" fileName="entry-logs" />
         </div>
 
         <!-- DaisyTable Component for displaying logs -->

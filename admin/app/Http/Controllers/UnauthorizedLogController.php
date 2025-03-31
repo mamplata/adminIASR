@@ -53,14 +53,6 @@ class UnauthorizedLogController extends Controller
 
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
@@ -77,36 +69,26 @@ class UnauthorizedLogController extends Controller
         return response()->json($unauthorizedLog, 201);
     }
 
-
     /**
-     * Display the specified resource.
+     * Export all unauthorized logs.
      */
-    public function show(UnauthorizedLog $unauthorizedLog)
+    public function export()
     {
-        //
-    }
+        $unauthorizedLogs = UnauthorizedLog::orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id'         => $log->id,
+                    'device_id'  => $log->device_id,
+                    'uid'        => $log->uid,
+                    'time_type'  => $log->time_type,
+                    'reason'     => $log->reason ?? 'N/A',
+                    'timestamp'  => $log->created_at->format('l, F j, Y, g:i A'),
+                ];
+            });
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(UnauthorizedLog $unauthorizedLog)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, UnauthorizedLog $unauthorizedLog)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(UnauthorizedLog $unauthorizedLog)
-    {
-        //
+        return response()->json([
+            'unauthorizedLogs' => $unauthorizedLogs,
+        ]);
     }
 }

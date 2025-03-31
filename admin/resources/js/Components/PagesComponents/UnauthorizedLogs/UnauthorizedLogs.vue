@@ -7,7 +7,7 @@
             @search="fetchLogs(1)" @reset="resetSearch" :loading="loading" />
 
         <div class="flex justify-end mb-4">
-            <DaisyExportModule :data="unauthorizedLogs.data" fileName="unauthorized-logs" />
+            <DaisyExportModule :exportUrl="route('logs.unauthorized-logs.export')" fileName="unauthorized-logs" />
         </div>
 
         <!-- DaisyTable Component for displaying logs -->

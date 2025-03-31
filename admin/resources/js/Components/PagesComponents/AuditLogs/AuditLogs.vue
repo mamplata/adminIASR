@@ -8,7 +8,7 @@
             @search="fetchLogs(1)" @reset="resetSearch" :loading="loading" />
 
         <div class="flex justify-end mb-4">
-            <DaisyExportModule :data="auditLogs.data" fileName="audit-logs" />
+            <DaisyExportModule :exportUrl="route('logs.audit-logs.export')" fileName="audit-logs" />
         </div>
 
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"

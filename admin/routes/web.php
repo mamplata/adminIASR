@@ -38,8 +38,14 @@ Route::middleware('auth')->group(function () {
 // LOGS
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
+    Route::get('/logs/audit-logs/export', [AuditLogController::class, 'export'])
+        ->name('logs.audit-logs.export');
     Route::get('/logs/entry-logs', [EntryLogController::class, 'index'])->name('logs.entry-logs.index');
+    Route::get('logs/entry-logs/export', [EntryLogController::class, 'export'])
+        ->name('logs.entry-logs.export');
     Route::get('/logs/unauthorized-logs', [UnauthorizedLogController::class, 'index'])->name('logs.unauthorized-logs.index');
+    Route::get('/logs/unauthorized-logs/export', [UnauthorizedLogController::class, 'export'])
+        ->name('logs.unauthorized-logs.export');
 });
 
 // ANNOUNCEMENTS
