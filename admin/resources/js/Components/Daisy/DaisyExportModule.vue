@@ -1,5 +1,5 @@
 <template>
-    <div class="flex gap-4 mt-4">
+    <div class="export-module flex gap-4 mt-4">
         <!-- CSV export button using image icon -->
         <button @click="exportCSV" class="btn btn-primary" title="Export as CSV">
             <img :src="csv" alt="CSV Export" class="w-6 h-6" />
@@ -28,12 +28,34 @@ const props = defineProps({
     }
 });
 
-// Returns a timestamp string formatted as YYYYMMDDTHHMMSS
-function getTimestamp() {
-    return new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+// Helper: Capitalize words and replace hyphens with spaces
+function getTitle(fileName) {
+    return fileName
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
-// Function to export data as CSV
+// Helper: Get formatted date as "March, 31, 2025, Monday"
+function getFormattedDate() {
+    const now = new Date();
+    const month = now.toLocaleDateString('en-US', { month: 'long' });
+    const day = now.toLocaleDateString('en-US', { day: 'numeric' });
+    const year = now.toLocaleDateString('en-US', { year: 'numeric' });
+    const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+    return `${month}, ${day}, ${year}, ${weekday}`;
+}
+
+// Generate header text based on fileName and current date
+function getHeaderText() {
+    const title = getTitle(props.fileName);
+    const dateStr = getFormattedDate();
+    return `${title} as of ${dateStr}`;
+}
+
+// --------------------- CSV Export ------------------------
+
+// Updated function to include header text in CSV content
 const exportCSV = () => {
     const timestamp = getTimestamp();
     const csvContent = convertToCSV(props.data);
@@ -48,30 +70,67 @@ const exportCSV = () => {
     document.body.removeChild(link);
 };
 
-// Helper function to convert JSON array to CSV string
+// Updated helper function to convert JSON array to CSV string with header text
 function convertToCSV(objArray) {
-    if (!objArray.length) return '';
+    // Generate header text row(s)
+    const headerText = getHeaderText();
+    let csvRows = [];
+    csvRows.push(headerText);
+    csvRows.push(''); // Blank row
+
+    if (!objArray.length) {
+        return csvRows.join('\r\n');
+    }
+
+    // Data headers
     const keys = Object.keys(objArray[0]);
-    const header = keys.join(',') + '\r\n';
-    const rows = objArray
-        .map(item =>
-            keys
-                .map(key => {
-                    const value = item[key] !== null && item[key] !== undefined ? item[key] : '';
-                    return `"${value.toString().replace(/"/g, '""')}"`;
-                })
-                .join(',')
-        )
-        .join('\r\n');
-    return header + rows;
+    csvRows.push(keys.join(','));
+
+    // Data rows
+    objArray.forEach(item => {
+        const row = keys.map(key => {
+            const value = item[key] !== null && item[key] !== undefined ? item[key] : '';
+            // Escape quotes and commas if necessary
+            return `"${value.toString().replace(/"/g, '""')}"`;
+        }).join(',');
+        csvRows.push(row);
+    });
+
+    return csvRows.join('\r\n');
 }
 
-// Function to export data as Excel using the XLSX library
+// --------------------- Excel Export ------------------------
+
+// Updated exportExcel to include header text rows in Excel file
 const exportExcel = () => {
     const timestamp = getTimestamp();
+    let wsData = [];
+
+    // First row: header text
+    wsData.push([getHeaderText()]);
+    // Second row: blank row
+    wsData.push([]);
+
+    if (props.data.length > 0) {
+        const keys = Object.keys(props.data[0]);
+        // Third row: table headers
+        wsData.push(keys);
+        // Data rows
+        props.data.forEach(item => {
+            wsData.push(keys.map(key => item[key] !== null && item[key] !== undefined ? item[key] : ''));
+        });
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(props.data);
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     XLSX.writeFile(wb, `${props.fileName}-${timestamp}.xlsx`);
 };
+
+// Helper: Generate a timestamp in YYYYMMDDTHHMMSS format
+function getTimestamp() {
+    return new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+}
 </script>
+
+<style scoped></style>

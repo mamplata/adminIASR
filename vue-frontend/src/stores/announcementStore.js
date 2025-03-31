@@ -1,7 +1,7 @@
 // src/stores/announcementStore.js
 import { defineStore } from "pinia";
 import HTTP from "@/http";
-import { useTimeInStore } from "@/stores/timeInStore";
+import { useTimeScannerStore } from "@/stores/useTimeScannerStore";
 
 export const useAnnouncementStore = defineStore("announcement", {
   state: () => ({
@@ -21,7 +21,7 @@ export const useAnnouncementStore = defineStore("announcement", {
       try {
         const response = await HTTP.get("/api/announcements");
         this.announcements = response.data.announcements || [];
-        const currentDept = useTimeInStore().selectedDepartment;
+        const currentDept = useTimeScannerStore().selectedDepartment;
 
         // Check if any announcement contains the selected department.
         // Here we split the departments string on ';' and compare either directly (for "GENERAL")
@@ -92,7 +92,7 @@ export const useAnnouncementStore = defineStore("announcement", {
       if (this.activeIndex < this.filteredAnnouncements.length - 1) {
         this.activeIndex++;
       } else {
-        const timeInStore = useTimeInStore();
+        const timeInStore = useTimeScannerStore();
         if (timeInStore.selectedDepartment !== "GENERAL") {
           timeInStore.selectedDepartment = "GENERAL";
         }
