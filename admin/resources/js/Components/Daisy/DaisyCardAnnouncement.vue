@@ -61,7 +61,6 @@ export default {
     data() {
         return {
             pncBg,
-            pncLogo,
         };
     },
     mounted() {
