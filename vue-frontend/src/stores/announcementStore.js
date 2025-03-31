@@ -1,7 +1,7 @@
 // src/stores/announcementStore.js
 import { defineStore } from "pinia";
 import HTTP from "@/http";
-import { useTimeScannerStore } from "@/stores/useTimeScannerStore";
+import { useTimeScannerStore } from "@/stores/timeScannerStore";
 
 export const useAnnouncementStore = defineStore("announcement", {
   state: () => ({
