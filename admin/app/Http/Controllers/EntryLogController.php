@@ -51,6 +51,7 @@ class EntryLogController extends Controller
             ->appends($request->all())
             ->through(fn($entryLog) => [
                 'id'         => $entryLog->id,
+                'device_id'  => $entryLog->device_id,
                 'student_id' => $entryLog->student_id,
                 'uid'        => $entryLog->uid,
                 'time_type'  => $entryLog->time_type,

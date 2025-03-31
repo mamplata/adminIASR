@@ -11,6 +11,8 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EntryLogController;
 use App\Http\Controllers\StudentInfoController;
 use App\Http\Controllers\SemesterController;
+use App\Http\Controllers\UnauthorizedLogController;
+use App\Models\UnauthorizedLog;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +39,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
     Route::get('/logs/entry-logs', [EntryLogController::class, 'index'])->name('logs.entry-logs.index');
-    Route::get('/logs/unauthorized-logs', [AuditLogController::class, 'index'])->name('logs.unauthorized-logs.index');
+    Route::get('/logs/unauthorized-logs', [UnauthorizedLogController::class, 'index'])->name('logs.unauthorized-logs.index');
 });
 
 // ANNOUNCEMENTS
