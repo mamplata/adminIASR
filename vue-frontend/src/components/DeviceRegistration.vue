@@ -9,7 +9,7 @@
 
                 <!-- Card -->
                 <div class="card custom-card bg-base-200 shadow-xl relative z-10">
-                    <img :src="pncLogo" alt="PNC Logo" class="w-[10vw] mx-auto h-auto mb-[-4vh] z-20" />
+                    <img :src="pncLogo" alt="PNC Logo" class="w-[10vw] mx-auto mt-3 h-auto mb-[-4vh] z-20" />
 
                     <div class="card-body custom-card-body">
                         <h2 class="card-title custom-card-title mb-[2vh] text-center">Register Device</h2>
