@@ -7,7 +7,9 @@
             v-model:searchDetails="searchDetails" :actions="actions" :types="types" :admins="admins"
             @search="fetchLogs(1)" @reset="resetSearch" :loading="loading" />
 
-        <DaisyExportModule :data="auditLogs.data" fileName="audit-logs" />
+        <div class="flex justify-end">
+            <DaisyExportModule :data="auditLogs.data" fileName="audit-logs" />
+        </div>
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
             @change-page="fetchLogs" :excludedColumns="['type_id']">
             <template #cell-details="{ row }">
