@@ -1,12 +1,13 @@
 <template>
     <div class="relative h-full texture-bg">
         <!-- Header -->
-        <header class="absolute top-0 left-0 m-4 z-50">
-            <img :src="ITAPLOGO" alt="iASR Logo" class="w-32" />
+        <header class="fixed top-[calc(1vh)] left-[calc(1vw)] z-50">
+            <img :src="ITAPLOGO" alt="ITAP Logo" class="w-[calc(6vw+6vh)] h-auto" />
         </header>
 
+
         <!-- Main content container -->
-        <div class="flex flex-col items-center justify-center h-full mx-10 pt-10">
+        <div class="flex flex-col items-center justify-center h-full mx-10 pt-[3vh]">
             <transition name="fade" mode="out-in">
                 <div
                     :key="timeScannerStore.isLoading ? 'loading' : (timeScannerStore.scannedStudent || timeScannerStore.nfcError) ? 'card' : 'prompt'">
@@ -88,7 +89,10 @@
                                     <div class="flex justify-between items-center mb-2">
                                         <span class="badge badge-xs badge-primary">Today</span>
                                         <span class="text-lg text-gray-700">
-                                            {{ new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) }}
+                                            {{ new Date().toLocaleDateString('en-US', {
+                                                month: 'long', day: 'numeric',
+                                                year: 'numeric'
+                                            }) }}
                                         </span>
                                     </div>
                                     <h3 class="text-2xl font-semibold text-gray-800 mb-3">Schedule</h3>
@@ -110,11 +114,12 @@
                     <template v-else>
                         <!-- "Tap your card" prompt or scanner status -->
                         <div class="text-center">
-                            <img :src="logoRFID" alt="RFID Icon" class="w-40 mx-auto"
+                            <img :src="logoRFID" alt="RFID Icon" class="w-[calc(10vw)] mx-auto"
                                 :class="{ 'animate-zoom-in-out': !timeScannerStore.scannerStatusLoading && isScanEnabled }" />
-                            <h1 class="text-4xl font-bold mt-4"
+                            <h1 class=" font-bold mt-[1vh] text-[calc(1.5vh+1.5vw)]"
                                 :class="{ 'text-green-900': !timeScannerStore.scannerStatusLoading && isScanEnabled, 'text-gray-500': !timeScannerStore.scannerStatusLoading && !isScanEnabled }">
-                                {{ timeScannerStore.scannerStatusLoading ? 'Checking scanner status...' : (isScanEnabled ? 'Tap your card' : 'Scanner Disabled') }}
+                                {{ timeScannerStore.scannerStatusLoading ? 'Checking scanner status...' : (isScanEnabled
+                                    ? 'Tap your card' : 'Scanner Disabled') }}
                             </h1>
                         </div>
                     </template>
@@ -149,6 +154,7 @@ onMounted(() => {
 
 <style scoped>
 .texture-bg {
+    width: calc(1vw +1vh);
     background-color: #f6f7fb;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='199' viewBox='0 0 100 199'%3E%3Cg fill='%23198754' fill-opacity='0.35'%3E%3Cpath d='M0 199V0h1v1.99L100 199h-1.12L1 4.22V199H0zM100 2h-.12l-1-2H100v2z'%3E%3C/path%3E%3C/g%3E%3C/svg%3E");
 }

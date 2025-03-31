@@ -4,7 +4,7 @@
     <header class="h-[calc(10vh)] flex items-center relative" style="background-color: #198754">
       <h1 class="text-white text-[calc(2.3vw+2.3vh)] font-bold mx-auto">Announcements</h1>
       <button @click="scannerPortStore.openPortStatusModal()"
-        class="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-[calc(0.5vw+0.5vh)] rounded-full flex items-center justify-center">
+        class="absolute right-[calc(1vw+1vh)] top-1/2 transform -translate-y-1/2 bg-blue-800 text-white p-[calc(0.5vw+0.5vh)] rounded-full flex items-center justify-center">
         <i class="fas fa-info-circle text-[calc(1vw+1vh)]"></i>
       </button>
     </header>
