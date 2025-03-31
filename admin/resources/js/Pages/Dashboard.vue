@@ -1,4 +1,5 @@
 <script setup>
+import Dashboard from '@/Components/PagesComponents/Dashboard/Dashboard.vue'
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue'
 </script>
 
@@ -12,10 +13,21 @@ import AuthenticatedLayout from '@/Layouts/Authenticated.vue'
             </div>
         </template>
 
-        <div class="p-6 overflow-hidden bg-white rounded-md shadow-md dark:bg-dark-eval-1">
-            <div>
-
-            </div>
-        </div>
+        <Dashboard :registeredCardsCount="registeredCardsCount" :entryLogsIn="entryLogsIn" :entryLogsOut="entryLogsOut"
+            :unauthorizedLogsIn="unauthorizedLogsIn" :unauthorizedLogsOut="unauthorizedLogsOut"
+            :registeredDevicesCount="registeredDevicesCount" :auditLogs="auditLogs" />
     </AuthenticatedLayout>
 </template>
+<script>
+export default {
+    props: {
+        registeredCardsCount: Number,
+        entryLogsIn: Number,
+        entryLogsOut: Number,
+        unauthorizedLogsIn: Number,
+        unauthorizedLogsOut: Number,
+        registeredDevicesCount: Number,
+        auditLogs: Array
+    }
+};
+</script>
