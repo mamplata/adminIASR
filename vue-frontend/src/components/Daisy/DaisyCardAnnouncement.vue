@@ -38,7 +38,7 @@
             :style="isThumb ? { height: thumbnailHeight, backgroundColor: 'black' } : { backgroundColor: 'black' }">
             <img :src="`${apiUrl}${announcement.content.file_path}`" :alt="announcement.content.file_name"
                 class="block m-0 p-0 object-contain object-center" :class="isThumb ? 'w-full h-full' : ''"
-                :style="!isThumb ? { width: '100vw', height: '100vh - 20vh' } : {}" />
+                :style="!isThumb ? { maxHeight: '65vh', width: '100vw', height: '100vh - 20vh' } : {}" />
         </div>
     </div>
 </template>

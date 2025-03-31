@@ -5,7 +5,7 @@
         <AuditLogFilterPanel v-model:selectedAction="selectedAction" v-model:selectedType="selectedType"
             v-model:selectedAdmin="selectedAdmin" v-model:startDate="startDate" v-model:endDate="endDate"
             v-model:searchDetails="searchDetails" :actions="actions" :types="types" :admins="admins"
-            @search="fetchLogs(1)" @reset="resetSearch" />
+            @search="fetchLogs(1)" @reset="resetSearch" :loading="loading" />
 
         <DaisyTable :data="auditLogs.data" :currentPage="auditLogs.current_page" :lastPage="auditLogs.last_page"
             @change-page="fetchLogs" :excludedColumns="['type_id']">
@@ -69,9 +69,12 @@ const formattedDetails = (details) => {
         .map(([key, value]) => {
             const formattedKey = capitalizeFirstLetter(key);
             if (typeof value === "object" && value !== null) {
-                return `<strong>${formattedKey}:</strong> ${JSON.stringify(value, null, 2)}`;
+                const jsonString = JSON.stringify(value, null, 2);
+                const truncated = jsonString.length > 200 ? jsonString.slice(0, 200) + '...' : jsonString;
+                return `<strong>${formattedKey}:</strong> ${truncated}`;
             }
-            return `<strong>${formattedKey}:</strong> ${value}`;
+            const truncated = value.length > 200 ? value.slice(0, 200) + '...' : value;
+            return `<strong>${formattedKey}:</strong> ${truncated}`;
         })
         .join("<br>");
 };

@@ -25,7 +25,7 @@ class DeviceService
 
         return $query->paginate(5)
             ->appends($request->only(['search', 'status']))
-            ->through(fn ($device) => [
+            ->through(fn($device) => [
                 'id'                => $device->id,
                 'name'              => $device->name,
                 'short_code'        => $device->short_code,
@@ -45,7 +45,15 @@ class DeviceService
             // Generate unique deviceFingerprint (UUID)
             $data['deviceFingerprint'] = (string) \Illuminate\Support\Str::uuid();
         } else { // Updating an existing device
-            unset($data['short_code'], $data['deviceFingerprint']); // Prevent changes
+            unset($data['short_code']); // Prevent changes to short_code
+
+            // If status is being updated to inactive, generate a new deviceFingerprint
+            if (isset($data['status']) && strtolower($data['status']) === 'inactive') {
+                $data['deviceFingerprint'] = (string) \Illuminate\Support\Str::uuid();
+            } else {
+                // Otherwise, remove deviceFingerprint from the update payload to keep the existing value
+                unset($data['deviceFingerprint']);
+            }
         }
 
         return Device::updateOrCreate(
@@ -53,6 +61,7 @@ class DeviceService
             $data
         );
     }
+
 
     public function deleteDevice(Device $device)
     {

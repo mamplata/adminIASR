@@ -8,6 +8,7 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\EntryLogController;
 use App\Http\Controllers\StudentInfoController;
 use App\Http\Controllers\SemesterController;
 
@@ -32,8 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// LOGS
 Route::middleware(['auth'])->group(function () {
     Route::get('/logs/audit-logs', [AuditLogController::class, 'index'])->name('logs.audit-logs.index');
+    Route::get('/logs/entry-logs', [EntryLogController::class, 'index'])->name('logs.entry-logs.index');
+    Route::get('/logs/unauthorized-logs', [AuditLogController::class, 'index'])->name('logs.unauthorized-logs.index');
 });
 
 // ANNOUNCEMENTS
@@ -78,6 +82,7 @@ Route::middleware(['auth'])->group(
         Route::get('/check-enrollment-status', [StudentInfoController::class, 'checkEnrollmentStatus'])->name('check-enrollment-status');
     }
 );
+
 
 //EMAIL VERIFICATION
 use App\Http\Controllers\EmailVerificationController;

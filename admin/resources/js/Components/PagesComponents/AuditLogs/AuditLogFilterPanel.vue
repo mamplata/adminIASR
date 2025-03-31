@@ -13,7 +13,8 @@
         <div class="flex flex-col md:flex-row items-center gap-2 mt-4">
             <DateRangePicker class="w-full" v-model:startDate="localStartDate" v-model:endDate="localEndDate" />
             <button @click="$emit('search')" class="btn btn-success text-white hover:bg-[#20714c] w-full md:w-auto">
-                Search
+                <span v-if="loading" class="loading loading-spinner loading-sm"></span>
+                <span v-else>Search</span>
             </button>
             <button @click="$emit('reset')" class="btn btn-neutral text-white hover:bg-[#7b7b7b] w-full md:w-auto">
                 Reset
@@ -37,6 +38,7 @@ const props = defineProps({
     actions: Array,
     types: Array,
     admins: Array,
+    loading: { type: Boolean, default: false },
 });
 
 const emits = defineEmits([

@@ -49,6 +49,10 @@ import { sidebarState } from '@/Composables'
 
             <SidebarCollapsibleItem :href="route('logs.audit-logs.index')" title="Audit Logs"
                 :active="route().current('logs.audit-logs.index')" />
+            <SidebarCollapsibleItem :href="route('logs.entry-logs.index')" title="Entry Logs"
+                :active="route().current('logs.entry-logs.index')" />
+            <SidebarCollapsibleItem :href="route('logs.unauthorized-logs.index')" title="Unauthorized Logs"
+                :active="route().current('logs.unauthorized-logs.index')" />
         </SidebarCollapsible>
 
 
