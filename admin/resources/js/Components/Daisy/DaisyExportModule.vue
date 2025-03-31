@@ -1,12 +1,12 @@
 <template>
     <div class="export-module flex gap-4 mt-4">
         <!-- CSV export button using image icon -->
-        <button @click="exportCSV" class="btn btn-primary" title="Export as CSV">
-            <img :src="csv" alt="CSV Export" class="w-6 h-6" />
+        <button @click="exportCSV" class="btn btn-soft" title="Export as CSV">
+            <span>Export as</span> <img :src="csv" alt="CSV Export" class="w-6 h-6" />
         </button>
         <!-- Excel export button using image icon -->
-        <button @click="exportExcel" class="btn btn-secondary" title="Export as Excel">
-            <img :src="excel" alt="Excel Export" class="w-6 h-6" />
+        <button @click="exportExcel" class="btn btn-soft" title="Export as Excel">
+            <span>Export as</span> <img :src="excel" alt="Excel Export" class="w-6 h-6" />
         </button>
     </div>
 </template>

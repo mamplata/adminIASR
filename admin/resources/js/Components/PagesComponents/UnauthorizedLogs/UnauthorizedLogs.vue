@@ -6,6 +6,10 @@
         <UnauthorizedLogFilterPanel v-model:timeType="timeType" v-model:dateFrom="dateFrom" v-model:dateTo="dateTo"
             @search="fetchLogs(1)" @reset="resetSearch" :loading="loading" />
 
+        <div class="flex justify-end mb-4">
+            <DaisyExportModule :data="unauthorizedLogs.data" fileName="unauthorized-logs" />
+        </div>
+
         <!-- DaisyTable Component for displaying logs -->
         <DaisyTable :data="unauthorizedLogs.data" :currentPage="unauthorizedLogs.current_page"
             :lastPage="unauthorizedLogs.last_page" @change-page="fetchLogs" />
@@ -17,14 +21,13 @@ import { ref } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import UnauthorizedLogFilterPanel from './UnauthorizedLogFilterPanel.vue';
 import DaisyTable from '@/Components/Daisy/DaisyTable.vue';
+import DaisyExportModule from '@/Components/Daisy/DaisyExportModule.vue';
 
 const { props: page } = usePage();
 
 const props = defineProps({
     unauthorizedLogs: Object,
 });
-
-console.log(page);
 
 // Initialize filter states using page props.
 const timeType = ref(page.filters.time_type || '');
