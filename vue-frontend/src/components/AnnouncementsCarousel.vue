@@ -58,11 +58,11 @@ import DaisyCardAnnouncement from "@/components/Daisy/DaisyCardAnnouncement.vue"
 import PortStatus from "@/components/PortStatus.vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 import { useAnnouncementStore } from "@/stores/announcementStore";
-import { useTimeInStore } from "@/stores/timeInStore";
+import { useTimeScannerStore } from "@/stores/timeScannerStore";
 
 const scannerPortStore = useScannerPortStore();
 const announcementStore = useAnnouncementStore();
-const timeInStore = useTimeInStore();
+const timeScannerStore = useTimeScannerStore();
 
 const carouselStyle = computed(() => ({
   backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.1)), url(${bgAnnouncement})`,
@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
 
 // When the department filter changes, reset announcements and active index.
 watch(
-  () => timeInStore.selectedDepartment,
+  () => timeScannerStore.selectedDepartment,
   async (newDept) => {
     // First fetch the latest announcements from the server
     await announcementStore.fetchAnnouncements();
