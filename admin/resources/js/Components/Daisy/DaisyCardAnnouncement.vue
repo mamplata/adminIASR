@@ -50,7 +50,6 @@
 
 <script>
 import pncBg from '../../../assets/img/pncAnnouncement.png';
-import pncLogo from '../../../assets/img/pnc-logo.png';
 
 export default {
     name: 'AnnouncementModal',
@@ -63,7 +62,6 @@ export default {
     data() {
         return {
             pncBg,
-            pncLogo,
         };
     },
     mounted() {
