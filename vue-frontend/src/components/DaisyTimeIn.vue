@@ -102,8 +102,8 @@
                                     </h3>
                                     <ul class="space-y-[0.5vw]" v-if="todaySchedule.length">
                                         <li v-for="item in todaySchedule" :key="item.id"
-                                            class="flex items-center text-sm text-gray-700">
-                                            <i class="fas fa-check-circle text-green-500 mr-[05.vw]"></i>
+                                            class="flex items-center text-[calc(0.8vw+0.8vh)] text-gray-700">
+                                            <i class="fas fa-check-circle text-green-500 mr-[0.5vw]"></i>
                                             <span class="text-[calc(0.8vw+0.8vh)]">
                                                 {{ item.courseCode }}: {{ item.courseDescription }} | {{ item.time }} |
                                                 {{ item.room }} | Section {{ item.section }}
@@ -111,7 +111,7 @@
                                         </li>
                                     </ul>
                                     <p v-else class="text-center text-[calc(0.8vw+0.8vh)] text-gray-600">{{
-                                        timeScannerStore.scheduleError }}</p>
+                                        timeScannerStore.scheduleError || 'Waiting for schedule...' }}</p>
                                 </div>
                             </div>
                         </template>

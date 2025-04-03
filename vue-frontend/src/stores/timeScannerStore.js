@@ -135,7 +135,7 @@ export const useTimeScannerStore = defineStore("timeScanner", {
           console.log(
             "Time OUT scanner is not available. Scanning disabled for OUT. Retrying..."
           );
-          setTimeout(() => this.readNfcCard(role), 3000);
+          setTimeout(() => this.readNfcCard(role), 1000);
           return;
         }
       }
@@ -246,50 +246,36 @@ export const useTimeScannerStore = defineStore("timeScanner", {
           { withCredentials: true }
         );
         studentData = response.data.student;
+
+        // Update UI immediately with scanned student data.
         this.scannedStudent = studentData;
-        try {
-          await HTTP.post("/api/entry-logs", {
-            device_id: this.deviceFingerprint,
-            uid: card.uid,
-            student_id: studentData.studentId.toString(),
-            time_type: "IN",
-            status: "Success",
-            failure_reason: null,
-          });
-        } catch (logError) {
+        // Clear any previous schedule or error
+        this.schedule = [];
+        this.scheduleError = "";
+
+        // Log the successful scan asynchronously.
+        HTTP.post("/api/entry-logs", {
+          device_id: this.deviceFingerprint,
+          uid: card.uid,
+          student_id: studentData.studentId.toString(),
+          time_type: "IN",
+          status: "Success",
+          failure_reason: null,
+        }).catch((logError) => {
           console.error("Failed to log IN entry:", logError);
-        }
-        const scheduleResponse = await HTTP.get(
-          `/api/fetch-schedule/${studentData.studentId}`
-        );
-        if (
-          scheduleResponse.data.schedule &&
-          scheduleResponse.data.schedule.length > 0
-        ) {
-          const allSchedules = Array.isArray(scheduleResponse.data.schedule)
-            ? scheduleResponse.data.schedule
-            : [scheduleResponse.data.schedule];
-          const todayName = new Date().toLocaleDateString("en-US", {
-            weekday: "long",
-          });
-          const todaySchedules = allSchedules.filter((item) =>
-            item.day.includes(todayName)
-          );
-          if (todaySchedules.length > 0) {
-            this.schedule = todaySchedules;
-          } else {
-            this.schedule = [];
-            this.scheduleError = "No schedule available for today.";
-          }
-        } else {
-          this.schedule = [];
-          this.scheduleError =
-            scheduleResponse.data.message || "No schedule available.";
-        }
+        });
+
+        // Initiate schedule fetching without waiting for it to complete.
+        this.fetchStudentSchedule(studentData.studentId);
+
+        // Update selected department immediately.
         this.selectedDepartment = `${studentData.department}: ${studentData.program}`;
         this.isLoading = false;
+
+        // Optionally, clear the student display after a delay.
         setTimeout(() => {
           this.scannedStudent = null;
+          // If needed, you can also clear schedule-related state here.
           this.schedule = [];
           this.scheduleError = "";
           this.readNfcCard("IN");
@@ -334,10 +320,48 @@ export const useTimeScannerStore = defineStore("timeScanner", {
         setTimeout(() => {
           this.nfcError = "";
           this.readNfcCard("IN");
-        }, 3000);
+        }, 5000);
       } finally {
         this.isReadingNfc = false;
       }
     },
+
+    /**
+     * Fetches the student's schedule and updates the UI.
+     */
+    async fetchStudentSchedule(studentId) {
+      try {
+        const scheduleResponse = await HTTP.get(`/api/fetch-schedule/${studentId}`);
+        if (
+          scheduleResponse.data.schedule &&
+          scheduleResponse.data.schedule.length > 0
+        ) {
+          const allSchedules = Array.isArray(scheduleResponse.data.schedule)
+            ? scheduleResponse.data.schedule
+            : [scheduleResponse.data.schedule];
+          const todayName = new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+          });
+          const todaySchedules = allSchedules.filter((item) =>
+            item.day.includes(todayName)
+          );
+          if (todaySchedules.length > 0) {
+            this.schedule = todaySchedules;
+          } else {
+            this.schedule = [];
+            this.scheduleError = "No schedule available for today.";
+          }
+        } else {
+          this.schedule = [];
+          this.scheduleError =
+            scheduleResponse.data.message || "No schedule available.";
+        }
+      } catch (err) {
+        console.error("Error fetching schedule:", err);
+        this.schedule = [];
+        this.scheduleError = "Failed to load schedule.";
+      }
+    }
+
   },
 });

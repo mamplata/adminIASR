@@ -134,9 +134,6 @@ function initializeNFCRead(io) {
           const fp =
             reader.deviceFingerprint ||
             (reader.customId ? reader.customId.split("-port")[0] : "");
-          io.to(fp).emit("readFailed", {
-            message: `Authentication Error: ${errFallback.message}`,
-          });
           return;
         }
       }
@@ -178,9 +175,6 @@ function initializeNFCRead(io) {
         const fp =
           reader.deviceFingerprint ||
           (reader.customId ? reader.customId.split("-port")[0] : "");
-        io.to(fp).emit("readFailed", {
-          message: `Read Error: ${readErr.message}`,
-        });
       }
     });
 
