@@ -4,28 +4,30 @@
         <div class="fixed inset-0 z-[9998] bg-black opacity-50"></div>
         <!-- Combined Modal Content -->
         <div
-            class="fixed rounded-lg top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] bg-base-200 border border-base-300 p-12 shadow-lg w-full max-w-xl">
-            <h3 class="text-xl font-bold mb-4">Scanner Configuration</h3>
+            class="fixed rounded-lg top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] bg-base-200 border border-base-300 p-[calc(3vw+3vh)] shadow-lg w-full max-w-[50vw]">
+            <h3 class="text-[calc(1.5vw+1.5vh)] font-bold mb-[1vh]">Scanner Configuration</h3>
 
             <!-- Assignment Section -->
-            <div v-if="scannerPortStore.unassignedScanners.length > 0 && availableRole" class="mb-8">
-                <label class="mb-4 block">
-                    <strong>Select Port:</strong>
-                    <select v-model="selectedPort" class="select select-bordered w-full max-w-xs">
-                        <option disabled value="">-- choose a port --</option>
+            <div v-if="scannerPortStore.unassignedScanners.length > 0 && availableRole" class="mb-[2.5vh]">
+                <label class="mb-[1vh] block">
+                    <strong class="text-[calc(1vw+1vh)]">Select Port: </strong>
+                    <select v-model="selectedPort"
+                        class="select select-bordered text-[calc(0.8vw+0.8vh)] h-[5vh] w-[30vw]">
+                        <option class="text-[calc(0.8vw+0.8vh)]" disabled value="">-- choose a port --</option>
                         <option v-for="scanner in scannerPortStore.unassignedScanners" :key="scanner.uniqueKey"
                             :value="scanner.uniqueKey">
                             {{ scanner.portPath }}
                         </option>
                     </select>
                 </label>
-                <p class="mb-4">Select a role to assign:</p>
-                <div class="flex gap-4">
-                    <button v-if="!hasRole('Time In')" @click="onAssignRole('Time In')" class="btn btn-success flex-1">
+                <p class="mb-[1vh] text-[calc(1vw+1vh)]">Select a role to assign:</p>
+                <div class="flex gap-[1vw]">
+                    <button v-if="!hasRole('Time In')" @click="onAssignRole('Time In')"
+                        class="btn btn-success p-[calc(1vw+1vh)] text-[calc(1vw+1vh)] h-[6.5vh] flex-1">
                         Time In
                     </button>
                     <button v-if="!hasRole('Time Out')" @click="onAssignRole('Time Out')"
-                        class="btn btn-warning flex-1">
+                        class="btn btn-warning p-[calc(1vw+1vh)] text-[calc(1vw+1vh)] h-[6.5vh] flex-1">
                         Time Out
                     </button>
                 </div>
@@ -33,48 +35,49 @@
 
             <!-- Status Section -->
             <div>
-                <h4 class="font-bold text-lg mb-2">Current Assignments</h4>
-                <p class="mb-2">
-                    <strong>Time In:</strong>
-                    <span v-if="scannerPortStore.timeInInfo">
+                <h4 class="font-bold text-[calc(1.5vw+1.5vh)] mb-[0.5vh]">Assignments</h4>
+                <p class="mb-[0.5vh]">
+                    <strong class="text-[calc(1vw+1vh)]">Time In:</strong>
+                    <span class="text-[calc(1vw+1vh)]" v-if="scannerPortStore.timeInInfo">
                         <template v-if="scannerPortStore.timeInInfo.online">
-                            <i class="fas fa-check text-green-500 mr-1"></i>
+                            <i class="fas fa-check text-green-500 mr-[0.5vw]"></i>
                             Online - Port {{ scannerPortStore.timeInInfo.portPath }}
                         </template>
                         <template v-else>
-                            <i class="fas fa-times text-red-500 mr-1"></i>
+                            <i class="fas fa-times text-red-500 mr-[0.5vw]"></i>
                             Offline - Port {{ scannerPortStore.timeInInfo.portPath }}
                         </template>
                         <button @click="removeAssignment(scannerPortStore.timeInInfo.uniqueKey)"
-                            class="btn btn-sm ml-2">
+                            class="btn bg-red-500 rounded-[calc(0.5vw+0.5vh)] p-[calc(0.5vw+0.5vh)] text-white text-[calc(0.8vw+0.8vh)] h-[5vh]">
                             Remove
                         </button>
                     </span>
-                    <span v-else>Not Assigned</span>
+                    <span class="text-[calc(1vw+1vh)]" v-else> Not Assigned</span>
                 </p>
                 <p>
-                    <strong>Time Out:</strong>
-                    <span v-if="scannerPortStore.timeOutInfo">
+                    <strong class="text-[calc(1vw+1vh)]">Time Out:</strong>
+                    <span class="text-[calc(1vw+1vh)]" v-if="scannerPortStore.timeOutInfo">
                         <template v-if="scannerPortStore.timeOutInfo.online">
-                            <i class="fas fa-check text-green-500 mr-1"></i>
+                            <i class="fas fa-check text-green-500 mr-[0.5vw]"></i>
                             Online - Port {{ scannerPortStore.timeOutInfo.portPath }}
                         </template>
                         <template v-else>
-                            <i class="fas fa-times text-red-500 mr-1"></i>
+                            <i class="fas fa-times text-red-500 mr-[0.5vw]"></i>
                             Offline - Port {{ scannerPortStore.timeOutInfo.portPath }}
                         </template>
                         <button @click="removeAssignment(scannerPortStore.timeOutInfo.uniqueKey)"
-                            class="btn btn-sm ml-2">
+                            class="btn bg-red-500 rounded-[calc(0.5vw+0.5vh)] p-[calc(0.5vw+0.5vh)] text-white text-[calc(0.8vw+0.8vh)] h-[5vh]">
                             Remove
                         </button>
                     </span>
-                    <span v-else>Not Assigned</span>
+                    <span class="text-[calc(1vw+1vh)]" v-else> Not Assigned</span>
                 </p>
             </div>
 
             <!-- Modal Actions -->
-            <div class="modal-action mt-6">
-                <button @click="closeModal" class="btn">Close</button>
+            <div class="modal-action mt-[2vh]">
+                <button @click="closeModal"
+                    class="btn rounded-[calc(0.5vw+0.5vh)] p-[calc(1vw+1vh)] text-[calc(1vw+1vh)] h-[6.5vh]">Close</button>
             </div>
         </div>
     </div>
