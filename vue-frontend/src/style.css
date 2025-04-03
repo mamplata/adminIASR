@@ -27,3 +27,11 @@
     font-weight: bold;
   }
 }
+
+.Vue-Toastification__toast {
+  font-size: 10vw !important;
+  /* Relative to viewport width */
+  padding: 1vw !important;
+  min-width: 15vw !important;
+  max-width: 20vw !important;
+}

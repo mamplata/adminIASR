@@ -5,6 +5,9 @@ import { getSocket } from "@/composables/socket";
 import { watch } from "vue";
 import { useScannerPortStore } from "@/stores/scannerPortStore";
 import { useDeviceStore } from "@/stores/deviceStore";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 export const useTimeScannerStore = defineStore("timeScanner", {
   state: () => ({
@@ -179,6 +182,10 @@ export const useTimeScannerStore = defineStore("timeScanner", {
             "Time OUT processing complete. Student ID:",
             studentData.studentId
           );
+          // Show a toast notification with the student ID
+          toast.success(`Time OUT: Student ID ${studentData.studentId}`, {
+            timeout: 5000,
+          });
           try {
             await HTTP.post("/api/entry-logs", {
               device_id: this.deviceFingerprint,
@@ -191,6 +198,7 @@ export const useTimeScannerStore = defineStore("timeScanner", {
           } catch (logError) {
             console.error("Failed to log Time OUT entry:", logError);
           }
+
         } catch (err) {
           const errorMessage =
             err.response?.data?.error ||
