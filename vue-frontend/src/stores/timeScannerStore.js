@@ -230,7 +230,7 @@ export const useTimeScannerStore = defineStore("timeScanner", {
           // For OUT, do not update UI; just restart reading.
           setTimeout(() => {
             this.readNfcCard("OUT");
-          }, 5000);
+          }, 1000);
           this.isReadingNfc = false;
         }
         return;
