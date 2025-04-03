@@ -16,8 +16,13 @@
 
       <!-- Carousel -->
       <div v-if="announcementStore.loading" class="flex-1 flex items-center justify-center relative z-20">
-        <p class="text-white text-[calc(1.5vw+1.5vh)] text-center">Loading announcements...</p>
+        <div class="flex flex-col items-center justify-center relative">
+          <span
+            class="loading loading-spinner loading-lg text-white absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></span>
+          <p class="text-white text-[calc(1.5vw+1.5vh)] text-center">Loading announcements...</p>
+        </div>
       </div>
+
       <div v-else-if="announcementStore.filteredAnnouncements.length > 0" class="relative flex-1 z-20">
         <div v-for="(announcement, index) in announcementStore.filteredAnnouncements" :key="announcement.id || index"
           class="carousel-item relative w-full h-full flex justify-center items-center"

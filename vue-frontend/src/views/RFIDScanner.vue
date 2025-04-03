@@ -3,7 +3,10 @@
   <div class="h-screen w-full">
     <!-- Loading state while checking registration -->
     <div v-if="deviceStore.checkingRegistration" class="flex items-center justify-center h-full">
-      <p class="text-[calc(1vw+1vh)]">Checking device registration...</p>
+      <div class="flex flex-col items-center justify-center space-y-4">
+        <span class="loading loading-spinner loading-lg"></span>
+        <p class="text-[calc(1vw+1vh)] text-center">Checking device registration...</p>
+      </div>
     </div>
 
     <!-- Once registration check is done -->
