@@ -134,11 +134,5 @@ function closeModal() {
 
 onMounted(() => {
     scannerPortStore.initializeSocket();
-    // Sync localStorage assignments on mount.
-    const stored = localStorage.getItem("scannerAssignments");
-    if (stored) {
-        const assignments = JSON.parse(stored);
-        scannerPortStore.socket.emit("syncScannerAssignments", assignments);
-    }
 });
 </script>

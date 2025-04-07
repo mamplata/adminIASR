@@ -46,12 +46,12 @@ function checkScanners(socket, deviceFingerprint) {
 
   usb.getDeviceList().forEach((device) => {
     if (isNfcScanner(device)) {
-      const portPath = device.portNumbers
-        ? device.portNumbers.join(".")
-        : "Unknown";
+      const portPath = device.portNumbers ? device.portNumbers.join(".") : "Unknown";
       const uniqueKey = `${deviceFingerprint}-port${portPath}`;
       currentConnected.add(uniqueKey);
 
+      // If this scanner is in our assignments (i.e. synced from localStorage),
+      // simply update its online status.
       if (roles[uniqueKey]) {
         socket.to(deviceFingerprint).emit("scannerDetected", {
           uniqueKey,
@@ -61,7 +61,7 @@ function checkScanners(socket, deviceFingerprint) {
           online: true,
         });
       } else {
-        // Only emit unassigned if less than 2 roles are assigned.
+        // Only emit unassigned if there’s room for assignment
         if (Object.keys(roles).length < 2) {
           socket.to(deviceFingerprint).emit("scannerDetected", {
             uniqueKey,
@@ -74,12 +74,9 @@ function checkScanners(socket, deviceFingerprint) {
     }
   });
 
-  // Emit events for scanners that are offline.
+  // Emit offline update for scanners that are no longer connected
   Object.keys(roles).forEach((uniqueKey) => {
-    if (
-      uniqueKey.startsWith(deviceFingerprint) &&
-      !currentConnected.has(uniqueKey)
-    ) {
+    if (uniqueKey.startsWith(deviceFingerprint) && !currentConnected.has(uniqueKey)) {
       const portPath = getPortFromUniqueKey(uniqueKey);
       socket.to(deviceFingerprint).emit("scannerDetected", {
         uniqueKey,
@@ -96,7 +93,7 @@ module.exports = {
   getAssignments,
   setAssignment,
   removeAssignment,
-  isNfcScanner: isNfcScanner, // exporting the generic NFC scanner detection
+  isNfcScanner: isNfcScanner,
   getPortFromUniqueKey,
   checkScanners,
 };

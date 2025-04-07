@@ -39,6 +39,7 @@ io.on("connection", (socket) => {
       for (const uniqueKey in assignments) {
         setAssignment(deviceFingerprint, uniqueKey, assignments[uniqueKey]);
       }
+
       // Update active readers for this client.
       updateActiveNfcReaders(deviceFingerprint);
     });
@@ -46,7 +47,7 @@ io.on("connection", (socket) => {
     // Periodically check for connected scanners.
     setInterval(() => {
       const roles = getAssignments(deviceFingerprint);
-      if (Object.keys(roles).length < 2) {
+      if (Object.keys(roles).length <= 2) {
         checkScanners(socket, deviceFingerprint);
       }
     }, 2000);

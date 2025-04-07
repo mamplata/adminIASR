@@ -39,29 +39,35 @@ function initializeNFC(io) {
     });
 
     reader.on("card", async (card) => {
-      // Only process card events if scanning is enabled.
       if (!nfcListening) {
         console.log("⚠️ NFC scanning disabled.");
         return;
       }
       console.log(`✅ Card detected with UID: ${card.uid}`);
-      // Emit the UID; the client will later include it with student data.
-      io.emit("cardScanned", { uid: card.uid });
+      if (currentScannerSocketId) {
+        io.to(currentScannerSocketId).emit("cardScanned", { uid: card.uid });
+      }
       nfcListening = false;
+      currentScannerSocketId = null; // Reset after sending event
     });
   });
+
+  let currentScannerSocketId = null;
 
   io.on("connection", (socket) => {
     // Start scanning when the client is ready.
     socket.on("startScan", () => {
       nfcListening = true;
+      currentScannerSocketId = socket.id; // Capture the scanning client's ID
       socket.emit("nfcStatus", "Tap your NFC card now!");
     });
 
     // Stop scanning when the client cancels.
     socket.on("cancelScan", () => {
       nfcListening = false;
-      console.log("NFC scanning cancelled by the client.");
+      if (currentScannerSocketId === socket.id) {
+        currentScannerSocketId = null;
+      }
     });
 
     // Handle registration confirmation, including the scanned UID.

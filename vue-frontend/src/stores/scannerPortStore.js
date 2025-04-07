@@ -29,21 +29,25 @@ export const useScannerPortStore = defineStore("scannerPort", {
       if (!this.socket) return;
 
       this.socket.on("scannerDetected", (data) => {
-        if (!data.assigned) {
+        // If the scanner is assigned (exists in local assignments), update its online/offline status.
+        if (data.assigned) {
+          // Update the respective state (Time In / Time Out) with online status.
+          if (data.role === "Time In") {
+            this.timeInInfo = { ...data };
+          } else if (data.role === "Time Out") {
+            this.timeOutInfo = { ...data };
+          }
+          // Also remove from unassigned if present.
+          this.unassignedScanners = this.unassignedScanners.filter(
+            (scanner) => scanner.uniqueKey !== data.uniqueKey
+          );
+        } else {
+          // For unassigned scanners, simply add them if they’re not already in the list.
           const exists = this.unassignedScanners.find(
             (scanner) => scanner.uniqueKey === data.uniqueKey
           );
           if (!exists) {
             this.unassignedScanners.push(data);
-          }
-        } else {
-          this.unassignedScanners = this.unassignedScanners.filter(
-            (scanner) => scanner.uniqueKey !== data.uniqueKey
-          );
-          if (data.role === "Time In") {
-            this.timeInInfo = data;
-          } else if (data.role === "Time Out") {
-            this.timeOutInfo = data;
           }
         }
       });
