@@ -168,6 +168,7 @@ const animationDuration = computed(() => {
     return 0;
 });
 
+// Calculate final transform for marquee animation based on content overflow
 const finalTransform = computed(() => {
     if (scrollContent.value && scrollContainer.value && needsMarquee.value) {
         const containerHeight = getContainerHeight();
@@ -179,6 +180,7 @@ const finalTransform = computed(() => {
     return "translateY(0%)";
 });
 
+// Computes animation string for marquee animation, or "none" if the content isn't overflowing
 const computedAnimation = computed(() => {
     if (needsMarquee.value && animationDuration.value > 0) {
         return `marquee ${animationDuration.value}ms linear forwards`;
@@ -186,6 +188,11 @@ const computedAnimation = computed(() => {
     return "none";
 });
 
+/**
+ * Computes a truncated version of the announcement title, fitting within the available space.
+ * If the title is longer than 41 characters, it will be truncated to 38 characters
+ * and suffixed with an ellipsis ("...").
+ */
 const truncatedTitle = computed(() => {
     const title = props.announcement.content.title || "";
     return title.length > 41 ? title.substring(0, 38) + "..." : title;
