@@ -69,6 +69,11 @@ function getContainerHeight() {
     return announcementStore.referenceHeight || (scrollContainer.value ? scrollContainer.value.clientHeight : 0);
 }
 
+/**
+ * Checks if the content of the slide is too tall to fit in the container,
+ * and if so, enables the marquee animation. Stores the result in the
+ * announcementStore so that it can be retrieved later.
+ */
 function checkOverflow() {
     if (props.isThumb) return;
     if (scrollContainer.value && scrollContent.value) {
@@ -79,6 +84,16 @@ function checkOverflow() {
     }
 }
 
+/**
+ * Handles the end of the marquee animation, advancing to the next slide.
+ *
+ * This function is called when the marquee animation ends, and it checks
+ * whether the animation was needed in the first place. If it was, it waits
+ * 3 seconds and then calls handleScrollFinished on the announcement store.
+ * If the animation wasn't needed, it calls handleScrollFinished immediately.
+ * In both cases, it double-checks that this slide is still active before
+ * advancing.
+ */
 function onAnimationEnd() {
     // Only proceed if this slide is still active
     if (announcementStore.activeIndex !== props.index) return;
@@ -116,6 +131,7 @@ watch(
 );
 
 onMounted(() => {
+    // Wait for the component to be fully mounted before checking for overflow
     nextTick(() => {
         checkOverflow();
         // If this is slide 0 and the store doesn't have a reference yet, store it.
@@ -126,12 +142,14 @@ onMounted(() => {
             }
         }
     });
+    // Set up event listeners
     window.addEventListener("resize", checkOverflow);
     if (scrollContent.value) {
         scrollContent.value.addEventListener("animationend", onAnimationEnd);
     }
 });
 
+// Clean up event listeners when the component is unmounted
 onBeforeUnmount(() => {
     window.removeEventListener("resize", checkOverflow);
     if (scrollContent.value) {
@@ -139,6 +157,7 @@ onBeforeUnmount(() => {
     }
 });
 
+// Compute animation duration based on overflow height
 const animationDuration = computed(() => {
     if (needsMarquee.value && scrollContainer.value && scrollContent.value) {
         const containerHeight = getContainerHeight();
