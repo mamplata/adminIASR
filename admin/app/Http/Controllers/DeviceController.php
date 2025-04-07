@@ -13,11 +13,23 @@ class DeviceController extends Controller
 {
     protected $deviceService;
 
+    /**
+     * Constructor.
+     *
+     * @param DeviceService $deviceService
+     */
     public function __construct(DeviceService $deviceService)
     {
         $this->deviceService = $deviceService;
     }
 
+    /**
+     * Renders the device index page.
+     *
+     * @param Request $request
+     *
+     * @return \Inertia\Response
+     */
     public function index(Request $request)
     {
         $devices = $this->deviceService->getDevices($request);
@@ -29,7 +41,19 @@ class DeviceController extends Controller
         ]);
     }
 
-    // Combined store function for both creation and update
+
+    /**
+     * Store or update a device based on the provided request data.
+     *
+     * This method validates the incoming request data, checks if an existing
+     * device should be updated or a new one should be created, and performs
+     * the update or create operation. It redirects to the devices index page
+     * with a success message indicating whether a device was created or updated.
+     *
+     * @param CreateUpdateRequest $request The request containing validated device data.
+     * @return \Illuminate\Http\RedirectResponse A redirect response with a success message.
+     */
+
     public function store(CreateUpdateRequest $request)
     {
 
@@ -45,6 +69,13 @@ class DeviceController extends Controller
         return redirect()->route('devices.index')->with('success', $message);
     }
 
+    /**
+     * Destroys a device, deleting it from the database.
+     *
+     * @param \App\Models\Device $device The device to be deleted.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Device $device)
     {
         $this->deviceService->deleteDevice($device);
@@ -52,6 +83,14 @@ class DeviceController extends Controller
         return redirect()->route('devices.index')->with('success', 'Device deleted!');
     }
 
+
+    /**
+     * Activates a device, marking it as active and setting a cookie with a random name and the device's fingerprint as its value.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -94,6 +133,13 @@ class DeviceController extends Controller
             );
     }
 
+    /**
+     * If this route is reached, it means the CheckDeviceFingerprint middleware has validated the
+     * device fingerprint in a cookie. This endpoint simply returns a 200 response with the
+     * device status as "active".
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function status()
     {
         // If this route is reached, it means CheckDeviceFingerprint passed

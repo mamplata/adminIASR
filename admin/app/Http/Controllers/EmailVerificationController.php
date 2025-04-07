@@ -7,6 +7,14 @@ use App\Models\User;
 
 class EmailVerificationController extends Controller
 {
+    /**
+     * Verify a new email address.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
+     * @param  string  $hash
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function verifyNewEmail(Request $request, User $user, $hash)
     {
         // Validate the signed URL and that the hash matches the pending email.

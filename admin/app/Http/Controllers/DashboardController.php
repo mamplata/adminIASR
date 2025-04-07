@@ -12,6 +12,12 @@ use App\Models\AuditLog;
 
 class DashboardController extends Controller
 {
+    /**
+     * Dashboard index page
+     *
+     * @param Request $request
+     * @return \Inertia\Response
+     */
     public function index(Request $request)
     {
         // Total registered cards/students

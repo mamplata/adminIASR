@@ -6,10 +6,23 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class AnnouncementStoreRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize()
     {
         return true;
     }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * If the announcement type is 'text', this function attempts to decode the 'content'
+     * field from JSON or object format into an array. It then merges the 'title' and 'body'
+     * fields from the content into the request data to facilitate validation.
+     */
 
     protected function prepareForValidation()
     {
@@ -36,6 +49,16 @@ class AnnouncementStoreRequest extends FormRequest
         }
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * The rules are dependent on the 'type' field value. If the type is 'text',
+     * the request must contain a 'title' and 'body' field in the 'content' field.
+     * If the type is 'image', the request must contain a file upload in the
+     * 'content' field.
+     *
+     * @return array
+     */
     public function rules()
     {
         $rules = [
@@ -58,6 +81,11 @@ class AnnouncementStoreRequest extends FormRequest
         return $rules;
     }
 
+    /**
+     * Custom message for validation errors.
+     *
+     * @return array
+     */
     public function messages()
     {
         return [

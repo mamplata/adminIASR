@@ -7,10 +7,27 @@ use Illuminate\Validation\Rule;
 
 class StoreRegisteredCardRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize(): bool
     {
         return true;
     }
+
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     *
+     * The validation rules ensure that:
+     * - 'studentId' is required and must exist in the 'student_infos' table.
+     * - 'uid' is required, must be a string, and must be unique in the 'registered_cards' table,
+     *   except for records with the same 'studentId' as this request.
+     */
 
     public function rules(): array
     {
@@ -26,6 +43,14 @@ class StoreRegisteredCardRequest extends FormRequest
         ];
     }
 
+    /**
+     * Return validation error messages.
+     *
+     * This method returns custom validation error messages for the fields
+     * 'studentId' and 'uid'.
+     *
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

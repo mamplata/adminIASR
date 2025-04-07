@@ -16,11 +16,23 @@ class AnnouncementController extends Controller
 {
     protected $announcementService;
 
+    /**
+     * Create a new controller instance.
+     *
+     * @param  AnnouncementService  $announcementService
+     * @return void
+     */
     public function __construct(AnnouncementService $announcementService)
     {
         $this->announcementService = $announcementService;
     }
 
+    /**
+     * Fetch announcements and related data for the announcements index page.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Inertia\Response
+     */
     public function index(Request $request)
     {
         // Fetch announcements
@@ -42,6 +54,13 @@ class AnnouncementController extends Controller
         ], $searchData, $departmentData));
     }
 
+    /**
+     * Store a newly created announcement in storage.
+     *
+     * @param  \App\Http\Requests\Announcements\AnnouncementStoreRequest  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+
     public function store(AnnouncementStoreRequest $request)
     {
         $this->announcementService->create($request->validated());
@@ -50,6 +69,21 @@ class AnnouncementController extends Controller
             ->with('success', 'Announcement created!');
     }
 
+    /**
+     * Update the specified announcement in storage.
+     *
+     * @param  \App\Http\Requests\Announcements\AnnouncementUpdateRequest  $request
+     * @param  \App\Models\Announcement  $announcement
+     * @return \Illuminate\Http\RedirectResponse
+     */
+
+    /**
+     * Update the specified announcement in storage.
+     *
+     * @param  \App\Http\Requests\Announcements\AnnouncementUpdateRequest  $request
+     * @param  \App\Models\Announcement  $announcement
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(AnnouncementUpdateRequest $request, Announcement $announcement)
     {
         $this->announcementService->update($announcement, $request->validated());
@@ -58,6 +92,12 @@ class AnnouncementController extends Controller
             ->with('success', 'Announcement updated!');
     }
 
+    /**
+     * Delete the specified announcement in storage.
+     *
+     * @param  \App\Models\Announcement  $announcement
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Announcement $announcement)
     {
         $this->announcementService->delete($announcement);
@@ -66,6 +106,11 @@ class AnnouncementController extends Controller
             ->with('success', 'Announcement deleted!');
     }
 
+    /**
+     * Fetch all announcements sorted in descending order of their publication date.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getAnnouncements()
     {
         $announcements = Announcement::orderBy('publication_date', 'desc')->get();

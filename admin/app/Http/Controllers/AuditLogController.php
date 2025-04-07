@@ -12,11 +12,22 @@ class AuditLogController extends Controller
 {
     protected $auditLogService;
 
+    /**
+     * Instantiate the controller.
+     *
+     * @param AuditLogService $auditLogService
+     */
     public function __construct(AuditLogService $auditLogService)
     {
         $this->auditLogService = $auditLogService;
     }
 
+    /**
+     * Show the audit logs for the given filters.
+     *
+     * @param AuditLogRequest $request
+     * @return \Inertia\Response
+     */
     public function index(AuditLogRequest $request)
     {
         $data = $this->auditLogService->getAuditLogs($request);

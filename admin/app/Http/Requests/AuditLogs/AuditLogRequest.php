@@ -11,6 +11,12 @@ class AuditLogRequest extends FormRequest
         return true; // If you need any specific authorization, adjust it here.
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+
     public function rules()
     {
         return [

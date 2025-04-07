@@ -14,11 +14,26 @@ class StudentInfoController extends Controller
 {
     protected $studentInfoService;
 
+    /**
+     * Construct a new StudentInfoController instance.
+     *
+     * @param  \App\Services\StudentInfoService  $studentInfoService
+     * @return void
+     */
     public function __construct(StudentInfoService $studentInfoService)
     {
         $this->studentInfoService = $studentInfoService;
     }
 
+    /**
+     * Check if a student ID exists in the student infos table, and return additional information:
+     * - student: the student information associated with the student ID (or null if not found)
+     * - isEnrolled: whether the student is enrolled in the current semester
+     * - message: a descriptive message about the result (or an error message if external API fails)
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function check(Request $request)
     {
         $request->validate([
@@ -28,6 +43,19 @@ class StudentInfoController extends Controller
         return response()->json($this->studentInfoService->checkStudentID($request->studentId));
     }
 
+    /**
+     * Store a new student info entry in the database.
+     *
+     * Validates the input using the StoreStudentInfoRequest class, then:
+     * - Extracts the last_enrolled_at value (e.g., "2nd 2025")
+     * - Checks the format of last_enrolled_at using a regular expression
+     * - Checks if the student is enrolled in the current semester
+     * - Stores the student info using the validated data
+     * - Returns a success response using Inertia
+     *
+     * @param  \App\Http\Requests\StudentInfos\StoreStudentInfoRequest  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(StoreStudentInfoRequest $request)
     {
 

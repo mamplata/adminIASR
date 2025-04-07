@@ -9,11 +9,23 @@ use Illuminate\Support\Carbon;
 
 class LogAuthenticationEvent
 {
+    /**
+     * Handle the Login event.
+     *
+     * @param  Login  $event
+     * @return void
+     */
     public function handleLogin(Login $event)
     {
         $this->logAudit('login', $event->user);
     }
 
+    /**
+     * Handle the Logout event.
+     *
+     * @param  Logout  $event
+     * @return void
+     */
     public function handleLogout(Logout $event)
     {
         $user = $event->user;
@@ -22,6 +34,12 @@ class LogAuthenticationEvent
         }
     }
 
+    /**
+     * Logs an audit event, given the action that was performed and the user who performed it.
+     *
+     * @param string $action
+     * @param \App\Models\User $user
+     */
     private function logAudit($action, $user)
     {
         AuditLog::create([
